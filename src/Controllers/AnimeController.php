@@ -404,9 +404,7 @@ class AnimeController extends BaseController
 
     public function showAllAnimes()
     {
-        define('TITLE_PAGE', 'Animes');
-        $this->query = "top/anime/";
-        $response_animes = $this->getApiJikan();
-        $this->render('animes', ['response_animes' => $response_animes, 'filters' => false]);
+        define('TITLE_PAGE', 'TESTE');
+        $this->render('template', []);
     }
 }
