@@ -10,6 +10,12 @@ use PHPMailer\PHPMailer\Exception;
 class FunctionController extends BaseController
 {
     public bool $api = false;
+
+    public function postStatement($data)
+    {
+        return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+
     public function sendResponse($responseData, $statusCode = 200)
     {
         if($this->api){

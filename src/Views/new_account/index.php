@@ -60,7 +60,9 @@ $functionsController = new FunctionController();
         </div>
 
         <div class="form-button-group  transparent">
-            <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">Acessar</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
+                <?=$functionsController->locale('create_account')?>
+            </button>
         </div>
 
     </form>

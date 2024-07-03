@@ -55,7 +55,8 @@ $functionsController = new FunctionController();
                     <div class="form-group basic animated">
                         <div class="input-wrapper">
                             <label class="label" for="email1">E-mail</label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="E-mail" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="E-mail"
+                                   autocomplete="new-password" required>
                             <i class="clear-input">
                                 <ion-icon name="close-circle"></ion-icon>
                             </i>
@@ -66,7 +67,7 @@ $functionsController = new FunctionController();
                         <div class="input-wrapper">
                             <label class="label" for="password1">Senha</label>
                             <input type="password" class="form-control" id="password" name="password"
-                            autocomplete="new-password" placeholder="Senha" required>
+                                autocomplete="new-password" placeholder="Senha" required>
                             <i class="clear-input">
                                 <ion-icon name="close-circle"></ion-icon>
                             </i>
@@ -79,7 +80,7 @@ $functionsController = new FunctionController();
 
         <div class="form-links mt-2">
             <div>
-                <a href="/login/new-account/"><?=$functionsController->locale('create_account')?></a>
+                <a href="/new-account/"><?=$functionsController->locale('create_account')?></a>
             </div>
             <div><a href="app-forgot-password.html" class="text-muted"><?=$functionsController->locale('forget_password')?></a></div>
         </div>

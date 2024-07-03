@@ -21,6 +21,12 @@ use App\Models\RelationProducerAnime;
 use Exception;
 
 class Validator {
+
+    public static function validateEmail($email): bool
+    {
+        $regex = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';
+        return preg_match($regex, $email);
+    }
     public static function validateTitle(Titles $title): bool
     {
         if (empty($title->title)) {
