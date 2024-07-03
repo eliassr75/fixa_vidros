@@ -1,2 +1,2 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="horizontal" data-theme-mode="dark" data-header-styles="dark" data-menu-styles="dark" data-toggled="close" loader="disable" data-page-style="modern" data-nav-style="menu-click">
+<!doctype html>
+<html lang="pt-BR">

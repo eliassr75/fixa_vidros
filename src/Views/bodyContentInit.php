@@ -1,11 +1,22 @@
-<body>
+<body class="dark-mode">
 
-    <!-- Loader -->
-    <div id="loader" >
+    <!-- loader -->
+    <div id="loader">
+        <img src="/assets/img/loading-icon.png" alt="icon" class="loading-icon">
     </div>
-    <!-- Loader -->
+    <!-- * loader -->
 
-    <?php require_once 'htmlHeader.php'; ?>
+    <div class="w-100" id="progressContainer">
+        <div class="progress rounded-0 mb-0" role="progressbar" id="progressDiv" aria-label="progressDiv" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+    </div>
 
-    <!-- Start::app-content -->
-    <div class="container-fluid">
+    <?php
+        if(isset($login) && $login === false) {
+            require_once 'htmlHeader.php';
+        }
+    ?>
+
+    <!-- App Capsule -->
+    <div id="appCapsule">

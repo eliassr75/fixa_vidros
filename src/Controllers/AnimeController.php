@@ -405,6 +405,6 @@ class AnimeController extends BaseController
     public function showAllAnimes()
     {
         define('TITLE_PAGE', 'TESTE');
-        $this->render('template', []);
+        $this->render('template', ["login_page" => true]);
     }
 }

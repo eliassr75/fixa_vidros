@@ -66,7 +66,7 @@ var loader = document.getElementById('loader');
 //-----------------------------------------------------------------------
 if (Finapp.PWA.enable) {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('__service-worker.js')
+        navigator.serviceWorker.register('/__service-worker.js')
             .then(reg => console.log('service worker registered'))
             .catch(err => console.log('service worker not registered - there is an error.', err));
     }
@@ -390,21 +390,18 @@ var toastCloseButton = document.querySelectorAll(".toast-box .close-button");
 var toastTaptoClose = document.querySelectorAll(".toast-box.tap-to-close");
 var toastBoxes = document.querySelectorAll(".toast-box");
 
-function closeToastBox() {
-    toastBoxes.forEach(function (el) {
-        el.classList.remove("show")
-    })
+function closeToastBox(target) {
+    $(`#${target}`).hide(500)
 }
 function toastbox(target, time) {
-    var a = document.getElementById(target);
-    closeToastBox()
+    let a = document.getElementById(target);
     setTimeout(() => {
         a.classList.add("show")
     }, 100);
     if (time) {
         time = time + 100;
         setTimeout(() => {
-            closeToastBox()
+            closeToastBox(target)
         }, time);
     }
 }

@@ -7,16 +7,12 @@ use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
-class User extends Model {
+class Permissions extends Model {
     protected $table = 'users';
     protected $columns = [
         'id',
         'name',
-        'email',
-        'username',
-        'password',
-        'language',
-        'token',
+        'description',
         'created_at',
         'updated_at'
     ];
@@ -24,28 +20,21 @@ class User extends Model {
     protected $guarded = ['id'];
     public $allowed_keys = [
         'name',
-        'email',
-        'username',
-        'password',
-        'language'
+        'description',
     ];
 
-//    public function permissions()
-//    {
-//        return $this->hasMany(Permissions::class, 'id', 'permission_id');
-//    }
+
+    public function users()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * @throws Exception
      */
     public function validate(): bool
     {
-
-        if(empty($this->token)){
-            $this->token = Uuid::uuid4();
-        }
-
-        return Validator::validateUser($this);
+        return true;
     }
 
 }

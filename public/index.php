@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === "GET"){
 }
 
 use App\Router;
-use App\Controllers\MenuController;
+use App\Controllers\LoginController;
 use App\Controllers\AnimeController;
 use App\Controllers\UserController;
 
@@ -19,8 +19,14 @@ use App\Controllers\UserController;
 $router = new Router();
 
 
-// ROTAS USERS - GET
-$router->addRoute('GET', '/users/', UserController::class, 'showAllUsers');
+// LOGIN ROUTES
+$router->addRoute('GET', '/login/', LoginController::class, 'login');
+$router->addRoute('GET', '/new-account/', LoginController::class, 'newAccount');
+$router->addRoute('POST', '/login/', LoginController::class, 'authenticate');
+$router->addRoute('POST', '/new-account/', LoginController::class, 'createAccount');
+
+
+$router->addRoute('GET', '/users/', UserController::class, 'showAll');
 $router->addRoute('GET', '/users/{userId}/post/{newId}/', UserController::class, 'getUserById');
 
 //ROTAS ANIMES - GET

@@ -13,12 +13,29 @@ class FunctionController extends BaseController
     public function sendResponse($responseData, $statusCode = 200)
     {
         if($this->api){
-            header('Content-Type: application/json', true, $statusCode);
+            header("Content-type: application/json; charset=utf-8", true, $statusCode);
             echo json_encode($responseData, true, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         }else{
             return $responseData;
         }
 
+    }
+
+    public function locale($key)
+    {
+        if(!isset($_SESSION['user_language'])){
+            $_SESSION['user_language'] = 'pt';
+        }
+
+        if($content = file_get_contents("../config/locales/locale.json")){
+            $locales = json_decode($content, true);
+
+            $value = $locales[$key][$_SESSION['user_language']];
+            if ($this->api){
+                return $value;
+            }
+            echo $value;
+        }
     }
 
     public function normalizeString($str): string|null

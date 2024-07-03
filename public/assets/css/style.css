@@ -4664,6 +4664,11 @@ textarea,
   margin-bottom: env(safe-area-inset-bottom);
 }
 
+.toast-box.toast-bottom.hide {
+  bottom: -100%;
+  top: auto;
+}
+
 .toast-box.toast-center {
   width: auto;
   left: auto;
