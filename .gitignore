@@ -4,3 +4,4 @@ config/function.txt
 install.sql
 .idea
 vendor
+/src/Views/template/
