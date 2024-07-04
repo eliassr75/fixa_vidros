@@ -7,27 +7,27 @@ use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
-class Permissions extends Model {
-    protected $table = 'users';
+class LogEntry extends Model {
+    protected $table = 'log_entry';
     protected $columns = [
         'id',
-        'name',
+        'title',
         'description',
-        'created_at',
-        'updated_at'
+        'request_type'
     ];
 
     protected $guarded = ['id'];
     public $timestamps = false;
     public $allowed_keys = [
-        'name',
+        'title',
         'description',
+        'request_type'
     ];
 
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'permission_user', 'permission_id', 'user_id');
+        return $this->belongsToMany(User::class, 'log_entry_user', 'log_id', 'user_id');
     }
 
     /**
@@ -35,7 +35,7 @@ class Permissions extends Model {
      */
     public function validate(): bool
     {
-        return true;
+        return Validator::validateLog($this);
     }
 
 }

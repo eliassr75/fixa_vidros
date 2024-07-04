@@ -18,6 +18,7 @@ $functionsController = new FunctionController();
 
         <div class="card">
             <div class="card-body pb-1">
+
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
                         <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
@@ -28,16 +29,6 @@ $functionsController = new FunctionController();
                     </div>
                 </div>
 
-                <div class="form-group basic animated">
-                    <div class="input-wrapper">
-                        <label class="label" for="password1"><?=$functionsController->locale('input_password')?></label>
-                        <input type="password" class="form-control" id="password" name="password"
-                        autocomplete="new-password" placeholder="<?=$functionsController->locale('input_password')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -47,15 +38,13 @@ $functionsController = new FunctionController();
                 <a href="/new-account/"><?=$functionsController->locale('create_account')?></a>
             </div>
             <div>
-                <a href="/forget-password/" class="text-muted">
-                    <?=$functionsController->locale('forget_password')?>
-                </a>
+                <a href="/login/"><?=$functionsController->locale('exists_account')?></a>
             </div>
         </div>
 
         <div class="form-button-group  transparent">
             <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
-                <?=$functionsController->locale('access')?>
+                <?=$functionsController->locale('recovery_password')?>
             </button>
         </div>
 

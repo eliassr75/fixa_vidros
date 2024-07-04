@@ -1,7 +1,7 @@
 {
-    "name": "Finapp",
-    "short_name": "Finapp",
-    "start_url": "index.html",
+    "name": "Fixa Vidros",
+    "short_name": "Fixa Vidros",
+    "start_url": "/",
     "display": "standalone",
     "scope" : "/",
     "background_color": "#000000",

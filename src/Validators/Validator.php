@@ -22,6 +22,36 @@ use Exception;
 
 class Validator {
 
+    public static function validateLog($log): bool
+    {
+        if (empty($log->title)) {
+            throw new Exception("O Nome deve ser preenchido.");
+        }
+        if (empty($log->description)) {
+            throw new Exception("O Email deve ser preenchido.");
+        }
+
+        return true;
+    }
+
+    public static function validateFormNewUser($form): bool
+    {
+        if (empty($form->name)) {
+            throw new Exception("O Nome deve ser preenchido.");
+        }
+        if (empty($form->email)) {
+            throw new Exception("O Email deve ser preenchido.");
+        }
+        if (empty($form->password)) {
+            throw new Exception("As senhas devem ser preenchidas.");
+        }
+        if (empty($form->confirm_password)) {
+            throw new Exception("As senhas devem ser preenchidas.");
+        }
+
+        return true;
+    }
+
     public static function validateEmail($email): bool
     {
         $regex = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';

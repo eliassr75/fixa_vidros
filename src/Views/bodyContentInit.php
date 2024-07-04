@@ -18,5 +18,10 @@
         }
     ?>
 
+    <div id="global-custom-alert" class="my-2 px-2"></div>
+
     <!-- App Capsule -->
     <div id="appCapsule">
+
+        <div id="toast-container"></div>
+        <div id="dialog-container"></div>

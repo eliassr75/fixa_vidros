@@ -1,6 +1,153 @@
-function formatString(value, mask, params={}) {
+const spinner = `<div class="spinner-border text-white" role="status"></div>`;
 
-    if (!value){
+function _alert(icon, message, type){
+
+    $('.custom-alert').html(`
+
+    <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" role="alert">
+        <div class="icon-wrap">
+            <ion-icon name="${icon}" role="img" class="md hydrated" aria-label="${icon}"></ion-icon>
+        </div>
+        <div>
+            ${message}
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    `)
+
+}
+
+function global_alert(response, time){
+
+    let type = "";
+    let icon = "";
+    switch (response.status) {
+        case "success":
+            type = "primary";
+            icon = `alert-circle-outline`;
+            break;
+        case "warning":
+            type = "warning";
+            icon = `warning-outline`
+            break;
+        case "error":
+            type = "danger";
+            icon = `close-circle`;
+            break;
+        default:
+            type = "info";
+            icon = `information-circle-outline`;
+            break;
+    }
+
+    $('#global-custom-alert').html(`
+
+    <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" id="global-alert-container" role="alert">
+        <div class="icon-wrap">
+            <ion-icon name="${icon}" role="img" class="md hydrated" aria-label="${icon}"></ion-icon>
+        </div>
+        <div>
+            ${response.message}
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    `)
+
+    if(time){
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert('#global-alert-container')
+            bsAlert.close()
+        }, time*1000)
+
+    }
+
+}
+
+
+function dialog(response, time) {
+
+    let dialogTheme = "";
+    let icon = "";
+    switch (response.status) {
+        case "success":
+            dialogTheme = "primary";
+            icon = `<ion-icon name="alert-circle-outline"></ion-icon>`;
+            break;
+        case "warning":
+            dialogTheme = "warning";
+            icon = `<ion-icon name="warning-outline"></ion-icon>`
+            break;
+        case "error":
+            dialogTheme = "danger";
+            icon = `<ion-icon name="close-circle"></ion-icon>`;
+            break;
+        default:
+            dialogTheme = "info";
+            icon = `<ion-icon name="information-circle-outline"></ion-icon>`;
+            break;
+    }
+
+    $('#dialog-container').html(`
+        <div class="modal fade dialogbox" id="DialogIconed" data-bs-backdrop="static" tabIndex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-icon text-${dialogTheme}">
+                        ${icon}
+                    </div>
+                    <div class="modal-header"></div>
+                    <div class="modal-body">
+                        ${response.message}
+                    </div>
+                    <div class="modal-footer">
+                        <div class="btn-inline">
+                            <a href="#" class="btn" data-bs-dismiss="modal">OK</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `)
+
+    if(time){
+        auto_remove_alert(time)
+    }
+
+    $("#DialogIconed").modal('toggle')
+
+}
+
+function auto_remove_alert(time) {
+    setTimeout(() => {
+        $('.custom-alert').hide(250)
+    }, time * 1000)
+
+}
+
+function checkPassword() {
+
+    const password = $("input#password").val()
+    const new_password = $("input#confirm-password").val()
+
+    if (password === new_password) {
+
+        if (password.length >= 8 && new_password.length >= 8) {
+            $('.btn-submit').attr("disabled", false)
+            auto_remove_alert(0)
+        } else {
+            _alert("alert-circle-outline", "A deve ter no mínimo 8 caracteres!", "danger")
+        }
+
+    } else {
+        _alert("alert-circle-outline", "As senhas devem ser iguais!", "danger")
+        $('.btn-submit').attr("disabled", true)
+    }
+}
+
+function formatString(value, mask, params = {}) {
+
+    if (!value) {
         return 'Não informado'
     }
 
@@ -26,30 +173,47 @@ function toast_alert(response, title=null){
             break;
     }
 
-    if(response.message){
-        $('#toast-container').html(`
-            <div id="toast" class="toast-box toast-bottom bottom-0 bg-${toastTheme}">
-                <div class="in">
-                    <div class="text">
-                        ${response.message}
-                    </div>
-                </div>
-            </div>
-        `);
-
-        toastbox('toast', 3000)
+    let timer = 1.5;
+    let timer_global_alert = 3;
+    if(response.custom_timer){
+        timer = response.custom_timer
+        timer_global_alert = response.custom_timer
     }
 
-    if (response.url){
+    if(response.message){
+
+        if(response.dialog){
+            dialog(response);
+        }else{
+            //$('#toast-container').html(`
+            //    <div id="toast" class="toast-box toast-top top-0 bg-${toastTheme}">
+            //        <div class="in w-100">
+            //            <div class="text w-100">
+            //                ${response.message}
+            //            </div>
+            //        </div>
+            //    </div>
+            //`);
+            //toastbox('toast', 3000)
+            global_alert(response, timer_global_alert)
+        }
+
+    }
+
+    if(response.spinner){
+        $('.btn-submit').html(spinner).attr("disabled", true)
+    }
+
+    if (response.url) {
         setTimeout(() => {
             window.location.href = response.url;
-        }, 1500)
+        }, timer*1000)
     }
 
     if (response.reload){
         setTimeout(() => {
             window.location.reload()
-        }, 1500)
+        }, timer*1000)
     }
 
 }
@@ -136,7 +300,7 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
         window.bkp_html = $('.btn-submit').html()
 
         $('.btn-submit').html(`
-            <div class="spinner-border text-primary" role="status"></div>
+            ${spinner}
         `).addClass("disabled")
         progressContainer.removeClass('bg-danger').show(500);
         progressBar.removeClass('bg-danger');
