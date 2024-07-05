@@ -2,9 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Models\Anime;
+use App\Models\User;
 use App\Models\ExplicitGenres;
-use App\Models\Genres;
 use Exception;
 use Statickidz\GoogleTranslate;
 

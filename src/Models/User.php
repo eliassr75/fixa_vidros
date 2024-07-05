@@ -35,12 +35,7 @@ class User extends Model {
     ];
 
     protected $guarded = ['id'];
-    public $allowed_keys = [
-        'name',
-        'email',
-        'username',
-        'password',
-        'language',
+    public $missingDataKeys = [
         'cpf',
         'rg',
         'phone_number',

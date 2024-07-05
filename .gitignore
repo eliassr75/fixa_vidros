@@ -5,3 +5,4 @@ install.sql
 .idea
 vendor
 /src/Views/template/
+/src/Views/documentation/

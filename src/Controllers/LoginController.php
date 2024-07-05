@@ -77,9 +77,15 @@ class LoginController extends BaseController
 
                     //$userModel->startSession();
 
+                    $missingDataController = new MissingDataController();
+                    if($missingDataController->verify($user_search->id)){
+                        $message['url'] = '/dashboard/';
+                    }else{
+                        $message['url'] = "/missing-data/{$user_search->id}/";
+                    }
+
                     $message['message'] = $functions->locale('welcome') . " - {$user_search->name}";
                     $message['status'] = 'success';
-                    $message['url'] = '/dashboard/';
                     $message['custom_timer'] = 2;
                     $message['spinner'] = true;
 
@@ -118,7 +124,7 @@ class LoginController extends BaseController
             if($userModel->validate()){
                 $userModel->save();
                 $userModel->setLog("Login", "Conta criada.");
-                $userModel->permissions()->attach(1);
+                //$userModel->permissions()->attach(1);
             }
 
             $message['message'] = $functions->locale('valid_user_created') . " - {$data->name} <hr class='border'>" . $functions->locale('wait_administrator_liberation');

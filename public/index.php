@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Controllers;
 require_once '../config/cors.php';
 require '../vendor/autoload.php';
 require '../config/database.php';
@@ -11,10 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === "GET"){
 }
 
 use App\Router;
-use App\Controllers\LoginController;
-use App\Controllers\AnimeController;
-use App\Controllers\UserController;
-
 $router = new Router();
 
 
@@ -30,6 +27,8 @@ $router->addRoute('GET', '/logout/', LoginController::class, 'logout');
 $router->addRoute('POST', '/login/', LoginController::class, 'authenticate');
 $router->addRoute('POST', '/new-account/', LoginController::class, 'createAccount');
 
+$router->addRoute('GET', '/missing-data/{userId}/', MissingDataController::class, 'index');
+$router->addRoute('PUT', '/missing-data/{userId}/', MissingDataController::class, 'missingData');
 
 $router->addRoute('GET', '/users/', UserController::class, 'showAll');
 $router->addRoute('GET', '/users/{userId}/post/{newId}/', UserController::class, 'getUserById');
