@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
+use stdClass;
 
 class FunctionController extends BaseController
 {
@@ -28,6 +29,48 @@ class FunctionController extends BaseController
         return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
+    public function putStatement()
+    {
+        // Ler o fluxo de entrada bruta
+        $input = file_get_contents('php://input');
+
+        // Separar os dados no formato multipart/form-data
+        $boundary = substr($input, 0, strpos($input, "\r\n"));
+        $parts = array_slice(explode($boundary, $input), 1);
+
+        $data = [];
+
+        foreach ($parts as $part) {
+            if ($part == "--\r\n") {
+                break;
+            }
+
+            // Remover cabeçalhos do conteúdo
+            $part = ltrim($part, "\r\n");
+            list($headers, $body) = explode("\r\n\r\n", $part, 2);
+
+            // Lidar com dados de arquivo
+            if (preg_match('/name=\"([^\"]*)\"; filename=\"([^\"]*)\"/', $headers, $matches)) {
+                $name = $matches[1];
+                $filename = $matches[2];
+                file_put_contents($filename, trim($body));
+                $data[$name] = $filename;
+            } elseif (preg_match('/name=\"([^\"]*)\"/', $headers, $matches)) {
+                // Lidar com dados de campo
+                $name = $matches[1];
+                $data[$name] = trim($body);
+            }
+        }
+
+        // Agora $data contém os dados do formulário
+        return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+
+    public function parseJsonToObject($data)
+    {
+        return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+
     public function sendResponse($responseData, $statusCode = 200)
     {
         if($this->api){
@@ -37,6 +80,21 @@ class FunctionController extends BaseController
             return $responseData;
         }
 
+    }
+
+    public function baseResponse(): stdClass
+    {
+        $response = new stdClass();
+
+        $response->message = "";
+        $response->status = "";
+        $response->url = false;
+        $response->custom_timer = false;
+        $response->reload = false;
+        $response->dialog = false;
+        $response->spinner = false;
+
+        return $response;
     }
 
     public function locale($key)
@@ -57,8 +115,8 @@ class FunctionController extends BaseController
     }
 
     public function timeDiff($startTime, $endTime, $unit = 'seconds') {
-        $start = new DateTime($startTime);
-        $end = new DateTime($endTime);
+        $start = new \DateTime($startTime);
+        $end = new \DateTime($endTime);
         $diff = $start->diff($end);
 
         switch ($unit) {

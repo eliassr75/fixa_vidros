@@ -75,7 +75,7 @@ class LoginController extends BaseController
 
                 }else{
 
-                    //$userModel->startSession();
+                    $user_search->startSession();
 
                     $missingDataController = new MissingDataController();
                     if($missingDataController->verify($user_search->id)){
@@ -98,11 +98,6 @@ class LoginController extends BaseController
         }else{
             $functions->sendResponse($message, 204);
         }
-
-//        $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
-//        if(!password_verify($password, $data->password)){
-//
-//        }
     }
 
     public function createAccount()
@@ -144,8 +139,18 @@ class LoginController extends BaseController
 
     public function forgetPassword()
     {
-        define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
-        $this->render('forget_password', ["login" => true, "route" => "/forget-password/"]);
+
+        $functionsController = new FunctionController();
+        $functionsController->api = true;
+
+        $data = $functionsController->postStatement($_POST);
+        if (!empty($data)):
+
+        else:
+            define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
+            $this->render('forget_password', ["login" => true, "route" => "/forget-password/"]);
+        endif;
+
     }
 
     public function newAccount()

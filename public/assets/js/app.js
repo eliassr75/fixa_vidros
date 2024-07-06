@@ -18,6 +18,44 @@ function _alert(icon, message, type){
 
 }
 
+function input_phone_number(locale){
+
+    $(`input[type="tel"]`).prop("disabled", true).parent().parent().append(`
+        <input id="ddi-phone-number" name="ddi-phone-number" type="hidden">
+        <input id="country-phone-number" name="country-phone-number" type="hidden">
+    `)
+
+    switch(locale){
+        case 'es':
+            locale = "es"
+            $("#ddi-phone-number").val("+34")
+            break
+        case 'pt':
+            locale = "br"
+            $("#ddi-phone-number").val("+55")
+            break
+        case 'en':
+            locale = "us"
+            $("#ddi-phone-number").val("+1")
+            break
+        default:
+            locale = "br"
+            $("#ddi-phone-number").val("+55")
+            break
+    }
+    const input = document.querySelector('input[type="tel"]');
+    const iti = window.intlTelInput(input, {
+
+        initialCountry: locale,
+        showSelectedDialCode: true,
+        utilsScript: "/assets/js/plugins/intlTelInput/build/js/utils.min.js",
+    });
+
+    iti.promise.then(() => {
+        $(`input[type="tel"]`).prop('disabled', false)
+    });
+}
+
 function global_alert(response, time){
 
     let type = "";
@@ -64,7 +102,6 @@ function global_alert(response, time){
     }
 
 }
-
 
 function dialog(response, time) {
 
@@ -218,7 +255,6 @@ function toast_alert(response, title=null){
 
 }
 
-
 async function sendGlobalAjax(params, progressBar=false) {
     try {
         return await $.ajax(params);
@@ -244,7 +280,6 @@ async function sendGlobalAjax(params, progressBar=false) {
         return false;
     }
 }
-
 
 /* Eemple Usage: data-method="PUT" data-action="{{ request.path }}" data-ajax="default" data-callback="get_datails" */
 function processForm(form=false, params=false, callbackName=false, callbackParams=false) {
@@ -335,6 +370,34 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
     sendGlobalAjax(params, progressBar).then(function (response){
         toast_alert(response);
     })
+}
+
+function get_cep(cep){
+
+    if (cep.length === 9){
+        _alert("alert-circle-outline", "Buscando informações...", "primary")
+        $.ajax({
+            url: `https://viacep.com.br/ws/${cep.replace('-', '')}/json/`,
+            success:function (data){
+                auto_remove_alert(0)
+                console.log(data)
+
+                $("#zone").val((data.bairro ? data.bairro : "")).trigger('change')
+                $("#complement").val((data.complemento ? data.complemento : "")).trigger('change')
+                $("#address").val((data.logradouro ? data.logradouro : "")).trigger('change')
+                $("#state").val((data.uf ? data.uf : "")).trigger('change')
+                $("#city").val((data.localidade ? data.localidade : "")).trigger('change')
+                $("#phone_number").val((data.ddd ? data.ddd : "")).trigger('change')
+
+            },
+            error: function (error){
+                console.log(error)
+            }
+        })
+    }else{
+        _alert("alert-circle-outline", "CEP inválido!", "danger")
+    }
+
 }
 
 

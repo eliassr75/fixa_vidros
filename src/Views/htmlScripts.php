@@ -7,6 +7,13 @@
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <!-- Splide -->
 <script src="/assets/js/plugins/splide/splide.min.js"></script>
+
+<!-- jQuery Mask -->
+<script src="/assets/js/plugins/jquery-mask/dist/jquery.mask.min.js"></script>
+
+<!-- intlTelInput -->
+<script src="/assets/js/plugins/intlTelInput/build/js/intlTelInput.min.js"></script>
+
 <!-- Base Js File -->
 <script src="/assets/js/base.js"></script>
 

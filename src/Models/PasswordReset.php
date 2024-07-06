@@ -30,8 +30,8 @@ class PasswordReset extends Model {
     public function check_expired(): bool
     {
 
-        $currentDateTime = new DateTime();
-        $expirationDateTime = new DateTime($this->expiration);
+        $currentDateTime = new \DateTime();
+        $expirationDateTime = new \DateTime($this->expiration);
 
         if ($currentDateTime > $expirationDateTime) {
             return false;

@@ -36,19 +36,18 @@ class User extends Model {
 
     protected $guarded = ['id'];
     public $missingDataKeys = [
-        'cpf',
-        'rg',
-        'phone_number',
-        'zip_code',
-        'address',
-        'complement',
-        'address_number',
-        'zone',
-        'city',
-        'state',
-        'birthday',
-        'age',
-        'obs'
+        ['name' => 'cpf', 'type' => 'tel', "required" => true, "mask" => "000.000.000-00"],
+        ['name' => 'rg', 'type' => 'tel', "required" => false, "mask" => "000000000"],
+        ['name' => 'birthday', 'type' => 'tel', "required" => false, "mask" => "00/00/0000"],
+        ['name' => 'phone_number', 'type' => 'tel', "required" => true, "mask" => "(00) 00000-0000"],
+        ['name' => 'zip_code', 'type' => 'tel', "required" => false, "mask" => "00000-000"],
+        ['name' => 'address', 'type' => 'text', "required" => true, "mask" => false],
+        ['name' => 'address_number', 'type' => 'tel', "required" => true, "mask" => "00000000"],
+        ['name' => 'zone', 'type' => 'text', "required" => true, "mask" => false],
+        ['name' => 'complement', 'type' => 'text', "required" => false, "mask" => false],
+        ['name' => 'city', 'type' => 'text', "required" => true, "mask" => false],
+        ['name' => 'state', 'type' => 'text', "required" => false, "mask" => false],
+        ['name' => 'obs', 'type' => 'text', "required" => false, "mask" => false],
     ];
 
     public function permissions()
@@ -80,6 +79,10 @@ class User extends Model {
     {
         foreach ($this->columns as $column) {
             $_SESSION[$column] = $this->$column;
+        }
+
+        foreach ($this->permissions() as $permission) {
+            $_SESSION['permission'] = $permission->id;
         }
     }
 

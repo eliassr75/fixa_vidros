@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
 class Permissions extends Model {
-    protected $table = 'users';
+    protected $table = 'permissions';
     protected $columns = [
         'id',
         'name',

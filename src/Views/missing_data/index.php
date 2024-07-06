@@ -23,63 +23,33 @@ $functionsController = new FunctionController();
                     <?=$functionsController->locale('missing_data')?>
                 </div>
 
+                <?php $requires = json_decode(json_encode($requires, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)); ?>
+
+                <?php foreach ($requires as $require): ?>
+
+                <?php if ($require->name == "zip_code"): ?>
+                    <br>
+                    <div class="custom-alert my-2"></div>
+                <?php endif; ?>
+
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="name"><?=$functionsController->locale('input_name')?></label>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="<?=$functionsController->locale('input_name')?>" required>
+                        <label class="label" for="<?=$require->name?>"><?=$functionsController->locale("input_{$require->name}")?></label>
+                        <input type="<?=$require->type?>" class="form-control" autocomplete="n-password" id="<?=$require->name?>" name="<?=$require->name?>" placeholder="<?=$functionsController->locale("input_{$require->name}")?>">
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
                     </div>
                 </div>
 
-                <div class="form-group basic animated">
-                    <div class="input-wrapper">
-                        <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionsController->locale('input_email')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
+                <?php endforeach; ?>
 
-                <div class="form-group basic animated">
-                    <div class="input-wrapper">
-                        <label class="label" for="password"><?=$functionsController->locale('input_password')?></label>
-                        <input type="password" class="form-control" id="password" name="password" onkeyup="checkPassword()"
-                        autocomplete="new-password" placeholder="<?=$functionsController->locale('input_password')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
-
-                <div class="form-group basic animated">
-                    <div class="input-wrapper">
-                        <label class="label" for="password"><?=$functionsController->locale('input_confirm_password')?></label>
-                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
-                               autocomplete="new-password" placeholder="<?=$functionsController->locale('input_confirm_password')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
-
-                <div class="custom-alert my-2"></div>
-
-            </div>
-        </div>
-
-
-        <div class="form-links mt-2">
-            <div>
-                <a href="/login/"><?=$functionsController->locale('exists_account')?></a>
             </div>
         </div>
 
         <div class="form-button-group  transparent">
             <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
-                <?=$functionsController->locale('create_account')?>
+                <?=$functionsController->locale('continue')?>
             </button>
         </div>
 
@@ -88,4 +58,22 @@ $functionsController = new FunctionController();
 
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
+
+<script>
+
+    $(document).ready(() => {
+
+        <?php foreach ($requires as $require): ?>
+            <?php if ($require->name == "zip_code"): ?>
+                $("#<?=$require->name?>").mask("00000-000").on("keyup", function (){
+                    get_cep(this.value)
+                })
+            <?php else: ?>
+                $("#<?=$require->name?>").mask("<?=$require->mask?>").attr('required', <?=$require->required ? "true" : "false"?>)
+            <?php endif; ?>
+        <?php endforeach; ?>
+    })
+
+</script>
+
 <?php require_once __DIR__ . '/../htmlEnd.php';?>
