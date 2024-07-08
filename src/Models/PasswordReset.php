@@ -27,6 +27,11 @@ class PasswordReset extends Model {
         'expiration'
     ];
 
+    public function user()
+    {
+        return User::find($this->user_id);
+    }
+
     public function check_expired(): bool
     {
 
@@ -34,9 +39,9 @@ class PasswordReset extends Model {
         $expirationDateTime = new \DateTime($this->expiration);
 
         if ($currentDateTime > $expirationDateTime) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
 
     }

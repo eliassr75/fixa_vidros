@@ -18,7 +18,8 @@ class MissingDataController extends BaseController
 
         $requires = [];
         foreach($userModel->missingDataKeys as $key) {
-            if (empty($user_search->$key)){
+            $key_name = $key['name'];
+            if (empty($user_search->$key_name)){
                 $requires[] = $key;
             }
         }
@@ -67,6 +68,8 @@ class MissingDataController extends BaseController
             $userModel = new User();
             $user_search = $userModel->find($userId);
             $have_update = false;
+            $invalid_cpf = false;
+            $error = false;
 
             foreach ($userModel->missingDataKeys as $key):
                 $key_name = $key['name'];
@@ -81,6 +84,15 @@ class MissingDataController extends BaseController
 
                             $user_search->$key_name = $birthday;
                             $user_search->age = $functionsController->timeDiff($birthday, date('Y-m-d'), 'years');
+                        endif;
+                    elseif($key_name === 'cpf'):
+                        if(!$functionsController->validaCPF($data->$key_name)):
+                            $invalid_cpf = true;
+                            $have_update = false;
+                            $error = true;
+                            break;
+                        else:
+                            $user_search->$key_name = $data->$key_name;
                         endif;
                     elseif ($key_name === 'phone_number'):
                         if (strlen($data->$key_name) >= 14):
@@ -97,12 +109,19 @@ class MissingDataController extends BaseController
                 $user_search->setLog('MissingData', "Usuário atualizou seu cadastro");
                 $response->message = $functionsController->locale('register_success_update');
                 $response->status = "success";
+            elseif ($invalid_cpf):
+                $response->message = $functionsController->locale('invalid_cpf');
+                $response->status = "warning";
+                $status_code = 400;
             else:
                 $response->message = $functionsController->locale('redirecting');
                 $response->status = "info";
             endif;
 
-            $response->url = "/dashboard/";
+            if(!$error):
+                $user_search->startSession();
+                $response->url = "/dashboard/";
+            endif;
 
         else:
             $response->message = $functionsController->locale('operation_denied_user_register');

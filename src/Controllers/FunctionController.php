@@ -12,7 +12,8 @@ class FunctionController extends BaseController
 {
     public bool $api = false;
 
-    public function replaceHyphensInKeys($array) {
+    public function replaceHyphensInKeys($array): array
+    {
         $newArray = [];
 
         foreach ($array as $key => $value) {
@@ -29,7 +30,56 @@ class FunctionController extends BaseController
         return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
-    public function putStatement()
+    public function parseObjectToJson($data): string
+    {
+        return json_encode($data, true, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+
+    public function validaCPF($cpf) {
+
+        // Remove caracteres não numéricos
+        $cpf = preg_replace('/[^0-9]/', '', $cpf);
+
+        // Verifica se o CPF possui 11 dígitos
+        if (strlen($cpf) != 11) {
+            return false;
+        }
+
+        // Verifica se todos os dígitos são iguais (caso contrário, não é um CPF válido)
+        if (preg_match('/(\d)\1{10}/', $cpf)) {
+            return false;
+        }
+
+        // Calcula o primeiro dígito verificador
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += $cpf[$i] * (10 - $i);
+        }
+        $digit1 = 11 - ($sum % 11);
+        if ($digit1 >= 10) {
+            $digit1 = 0;
+        }
+
+        // Calcula o segundo dígito verificador
+        $sum = 0;
+        for ($i = 0; $i < 10; $i++) {
+            $sum += $cpf[$i] * (11 - $i);
+        }
+        $digit2 = 11 - ($sum % 11);
+        if ($digit2 >= 10) {
+            $digit2 = 0;
+        }
+
+        // Verifica se os dígitos verificadores calculados são iguais aos fornecidos
+        if ($cpf[9] == $digit1 && $cpf[10] == $digit2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public function putStatement(): stdClass
     {
         // Ler o fluxo de entrada bruta
         $input = file_get_contents('php://input');
@@ -66,7 +116,7 @@ class FunctionController extends BaseController
         return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
-    public function parseJsonToObject($data)
+    public function parseJsonToObject($data): array
     {
         return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
@@ -97,21 +147,34 @@ class FunctionController extends BaseController
         return $response;
     }
 
-    public function locale($key)
+    public function locale($key): string
     {
         if(!isset($_SESSION['user_language'])){
             $_SESSION['user_language'] = 'pt';
         }
 
-        if($content = file_get_contents("../config/locales/locale.json")){
-            $locales = json_decode($content, true);
+        $content = file_get_contents("../config/locales/locale.json");
+        $locales = json_decode($content, true);
 
-            $value = $locales[$key][$_SESSION['user_language']];
-            if ($this->api){
-                return $value;
-            }
-            echo $value;
+        $js_locale = [];
+        foreach ($locales as $key_new => $locale) {
+            $js_locale[$key_new] = $locale[$_SESSION['user_language']];
         }
+
+        // Gerar o conteúdo do arquivo JavaScript
+        $jsContent = "const locale = " . json_encode($js_locale, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . ";";
+
+        // Caminho do arquivo JavaScript
+        $jsFilePath = "../public/assets/js/locale.js";
+
+        // Escrever no arquivo JavaScript
+        file_put_contents($jsFilePath, $jsContent);
+
+        $value = $locales[$key][$_SESSION['user_language']];
+        if ($this->api){
+            return $value;
+        }
+        return $value;
     }
 
     public function timeDiff($startTime, $endTime, $unit = 'seconds') {
@@ -145,6 +208,23 @@ class FunctionController extends BaseController
         $str = preg_replace('/\-+/', '-', $str);
 
         return $str;
+    }
+
+    public function generateCurrentUrl() {
+
+        // Determine the scheme (http or https)
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+
+        // Get the host (domain or IP)
+        $host = $_SERVER['HTTP_HOST'];
+
+        // Get the path of the current script
+        $path = $_SERVER['REQUEST_URI'];
+
+        // Combine to form the full URL
+        $url = $scheme . '://' . $host . $path;
+
+        return $url;
     }
 
     public function sendMail($para, $assunto, $msg, $url=false, $btn=false): bool|string
@@ -249,7 +329,7 @@ class FunctionController extends BaseController
                                                 </tr>
                                               </tbody>
                                             </table>
-                                            <img class='' width='50%' src='https://maonaroda.etecsystems.com.br/assets/images/logo_lg_default.png' style='height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; border-style: none; border-width: 0;'>
+                                            <img class='' width='50%' src='https://fixavidros.etecsystems.com.br/assets/img/logo-fixa-new.png' style='height: auto; line-height: 100%; outline: none; text-decoration: none; display: block; border-style: none; border-width: 0;'>
                                             <table class='s-10 w-full' role='presentation' border='0' cellpadding='0' cellspacing='0' style='width: 100%;' width='100%'>
                                               <tbody>
                                                 <tr>
@@ -306,7 +386,7 @@ class FunctionController extends BaseController
             </body>
       </html>
         
-      ";
+            ";
 
             $mail->send();
             return true;

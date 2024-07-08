@@ -20,8 +20,11 @@ $functionsController = new FunctionController();
             <div class="card-body pb-1">
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionsController->locale('input_email')?>" required>
+                        <label class="label" for="username"><?=$functionsController->locale('input_email')?></label>
+                        <input type="email" class="form-control" id="username" name="username"
+                               placeholder="<?=$functionsController->locale('input_email')?>"
+                               autocomplete="username"
+                               required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>

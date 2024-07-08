@@ -11,28 +11,37 @@ if ($_SERVER['REQUEST_METHOD'] === "GET"){
     header("Content-type: application/json; charset=utf-8");
 }
 
+use App\Middleware;
 use App\Router;
+
+$middleware = new Middleware();
 $router = new Router();
 
-
-//MAIN ROUTE
-$router->addRoute('GET', '', LoginController::class, 'redirectToLogin');
-$router->addRoute('GET', '/', LoginController::class, 'redirectToLogin');
+//MAIN ROUTES
+$router->addRoute('GET', '', false, LoginController::class, 'redirectToLogin');
+$router->addRoute('GET', '/', false, LoginController::class, 'redirectToLogin');
+$router->addRoute('GET', '/error/{codeError}/', false, ErrorController::class, 'errorPage');
 
 // LOGIN ROUTES
-$router->addRoute('GET', '/login/', LoginController::class, 'login');
-$router->addRoute('GET', '/new-account/', LoginController::class, 'newAccount');
-$router->addRoute('GET', '/forget-password/', LoginController::class, 'forgetPassword');
-$router->addRoute('GET', '/logout/', LoginController::class, 'logout');
+$router->addRoute('GET', '/logout/', false, LoginController::class, 'logout');
 
-$router->addRoute('POST', '/login/', LoginController::class, 'authenticate');
-$router->addRoute('POST', '/new-account/', LoginController::class, 'createAccount');
-$router->addRoute('POST', '/forget-password/', LoginController::class, 'forgetPassword');
+$router->addRoute('GET', '/login/', false, LoginController::class, 'login');
+$router->addRoute('POST', '/login/', false, LoginController::class, 'authenticate');
 
-$router->addRoute('GET', '/missing-data/{userId}/', MissingDataController::class, 'index');
-$router->addRoute('PUT', '/missing-data/{userId}/', MissingDataController::class, 'missingData');
+$router->addRoute('GET', '/new-account/', false, LoginController::class, 'newAccount');
+$router->addRoute('POST', '/new-account/', false, LoginController::class, 'createAccount');
 
-$router->addRoute('GET', '/users/', UserController::class, 'showAll');
-$router->addRoute('GET', '/users/{userId}/post/{newId}/', UserController::class, 'getUserById');
+$router->addRoute('GET', '/forget-password/', false, LoginController::class, 'forgetPassword');
+$router->addRoute('POST', '/forget-password/', false, LoginController::class, 'forgetPassword');
 
+$router->addRoute('GET', '/forget-password/{token}/', false, LoginController::class, 'forgetPassword');
+$router->addRoute('PUT', '/forget-password/{token}/', false, LoginController::class, 'resetPassword');
+
+$router->addRoute('GET', '/missing-data/{userId}/', true, MissingDataController::class, 'index');
+$router->addRoute('PUT', '/missing-data/{userId}/', true,MissingDataController::class, 'missingData');
+
+// SYSTEM ROUTES
+$router->addRoute('GET', '/users/', true,UserController::class, 'showAll');
+
+$middleware->autoRedirect();
 $router->handleRequest();

@@ -13,7 +13,8 @@ class LogEntry extends Model {
         'id',
         'title',
         'description',
-        'request_type'
+        'request_type',
+        'user_agent'
     ];
 
     protected $guarded = ['id'];
@@ -21,7 +22,8 @@ class LogEntry extends Model {
     public $allowed_keys = [
         'title',
         'description',
-        'request_type'
+        'request_type',
+        'user_agent'
     ];
 
 

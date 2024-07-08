@@ -14,21 +14,64 @@ $functionsController = new FunctionController();
 </div>
 <div class="section mb-5 p-2">
 
-    <form data-method="POST" data-action="<?=$route?>" data-ajax="default" data-callback="">
+    <form data-method="<?=$method?>" data-action="<?=$route?>" data-ajax="default" data-callback="">
 
         <div class="card">
             <div class="card-body pb-1">
 
-                <div class="form-group basic animated">
-                    <div class="input-wrapper">
-                        <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionsController->locale('input_email')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
+                <?php if(!$allowed_reset): ?>
 
+                    <div class="form-group basic animated">
+                        <div class="input-wrapper">
+                            <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionsController->locale('input_email')?>" required>
+                            <i class="clear-input">
+                                <ion-icon name="close-circle"></ion-icon>
+                            </i>
+                        </div>
+                    </div>
+
+                <?php else: ?>
+
+
+                    <div class="form-group basic animated">
+                        <div class="input-wrapper">
+                            <label class="label" for="username"><?=$functionsController->locale('input_email')?></label>
+                            <input type="email" class="form-control" id="username" name="username" autocomplete="username"
+                                   placeholder="<?=$functionsController->locale('input_email')?>"
+                                   value="<?=$user->email?>"
+                                   required disabled>
+                            <i class="clear-input">
+                                <ion-icon name="close-circle"></ion-icon>
+                            </i>
+                        </div>
+                    </div>
+
+                    <div class="form-group basic animated">
+                        <div class="input-wrapper">
+                            <label class="label" for="password"><?=$functionsController->locale('input_password')?></label>
+                            <input type="password" class="form-control" id="password" name="password" onkeyup="checkPassword()"
+                                   autocomplete="new-password" placeholder="<?=$functionsController->locale('input_password')?>" required>
+                            <i class="clear-input">
+                                <ion-icon name="close-circle"></ion-icon>
+                            </i>
+                        </div>
+                    </div>
+
+                    <div class="form-group basic animated">
+                        <div class="input-wrapper">
+                            <label class="label" for="confirm-password"><?=$functionsController->locale('input_confirm_password')?></label>
+                            <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
+                                   autocomplete="new-password" placeholder="<?=$functionsController->locale('input_confirm_password')?>" required>
+                            <i class="clear-input">
+                                <ion-icon name="close-circle"></ion-icon>
+                            </i>
+                        </div>
+                    </div>
+
+                    <div class="custom-alert my-2"></div>
+
+                <?php endif; ?>
             </div>
         </div>
 
@@ -53,4 +96,13 @@ $functionsController = new FunctionController();
 
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
+
+<?php if($expired): ?>
+<script>
+    $(document).ready(() => {
+        global_alert(<?=$functionsController->parseObjectToJson($response)?>, 5)
+    })
+</script>
+<?php endif; ?>
+
 <?php require_once __DIR__ . '/../htmlEnd.php';?>

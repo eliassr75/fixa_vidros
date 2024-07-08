@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
+use App\Controllers\CookieController;
 use Ramsey\Uuid\Uuid;
 
 class User extends Model {
@@ -17,6 +18,7 @@ class User extends Model {
         'password',
         'language',
         'token',
+        'auth_hash',
         'cpf',
         'rg',
         'phone_number',
@@ -60,30 +62,54 @@ class User extends Model {
         return $this->belongsToMany(LogEntry::class, 'log_entry_user', 'user_id', 'log_id');
     }
 
+    public function last_log_entry()
+    {
+        return $this->belongsToMany(LogEntry::class);
+    }
+
+    public function cookie_user_agent(): string|bool
+    {
+        $last_log = $this->log_entry()->orderBy('created', 'desc')->first();
+        return $last_log ? $last_log->user_agent : false;
+    }
+
     public function setLog($title, $description)
     {
 
         $log = new LogEntry();
         $log->request_type = $_SERVER['REQUEST_METHOD'];
+        $log->user_agent = $_SERVER['HTTP_USER_AGENT'];
         $log->title = $title;
         $log->description = $description;
 
         if($log->validate()){
             $log->save();
             $this->log_entry()->attach($log->id);
+            return $log->id;
         }
 
     }
 
     public function startSession()
     {
+
+        $cookieController = new CookieController();
+
         foreach ($this->columns as $column) {
             $_SESSION[$column] = $this->$column;
         }
 
-        foreach ($this->permissions() as $permission) {
-            $_SESSION['permission'] = $permission->id;
+        $_SESSION['user_language'] = $this->language;
+        $_SESSION['authenticated'] = true;
+
+        $user = parent::with('permissions')->find($this->id);
+        unset($_SESSION['permissions']);
+        foreach ($user->permissions as $permission) {
+            $_SESSION['permissions'] = $permission->id;
         }
+        if (!isset($_COOKIE['auth_hash'])):
+            $cookieController->setAuthCookie($user);
+        endif;
     }
 
     /**

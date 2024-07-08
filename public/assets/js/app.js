@@ -1,4 +1,4 @@
-const spinner = `<div class="spinner-border text-white" role="status"></div>`;
+const spinner = `<div class="loader"></div>`;
 
 function _alert(icon, message, type){
 
@@ -91,10 +91,11 @@ function global_alert(response, time){
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     
-    `)
+    `).hide().show(500)
 
     if(time){
         setTimeout(() => {
+            $('#global-custom-alert').hide(500)
             const bsAlert = new bootstrap.Alert('#global-alert-container')
             bsAlert.close()
         }, time*1000)
@@ -173,11 +174,11 @@ function checkPassword() {
             $('.btn-submit').attr("disabled", false)
             auto_remove_alert(0)
         } else {
-            _alert("alert-circle-outline", "A deve ter no mínimo 8 caracteres!", "danger")
+            _alert("alert-circle-outline", locale.password_verify_length, "danger")
         }
 
     } else {
-        _alert("alert-circle-outline", "As senhas devem ser iguais!", "danger")
+        _alert("alert-circle-outline", locale.password_verify_match, "danger")
         $('.btn-submit').attr("disabled", true)
     }
 }

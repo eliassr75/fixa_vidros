@@ -52,7 +52,7 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="password"><?=$functionsController->locale('input_confirm_password')?></label>
+                        <label class="label" for="new-password"><?=$functionsController->locale('input_confirm_password')?></label>
                         <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
                                autocomplete="new-password" placeholder="<?=$functionsController->locale('input_confirm_password')?>" required>
                         <i class="clear-input">

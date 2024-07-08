@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+use App\Models\PasswordReset;
 use App\Models\User;
 use App\Validators\Validator;
 use Cassandra\Exception\ValidationException;
@@ -11,12 +12,26 @@ class LoginController extends BaseController
 
     public function redirectToLogin()
     {
-        header('Location: /login/');
+        if (!isset($_SESSION['auth_hash'])):
+            header('Location: /login/');
+        else:
+            header('Location: /dashboard/');
+        endif;
     }
 
     public function logout()
     {
+        if (isset($_SESSION['id'])):
+
+            $user = User::find($_SESSION['id']);
+            $user->auth_hash = null;
+            $user->save();
+            $user->setLog('Login', 'Sessão encerrada pelo própio usuário.');
+
+        endif;
+
         session_destroy();
+        setcookie('auth_hash', '', time() - 3600, "/", "", false, true);
         $this->redirectToLogin();
     }
 
@@ -29,9 +44,9 @@ class LoginController extends BaseController
 
         $message = ['message' => $functions->locale('invalid_login'), 'status' => 'error'];
 
-        if(!empty($data->email) && !empty($data->password)){
+        if(!empty($data->username) && !empty($data->password)){
 
-            if(!Validator::validateEmail($data->email)){
+            if(!Validator::validateEmail($data->username)){
                 $functions->sendResponse($message, 403);
             }
 
@@ -40,7 +55,7 @@ class LoginController extends BaseController
             }
 
             $userModel = new User();
-            $user_search = $userModel->where('email', str($data->email))->first();
+            $user_search = $userModel->where('email', str($data->username))->first();
             if(!empty($user_search)){
 
                 $_SESSION['user_language'] = $user_search->language;
@@ -76,7 +91,6 @@ class LoginController extends BaseController
                 }else{
 
                     $user_search->startSession();
-
                     $missingDataController = new MissingDataController();
                     if($missingDataController->verify($user_search->id)){
                         $message['url'] = '/dashboard/';
@@ -136,19 +150,143 @@ class LoginController extends BaseController
         $functions->sendResponse($message, $status_code);
     }
 
-
-    public function forgetPassword()
+    public function resetPassword($token)
     {
-
+        $p_resetModel = new PasswordReset();
         $functionsController = new FunctionController();
         $functionsController->api = true;
+        $status_code = 401;
 
-        $data = $functionsController->postStatement($_POST);
-        if (!empty($data)):
+        $response = $functionsController->baseResponse();
+        $data = $functionsController->putStatement();
+
+        $p_reset_search = $p_resetModel->where('token', $token)->first();
+        $user = $p_reset_search ? $p_reset_search->user() : false;
+
+        if (!$p_reset_search || $p_reset_search->check_expired()):
+
+            $response->message = $functionsController->locale('expired_link');
+            $response->status = "warning";
+            $response->custom_timer = 5;
+            $response->spinner = true;
+            $response->url = "/reset-password/";
 
         else:
-            define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
-            $this->render('forget_password', ["login" => true, "route" => "/forget-password/"]);
+
+            $user->password = password_hash($data->password, PASSWORD_BCRYPT);
+            $user->save();
+            $user->setLog("Login", "Usuário redefiniu a própria senha pela página de login.");
+
+            $response->message = $functionsController->locale('password_updated');
+            $response->status = "success";
+            $response->custom_timer = 3;
+            $response->spinner = true;
+            $response->url = "/login/";
+
+        endif;
+
+        $functionsController->sendResponse($response, $status_code);
+    }
+
+    public function forgetPassword($token=false)
+    {
+
+        $p_resetModel = new PasswordReset();
+        $functionsController = new FunctionController();
+        $functionsController->api = true;
+        $status_code = 406;
+        $method = "POST";
+        $data = $functionsController->postStatement($_POST);
+
+        if ($token && !empty($data)):
+            return;
+        else:
+
+            if($token):
+
+                $method = "PUT";
+                $p_reset_search = $p_resetModel->where('token', $token)->first();
+                $user = $p_reset_search ? $p_reset_search->user() : false;
+                $expired = false;
+                $response = false;
+                $allowed_reset = true;
+
+                if (!$p_reset_search || $p_reset_search->check_expired()):
+
+                    $expired = true;
+                    $allowed_reset = false;
+                    $method = "POST";
+                    $response = $functionsController->baseResponse();
+                    $response->message = $functionsController->locale('expired_link');
+                    $response->status = "warning";
+
+                endif;
+
+                define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
+                $this->render('forget_password', [
+                    "login" => true,
+                    "route" => $expired ? "/forget-password/" : "/forget-password/{$token}/",
+                    "expired" => $expired,
+                    "response" => $response,
+                    "method" => $method,
+                    "user" => $user,
+                    "allowed_reset" => $allowed_reset
+                ]);
+                return;
+            endif;
+
+            if (!empty($data) and !$token):
+
+                $response = $functionsController->baseResponse();
+                $response->message = $functionsController->locale('invalid_email');
+                $response->status = "warning";
+
+                $userModel = new User();
+                $user_search = $userModel->where('email', $data->email)->first();
+                if(Validator::validateEmail($data->email) && $user_search):
+
+                    $_SESSION['user_language'] = $user_search->language;
+                    $token_reset = password_hash("{$user_search->id}-" . date('Y-m-d H:i:s'), PASSWORD_BCRYPT);
+                    $token_reset = str_replace('/', '', $token_reset);
+
+                    $user_reset = $p_resetModel->create([
+                        "user_id" => $user_search->id,
+                        "token" => $token_reset,
+                        "log_id" => $user_search->setLog("Login", "Usuário solicitou recuperação de senha")
+                    ]);
+
+                    $url_reset = $functionsController->generateCurrentUrl() . "{$user_reset->token}";
+                    $response_email = $functionsController->sendMail(
+                        $data->email,
+                        $functionsController->locale('recovery_password'),
+                        "{$functionsController->locale('hello')}, {$user_search->name}! <br> {$functionsController->locale('recovery_password_email_message')}",
+                        $url_reset,
+                        $functionsController->locale('recovery_password')
+                    );
+
+                    if(gettype($response_email) == "boolean"):
+
+                        $response->message = $functionsController->locale('sent_email_recovery');
+                        $response->status = "info";
+                        $status_code = 200;
+                    else:
+                        $response->message = $response_email;
+                        $response->status = "error";
+                        $status_code = 400;
+                    endif;
+                endif;
+
+                $functionsController->sendResponse($response, $status_code);
+            else:
+                define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
+                $this->render('forget_password', [
+                    "login" => true,
+                    "route" => "/forget-password/",
+                    "method" => $method,
+                    "expired" => false,
+                    "allowed_reset" => false
+                ]);
+            endif;
         endif;
 
     }
