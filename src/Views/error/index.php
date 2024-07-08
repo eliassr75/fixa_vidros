@@ -16,7 +16,6 @@ $functionsController = new FunctionController();
 <div class="section align-items-center mt-auto">
     <div class="splash-page mt-5 mb-5">
 
-        <?= print_r($_SESSION)?>
         <hr>
         <h1><?=$code?></h1>
         <h2 class="mb-2"><?=$functionsController->locale("{$code}_error")?>!</h2>
