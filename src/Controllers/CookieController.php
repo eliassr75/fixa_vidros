@@ -21,25 +21,28 @@ class CookieController extends BaseController
 
     public function checkAuthCookie()
     {
-        if (isset($_COOKIE['auth_hash']) and !isset($_SESSION['authenticated'])) {
+        if (isset($_COOKIE['auth_hash']) and !isset($_SESSION['authenticated'])):
 
             $hash = $_COOKIE['auth_hash'];
+            if($hash):
+                $user = User::where('auth_hash', $hash)->first();
+                if($user):
+                    $last_user_agent_register = $this->agent;
+                    $agent_from_request = $this->agent;
 
-            $user = User::where('auth_hash', $hash)->first();
-            $last_user_agent_register = $this->agent;
-            $agent_from_request = $this->agent;
+                    $last_user_agent_register->setUserAgent($user->cookie_user_agent());
+                    $agent_from_request->setHttpHeaders($this->headers);
 
-            $last_user_agent_register->setUserAgent($user->cookie_user_agent());
-            $agent_from_request->setHttpHeaders($this->headers);
+                    $device = $last_user_agent_register->device() === $agent_from_request->device();
+                    $platform = $last_user_agent_register->platform() === $agent_from_request->platform();
+                    $browser = $last_user_agent_register->browser() === $agent_from_request->browser();
 
-            $device = $last_user_agent_register->device() === $agent_from_request->device();
-            $platform = $last_user_agent_register->platform() === $agent_from_request->platform();
-            $browser = $last_user_agent_register->browser() === $agent_from_request->browser();
-
-            if ($device and $platform and $browser):
-                $user->startSession();
-                $user->setLog("Login", "Sessão iniciada via cookie.");
+                    if ($device and $platform and $browser):
+                        $user->startSession();
+                        $user->setLog("Login", "Sessão iniciada via cookie.");
+                    endif;
+                endif;
             endif;
-        }
+        endif;
     }
 }

@@ -1,5 +1,31 @@
 const spinner = `<div class="loader"></div>`;
 
+let configDataTable = {
+    stateSave: true,
+    responsive: true,
+    language: {
+        searchPlaceholder: 'Faça uma pesquisa nesta página',
+        zeroRecords: "Não encontramos resultados...",
+        sSearch: '',
+        sLengthMenu: '_MENU_',
+        sLength: 'dataTables_length',
+        info: 'Total de Registros: _TOTAL_',
+        infoFiltered: '(Filtrado de _MAX_ resultados)',
+        infoEmpty: "Total de Registros: _TOTAL_",
+        oPaginate: {
+            sFirst: '<ion-icon name="arrow-back-circle-outline"></ion-icon>',
+            sPrevious: '<ion-icon name="arrow-back-circle-outline"></ion-icon>',
+            sNext: '<ion-icon name="arrow-forward-circle-outline"></ion-icon>',
+            sLast: '<ion-icon name="arrow-forward-circle-outline"></ion-icon>'
+        }
+    },
+    order: false,
+    lengthChange: false,
+    autoWidth: false,
+    paging: false
+}
+
+
 function _alert(icon, message, type){
 
     $('.custom-alert').html(`
@@ -79,7 +105,7 @@ function global_alert(response, time){
             break;
     }
 
-    $('#global-custom-alert').html(`
+    const alert_html = `
 
     <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" id="global-alert-container" role="alert">
         <div class="icon-wrap">
@@ -91,13 +117,26 @@ function global_alert(response, time){
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     
-    `).hide().show(500)
+    `;
+
+    if (document.querySelector('#child-global-custom-alert')) {
+        $('#child-global-custom-alert').html(alert_html).hide().show(500)
+    }else{
+        $('#global-custom-alert').html(alert_html).hide().show(500)
+    }
 
     if(time){
         setTimeout(() => {
-            $('#global-custom-alert').hide(500)
+
+            if (document.querySelector('#child-global-custom-alert')) {
+                $('#child-global-custom-alert').hide(500)
+            }else{
+                $('#global-custom-alert').hide(500)
+            }
+
             const bsAlert = new bootstrap.Alert('#global-alert-container')
             bsAlert.close()
+
         }, time*1000)
 
     }
@@ -223,16 +262,6 @@ function toast_alert(response, title=null){
         if(response.dialog){
             dialog(response);
         }else{
-            //$('#toast-container').html(`
-            //    <div id="toast" class="toast-box toast-top top-0 bg-${toastTheme}">
-            //        <div class="in w-100">
-            //            <div class="text w-100">
-            //                ${response.message}
-            //            </div>
-            //        </div>
-            //    </div>
-            //`);
-            //toastbox('toast', 3000)
             global_alert(response, timer_global_alert)
         }
 
@@ -283,7 +312,7 @@ async function sendGlobalAjax(params, progressBar=false) {
 }
 
 /* Eemple Usage: data-method="PUT" data-action="{{ request.path }}" data-ajax="default" data-callback="get_datails" */
-function processForm(form=false, params=false, callbackName=false, callbackParams=false) {
+function processForm(form=false, params=false, callbackName=false, callbackParams=false, custom_spinner=false) {
 
     let progressBar = $("#progressBar");
     let progressDiv = $("#progressDiv");
@@ -333,11 +362,16 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
 
     params.beforeSend = function() {
 
+        if (custom_spinner){
+            $("#section-animation").html(spinner)
+        }
+
         window.bkp_html = $('.btn-submit').html()
 
         $('.btn-submit').html(`
             ${spinner}
         `).addClass("disabled")
+        progressContainer.css('z-index', 9999)
         progressContainer.removeClass('bg-danger').show(500);
         progressBar.removeClass('bg-danger');
         progressDiv.prop('aria-valuenow', '0');
@@ -365,6 +399,10 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
 
         setTimeout(function() {
             progressContainer.hide(500);
+
+            if (custom_spinner){
+                $("#section-animation").hide(500).html("")
+            }
         }, 2000);
     }
 
@@ -405,6 +443,12 @@ function get_cep(cep){
 $(document).ready(() => {
 
     $("#progressContainer").hide()
+
+    $(".select-2").select2({
+        placeholder: locale.select_2_placeholder,
+        language: "pt",
+        dropdownParent: $('.modal')
+    });
 
     $("form").on('submit', function (e){
 

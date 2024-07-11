@@ -6,13 +6,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <title><?=TITLE_PAGE?></title>
-    <meta name="description" content="Finapp HTML Mobile Template">
-    <meta name="keywords"
-          content="bootstrap, wallet, banking, fintech mobile template, cordova, phonegap, mobile, html, responsive" />
+    <meta name="description" content="FixaVidros ERP">
     <link rel="icon" type="image/png" href="/assets/img/favicon.png" sizes="32x32">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/icon/192x192.png">
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="manifest" href="/__manifest.json">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         .loader {

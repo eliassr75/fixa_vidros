@@ -90,6 +90,15 @@ class User extends Model {
 
     }
 
+    public function current_permission()
+    {
+        $user = parent::with('permissions')->find($this->id);
+        unset($_SESSION['permissions']);
+        foreach ($user->permissions as $permission) {
+            return $permission->name;
+        }
+    }
+
     public function startSession()
     {
 
@@ -105,7 +114,8 @@ class User extends Model {
         $user = parent::with('permissions')->find($this->id);
         unset($_SESSION['permissions']);
         foreach ($user->permissions as $permission) {
-            $_SESSION['permissions'] = $permission->id;
+            $_SESSION['permission_id'] = $permission->id;
+            $_SESSION['permission_name'] = $permission->name;
         }
         if (!isset($_COOKIE['auth_hash'])):
             $cookieController->setAuthCookie($user);

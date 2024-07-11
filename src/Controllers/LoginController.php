@@ -12,7 +12,7 @@ class LoginController extends BaseController
 
     public function redirectToLogin()
     {
-        if (!isset($_SESSION['auth_hash'])):
+        if (!isset($_SESSION['authenticated'])):
             header('Location: /login/');
         else:
             header('Location: /dashboard/');
@@ -66,8 +66,16 @@ class LoginController extends BaseController
                     $message['status'] = 'warning';
                     $message['dialog'] = true;
 
+                    $user_search->setLog('Login', $functions->locale('try_login_not_permission'));
                     $functions->sendResponse($message, 403);
+
                 }elseif(!$user_search->active){
+
+                    $message['message'] = $functions->locale('login_not_permission');
+                    $message['status'] = 'warning';
+                    $message['dialog'] = true;
+
+                    $user_search->setLog('Login', "Tentativa de login sem permissão de acesso (Locked).");
                     $functions->sendResponse($message, 403);
 
                 }elseif(!password_verify($data->password, $user_search->password)){
@@ -300,6 +308,9 @@ class LoginController extends BaseController
     public function login()
     {
         define('TITLE_PAGE', 'Fixa Vidros - Login');
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: post-check=0, pre-check=0", false);
+        header("Pragma: no-cache");
         $this->render('login', ["login" => true, "route" => "/login/"]);
     }
 }

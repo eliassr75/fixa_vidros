@@ -147,6 +147,11 @@ class FunctionController extends BaseController
         return $response;
     }
 
+    public function is_dashboard($is)
+    {
+        $_SESSION['dashboard'] = $is;
+    }
+
     public function locale($key): string
     {
         if(!isset($_SESSION['user_language'])){
@@ -165,7 +170,7 @@ class FunctionController extends BaseController
         $jsContent = "const locale = " . json_encode($js_locale, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . ";";
 
         // Caminho do arquivo JavaScript
-        $jsFilePath = "../public/assets/js/locale.js";
+        $jsFilePath = "../public/assets/js/locale_{$_SESSION['user_language']}.js";
 
         // Escrever no arquivo JavaScript
         file_put_contents($jsFilePath, $jsContent);

@@ -34,7 +34,7 @@ class Router
             if ($route['method'] == $method && preg_match($route['url'], $uri, $matches)) {
 
                 if (!$middleware->is_authenticated() and $route['login_required']):
-                    header("Location: /error/403/");
+                    header("Location: /");
                     return;
                 endif;
 

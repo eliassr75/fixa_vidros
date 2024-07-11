@@ -1,3 +1,13 @@
+<?php
+
+use App\Controllers\FunctionController;
+use App\Controllers\MenuController;
+
+$functionsController = new FunctionController();
+$menuController = new MenuController();
+
+?>
+
 <!-- App Bottom Menu -->
 <div class="appBottomMenu">
     <a href="index.html" class="item active">
@@ -41,11 +51,11 @@
                 <!-- profile box -->
                 <div class="profileBox pt-2 pb-2">
                     <div class="image-wrapper">
-                        <img src="/assets/img/sample/avatar/avatar1.jpg" alt="image" class="imaged  w36">
+                        <img src="/assets/img/sample/avatar/do-utilizador.png" alt="image" class="imaged w36">
                     </div>
                     <div class="in">
-                        <strong>Sebastian Doe</strong>
-                        <div class="text-muted">4029209</div>
+                        <strong><?=$_SESSION['name']?></strong>
+                        <div class="text-muted"><?=$_SESSION['permission_name']?></div>
                     </div>
                     <a href="#" class="btn btn-link btn-icon sidebar-close" data-bs-dismiss="modal">
                         <ion-icon name="close-outline"></ion-icon>
@@ -53,16 +63,16 @@
                 </div>
                 <!-- * profile box -->
                 <!-- balance -->
-                <div class="sidebar-balance">
-                    <div class="listview-title">Balance</div>
+                <!-- <div class="sidebar-balance">
+                    <div class="listview-title">Movimentações</div>
                     <div class="in">
                         <h1 class="amount">$ 2,562.50</h1>
                     </div>
-                </div>
+                </div> -->
                 <!-- * balance -->
 
                 <!-- action group -->
-                <div class="action-group">
+                <!-- <div class="action-group">
                     <a href="index.html" class="action-button">
                         <div class="in">
                             <div class="iconbox">
@@ -95,123 +105,50 @@
                             My Cards
                         </div>
                     </a>
-                </div>
+                </div> -->
                 <!-- * action group -->
 
                 <!-- menu -->
                 <div class="listview-title mt-1">Menu</div>
                 <ul class="listview flush transparent no-line image-listview">
+                    <?php foreach ($menuController->menu_options() as $menu_option): ?>
                     <li>
-                        <a href="index.html" class="item">
+                        <a href="<?=$menu_option->url?>" class="item">
                             <div class="icon-box bg-primary">
-                                <ion-icon name="pie-chart-outline"></ion-icon>
+                                <ion-icon name="<?=$menu_option->icon?>"></ion-icon>
                             </div>
                             <div class="in">
-                                Overview
-                                <span class="badge badge-primary">10</span>
+                                <?=$menu_option->name?>
+                                <?php if($menu_option->badge): ?>
+                                    <span class="badge badge-primary"><?=$menu_option->badge?></span>
+                                <?php endif; ?>
                             </div>
                         </a>
                     </li>
-                    <li>
-                        <a href="app-pages.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="document-text-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                Pages
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="app-components.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="apps-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                Components
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="app-cards.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="card-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                My Cards
-                            </div>
-                        </a>
-                    </li>
+                    <?php endforeach; ?>
                 </ul>
                 <!-- * menu -->
 
                 <!-- others -->
                 <div class="listview-title mt-1">Others</div>
                 <ul class="listview flush transparent no-line image-listview">
-                    <li>
-                        <a href="app-settings.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="settings-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                Settings
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="component-messages.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="chatbubble-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                Support
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="app-login.html" class="item">
-                            <div class="icon-box bg-primary">
-                                <ion-icon name="log-out-outline"></ion-icon>
-                            </div>
-                            <div class="in">
-                                Log out
-                            </div>
-                        </a>
-                    </li>
-
-
+                    <?php foreach ($menuController->other_options() as $menu_option): ?>
+                        <li>
+                            <a href="<?=$menu_option->url?>" class="item">
+                                <div class="icon-box bg-primary">
+                                    <ion-icon name="<?=$menu_option->icon?>"></ion-icon>
+                                </div>
+                                <div class="in">
+                                    <?=$menu_option->name?>
+                                    <?php if($menu_option->badge): ?>
+                                        <span class="badge badge-primary"><?=$menu_option->badge?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
                 <!-- * others -->
-
-                <!-- send money -->
-                <div class="listview-title mt-1">Send Money</div>
-                <ul class="listview image-listview flush transparent no-line">
-                    <li>
-                        <a href="#" class="item">
-                            <img src="/assets/img/sample/avatar/avatar2.jpg" alt="image" class="image">
-                            <div class="in">
-                                <div>Artem Sazonov</div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item">
-                            <img src="/assets/img/sample/avatar/avatar4.jpg" alt="image" class="image">
-                            <div class="in">
-                                <div>Sophie Asveld</div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item">
-                            <img src="/assets/img/sample/avatar/avatar3.jpg" alt="image" class="image">
-                            <div class="in">
-                                <div>Kobus van de Vegte</div>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-                <!-- * send money -->
 
             </div>
         </div>

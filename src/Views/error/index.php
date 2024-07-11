@@ -28,7 +28,7 @@ $functionsController = new FunctionController();
 <div class="fixed-bar">
     <div class="row justify-content-center">
         <div class="col-md-6 col-12">
-            <a href="#" class="btn btn-lg btn-primary btn-block goBack" onclick="history.back()">
+            <a href="#" class="btn btn-lg btn-primary btn-block goBack" onclick="window.location.href='/dashboard/'">
                 <?=$functionsController->locale('go_back')?>
             </a>
         </div>

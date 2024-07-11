@@ -41,7 +41,12 @@ $router->addRoute('GET', '/missing-data/{userId}/', true, MissingDataController:
 $router->addRoute('PUT', '/missing-data/{userId}/', true,MissingDataController::class, 'missingData');
 
 // SYSTEM ROUTES
-$router->addRoute('GET', '/users/', true,UserController::class, 'showAll');
+$router->addRoute('GET', '/dashboard/', true,DashboardController::class, 'index');
+
+$router->addRoute('GET', '/users/', true,UserController::class, 'index');
+$router->addRoute('PUT', '/users/{userId}/', true,UserController::class, 'updateUser');
+$router->addRoute('GET', '/users/json/', true,UserController::class, 'json');
+$router->addRoute('GET', '/users/json/{userId}/', true,UserController::class, 'json');
 
 $middleware->autoRedirect();
 $router->handleRequest();

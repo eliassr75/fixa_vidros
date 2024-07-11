@@ -6,12 +6,15 @@ use App\Models\User;
 use Exception;
 use Statickidz\GoogleTranslate;
 
-define('TITLE_PAGE', 'Fixa Vidros - Dados Complementares');
+define('TITLE_PAGE', 'Fixa Vidros - Dashboard');
 
 class DashboardController extends BaseController
 {
-    public function errorPage($userId)
+    public function index()
     {
+        $functionController = new FunctionController();
+        $functionController->is_dashboard(true);
+
         $this->render('dashboard', []);
     }
 }
