@@ -26,6 +26,19 @@ class LogEntry extends Model {
         'user_agent'
     ];
 
+    public function setLog($title, $description)
+    {
+        $log = new LogEntry();
+        $log->request_type = $_SERVER['REQUEST_METHOD'];
+        $log->user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $log->title = $title;
+        $log->description = $description;
+
+        if($log->validate()){
+            $log->save();
+        }
+    }
+
 
     public function users()
     {

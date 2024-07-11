@@ -5,7 +5,7 @@ class Router
 {
     private $routes = [];
 
-    public function addRoute($method, $url, $login_required, $controller, $action)
+    public function addRoute($method, $url, $login_required, $category, $controller, $action)
     {
         // Transformar URL em regex e identificar parâmetros dinâmicos
         $url = rtrim($url, '/') . '/';
@@ -17,6 +17,7 @@ class Router
             'method' => $method,
             'url' => $url,
             'login_required' => $login_required,
+            'category' => $category,
             'controller' => $controller,
             'action' => $action
         ];
@@ -35,6 +36,9 @@ class Router
 
                 if (!$middleware->is_authenticated() and $route['login_required']):
                     header("Location: /");
+                    return;
+                elseif(isset($_SESSION['authenticated']) and $route['category'] === 'login'):
+                    header("Location: /dashboard/");
                     return;
                 endif;
 

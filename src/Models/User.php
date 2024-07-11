@@ -117,9 +117,7 @@ class User extends Model {
             $_SESSION['permission_id'] = $permission->id;
             $_SESSION['permission_name'] = $permission->name;
         }
-        if (!isset($_COOKIE['auth_hash'])):
-            $cookieController->setAuthCookie($user);
-        endif;
+        $cookieController->setAuthCookie($user);
     }
 
     /**

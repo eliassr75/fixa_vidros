@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\LogEntry;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -41,6 +42,9 @@ class CookieController extends BaseController
                         $user->startSession();
                         $user->setLog("Login", "Sessão iniciada via cookie.");
                     endif;
+                else:
+                    $logEntry = new LogEntry();
+                    $logEntry->setLog("Cookies", "Tentativa de login via cookie inválida.");
                 endif;
             endif;
         endif;

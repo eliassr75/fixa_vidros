@@ -19,12 +19,11 @@ class Middleware
 
     public function autoRedirect()
     {
+        $loginCookie = new CookieController();
+        $loginCookie->checkAuthCookie();
+
         if (!isset($_SESSION['authenticated']) and !isset($_SESSION['user_language'])):
-
-            $loginCookie = new CookieController();
-            $loginCookie->checkAuthCookie();
             header('Location: /');
-
         endif;
     }
 
