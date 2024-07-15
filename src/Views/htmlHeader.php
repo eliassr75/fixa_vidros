@@ -25,6 +25,17 @@
     </div>
     <div class="pageTitle"><?=SUBTITLE_PAGE?></div>
     <div class="right">
+
+        <?php switch($button){
+            case 'add':
+                ?>
+                <a href="javascript:void(0)" class="headerButton" onclick="actionForm('addUser')" data-bs-toggle="modal" data-bs-target="#actionSheetForm">
+                    <ion-icon role="img" class="md hydrated" name="add-outline"></ion-icon>
+                </a>
+                <?php
+                break;
+        } ?>
+
     </div>
 </div>
 <?php endif; ?>

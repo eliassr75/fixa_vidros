@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+use App\Models\LinkManager;
 use App\Models\PasswordReset;
 use App\Models\User;
 use App\Validators\Validator;
@@ -9,6 +10,19 @@ use Exception;
 
 class LoginController extends BaseController
 {
+
+    public function linkManager($token)
+    {
+        $linkManager = new LinkManager();
+        $linkManager = $linkManager->where('token', $token)->first();
+
+        if (!$linkManager || $linkManager->check_expired()) {
+            header('Location: /error/404/');
+        }else{
+            header("Location: /forget-password/{$token}/");
+        }
+
+    }
 
     public function redirectToLogin()
     {
@@ -135,21 +149,102 @@ class LoginController extends BaseController
 
             $userModel = new User();
             $userModel->name = $data->name;
-            $userModel->email = $data->email;
-            $userModel->username = explode('@', $data->email)[0];
-            $userModel->password = password_hash($data->password, PASSWORD_BCRYPT);
+            $userModel->email = $data->username;
+            $userModel->username = explode('@', $data->username)[0];
+
+            $suggestPassword = "";
+            if(isset($data->suggestPassword)):
+                $userModel->password = password_hash($functions->defaultPassword(), PASSWORD_BCRYPT);
+            else:
+                $userModel->password = password_hash($data->password, PASSWORD_BCRYPT);
+            endif;
+
+
             if($userModel->validate()){
-                $userModel->save();
-                $userModel->setLog("Login", "Conta criada.");
-                //$userModel->permissions()->attach(1);
+
+                $byAdmin = "";
+                if(isset($data->generate_link)):
+                    $userModel->language = $data->language;
+                    $userModel->save();
+                    $userModel->permissions()->attach($data->permission);
+                    $byAdmin = " por administrador ({$_SESSION['name']})";
+                else:
+                    $userModel->save();
+                endif;
+
+                $userModel->setLog("Login", "Conta criada$byAdmin.");
+
             }
 
-            $message['message'] = $functions->locale('valid_user_created') . " - {$data->name} <hr class='border'>" . $functions->locale('wait_administrator_liberation');
-            $message['status'] = 'success';
-            $message['url'] = '/login/';
-            $message['custom_timer'] = 5;
-            $message['spinner'] = true;
-            $status_code = 200;
+            if(isset($data->generate_link)):
+
+                $bkp_user_language = $_SESSION['user_language'];
+                $_SESSION['user_language'] = $userModel->language;
+
+                if(isset($data->suggestPassword)):
+                    $suggestPassword =  str_replace('__password__', $functions->defaultPassword(), $functions->locale('email_msg_temp_password'));
+                else:
+                    $suggestPassword =  str_replace('__password__', $data->password, $functions->locale('email_msg_temp_password'));
+                endif;
+
+                $suggestPassword = "<hr> {$functions->locale('input_username')}: {$userModel->email} <br> {$suggestPassword}";
+                $token_reset = password_hash("{$userModel->id}-" . date('Y-m-d H:i:s'), PASSWORD_BCRYPT);
+                $token_reset = str_replace('/', '', $token_reset);
+
+                $linkManagerModel = new LinkManager();
+                $linkManagerModel->user_id = $userModel->id;
+                $linkManagerModel->log_id = $userModel->last_log_entry()->id;
+                $linkManagerModel->setAction([
+                    "action" => "forget-password",
+                    "url_for" => "/forget-password/"
+                ]);
+
+                $p_resetModel = new PasswordReset();
+                $user_reset = $p_resetModel->create([
+                    "user_id" => $userModel->id,
+                    "token" => $token_reset,
+                    "log_id" => $userModel->setLog("Login", "Recuperação de senha pós criação de conta.")
+                ]);
+
+                $linkManagerModel->token = $user_reset->token;
+                $linkManagerModel->validate();
+                $linkManagerModel->save();
+
+                $msg_email = "{$functions->locale('email_msg_user_created')} $suggestPassword";
+                $msg_email = str_replace("__name__", $userModel->name, $msg_email);
+
+                $url_reset = $functions->generateCurrentUrl() . "continue/{$user_reset->token}";
+                $response_email = $functions->sendMail(
+                    $userModel->email, $functions->locale('valid_user_created'),
+                    $msg_email, $url_reset,
+                    $functions->locale('continue')
+                );
+
+                $_SESSION['user_language'] = $bkp_user_language;
+                $message['dialog'] = true;
+                if(gettype($response_email) == "boolean"):
+
+                    $message['message'] = $functions->locale('valid_user_created');
+                    $message['status'] = "info";
+                    $message['reload'] = true;
+                    $status_code = 200;
+                else:
+
+                    $message['message'] = $response_email;
+                    $message['status'] = "error";
+                    $status_code = 400;
+                endif;
+
+            else:
+
+                $message['message'] = $functions->locale('valid_user_created') . " - {$data->name} <hr class='border'>" . $functions->locale('wait_administrator_liberation');
+                $message['status'] = 'success';
+                $message['url'] = '/login/';
+                $message['custom_timer'] = 5;
+                $message['spinner'] = true;
+                $status_code = 200;
+
+            endif;
 
         }catch(Exception $e){
             $message['message'] = $e->getMessage();

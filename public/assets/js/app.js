@@ -82,6 +82,165 @@ function input_phone_number(locale){
     });
 }
 
+function actionForm(action){
+
+    let global_action_sheet_content = $('#global-action-sheet-content');
+    let global_action_sheet_title = $('#global-action-sheet-title');
+    let body = ``;
+
+    switch (action){
+        case 'addUser':
+
+            //For legends
+            window.permissions = window.systemPermissions
+
+            let values_select = ""
+            for (let permission of window.systemPermissions){
+                values_select += `
+                    <option value="${permission.id}">${permission.name}</option>
+                `
+            }
+
+            let values_select_language = ""
+            let languages = [
+                {language: "pt", label: locale.language_system_pt},
+                {language: "en", label: locale.language_system_en},
+                {language: "es", label: locale.language_system_es}
+            ]
+
+            for (let language of languages){
+                values_select_language += `
+                    <option value="${language.language}">${language.label}</option>
+                `
+            }
+
+            global_action_sheet_title.html(locale.create_account);
+            body = `
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_name}</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="${locale.input_name}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="username">${locale.input_email}</label>
+                        <input type="email" class="form-control" id="username" name="username" autocomplete="username" placeholder="${locale.input_email}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div class="form-group boxed">
+                    <div class="input-wrapper">
+                        <label class="label" for="select-permission">${locale.permission_level}</label>
+                        <select class="form-control custom-select" id="select-permission" name="permission" onchange="setLegend(this.value)" required>
+                            <option value="" selected disabled>Selecione uma opção</option>
+                            ${values_select}
+                        </select>
+                        <label class="text-warning label mt-1" id="legend-permission"></label>
+                    </div>
+                </div>
+    
+                <div class="form-group boxed">
+                    <div class="input-wrapper">
+                        <label class="label" for="select-language">${locale.language_system}</label>
+                        <select class="form-control custom-select" id="select-language" name="language" required>
+                            <option value="" selected disabled>Selecione uma opção</option>
+                            ${values_select_language}
+                        </select>
+                        <label class="text-warning label mt-1" id="legend-permission"></label>
+                    </div>
+                </div>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="suggestPassword" name="suggestPassword" checked>
+                    <label class="form-check-label" for="suggestPassword">${locale.generate_password}</label>
+                </div>
+
+                <div class="form-group basic password-wrapper" hidden>
+                    <div class="input-wrapper">
+                        <label class="label" for="password">${locale.input_password}</label>
+                        <input type="password" class="form-control" id="password" name="password" onkeyup="checkPassword()"
+                        autocomplete="new-password" placeholder="${locale.input_password}">
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+
+                <div class="form-group basic password-wrapper" hidden>
+                    <div class="input-wrapper">
+                        <label class="label" for="new-password">${locale.input_confirm_password}</label>
+                        <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
+                               autocomplete="new-password" placeholder="${locale.input_confirm_password}">
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+
+                <div class="custom-alert my-2"></div>
+            `;
+
+            break;
+    }
+
+    global_action_sheet_content.html(`
+    <form data-method="POST" data-action="/new-account/" data-ajax="default" data-callback="">
+        <input type="hidden" name="generate-link" value="1">
+        
+        ${body}
+        <div class="row mt-2">
+            <div class="col-6">
+                <button type="button" class="btn btn-lg btn-cancel btn-outline-secondary btn-block" data-bs-dismiss="modal">
+                    ${locale.label_btn_cancel}
+                </button>
+            </div>
+            <div class="col-6">
+                <button type="submit" class="btn btn-lg btn-primary btn-block btn-submit">
+                    ${locale.label_btn_save}
+                </button>
+            </div>
+        </div>
+    </form>
+    `);
+
+    $("#suggestPassword").on("change", function(){
+
+        if($(this).is(':checked')){
+            $(".password-wrapper").prop('hidden', true)
+            $('input[type="password"]').prop('required', false).val("")
+        }else{
+            $(".password-wrapper").prop('hidden', false)
+            $('input[type="password"]').prop('required', true)
+        }
+
+    })
+
+    $("form").on('submit', function (e){
+
+        let form = $(this);
+        const ajaxMod = $(form).data('ajax')
+        if (ajaxMod === "default"){
+
+            e.preventDefault();
+            processForm(form);
+
+        }
+    })
+
+}
+
+function close_global_modal(){
+    $('.modal').modal('hide')
+}
+
 function global_alert(response, time){
 
     let type = "";
@@ -119,23 +278,25 @@ function global_alert(response, time){
     
     `;
 
-    if (document.querySelector('#child-global-custom-alert')) {
+    if (document.querySelector('#child-global-custom-alert') && !window.use_global_alert) {
         $('#child-global-custom-alert').html(alert_html).hide().show(500)
     }else{
         $('#global-custom-alert').html(alert_html).hide().show(500)
     }
 
     if(time){
+
         setTimeout(() => {
 
-            if (document.querySelector('#child-global-custom-alert')) {
-                $('#child-global-custom-alert').hide(500)
-            }else{
-                $('#global-custom-alert').hide(500)
-            }
+            close_global_modal();
 
-            const bsAlert = new bootstrap.Alert('#global-alert-container')
+            let bsAlert = new bootstrap.Alert('#global-alert-container')
+            if (document.querySelector('#child-global-custom-alert') && !window.use_global_alert) {
+                bsAlert = new bootstrap.Alert('#child-global-custom-alert')
+            }
+            window.use_global_alert = false;
             bsAlert.close()
+            $('.appHeader').show()
 
         }, time*1000)
 
@@ -285,6 +446,48 @@ function toast_alert(response, title=null){
 
 }
 
+function change(url=false, id=false, el=false){
+
+    const url_call = `${url}${id}/`;
+    let prop = false
+
+    if(el){
+
+        $('[id^="SwitchCheckUser"]').each(function() {
+            let el = this
+            prop = $(el).is(':checked')
+            if (el.value === id){
+                window.SwitchCheckUser = id
+                $(el).prop('checked', !prop).prop('disabled', true)
+            }else{
+                $(el).prop('disabled', true)
+            }
+
+        });
+
+        params = {
+            method: "PUT",
+            url: `${url_call}`,
+            dataType: 'json',
+        }
+        window.use_global_alert = true;
+        processForm(false, params, 'change', false, false, false)
+
+    }else{
+
+        $('[id^="SwitchCheckUser"]').each(function() {
+            let el = this
+            prop = $(el).is(':checked')
+
+            if (el.value === window.SwitchCheckUser){
+                $(el).prop('checked', !prop).prop('disabled', false);
+            }else{
+                $(el).prop('disabled', false);
+            }
+        });
+    }
+}
+
 async function sendGlobalAjax(params, progressBar=false) {
     try {
         return await $.ajax(params);
@@ -312,7 +515,7 @@ async function sendGlobalAjax(params, progressBar=false) {
 }
 
 /* Eemple Usage: data-method="PUT" data-action="{{ request.path }}" data-ajax="default" data-callback="get_datails" */
-function processForm(form=false, params=false, callbackName=false, callbackParams=false, custom_spinner=false) {
+function processForm(form=false, params=false, callbackName=false, callbackParams=false, custom_spinner=false, progresBarEnabled=false) {
 
     let progressBar = $("#progressBar");
     let progressDiv = $("#progressDiv");
@@ -367,12 +570,15 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
         }
 
         window.bkp_html = $('.btn-submit').html()
+        $('.btn-submit').html(spinner).addClass("disabled")
 
-        $('.btn-submit').html(`
-            ${spinner}
-        `).addClass("disabled")
+        $('.appHeader').hide()
         progressContainer.css('z-index', 9999)
-        progressContainer.removeClass('bg-danger').show(500);
+
+        if(progresBarEnabled){
+            progressContainer.removeClass('bg-danger').show(500);
+        }
+
         progressBar.removeClass('bg-danger');
         progressDiv.prop('aria-valuenow', '0');
         progressBar.css("width", "0%");
@@ -391,15 +597,14 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
     }
 
     params.complete = function(response) {
-        $('.btn-submit').html(window.bkp_html).removeClass("disabled")
 
+        $('.btn-submit').html(window.bkp_html).removeClass("disabled")
         if (callbackName && typeof window[callbackName] === 'function') {
             window[callbackName](response, callbackParams);
         }
 
         setTimeout(function() {
             progressContainer.hide(500);
-
             if (custom_spinner){
                 $("#section-animation").hide(500).html("")
             }

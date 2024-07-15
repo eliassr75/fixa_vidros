@@ -1,11 +1,13 @@
 <?php
 
 namespace App;
+use App\Controllers\LoginController;
+
 class Router
 {
     private $routes = [];
 
-    public function addRoute($method, $url, $login_required, $category, $controller, $action)
+    public function addRoute($method, $url, $login_required, $category, $permissions, $controller, $action)
     {
         // Transformar URL em regex e identificar parâmetros dinâmicos
         $url = rtrim($url, '/') . '/';
@@ -18,6 +20,7 @@ class Router
             'url' => $url,
             'login_required' => $login_required,
             'category' => $category,
+            'permissions' => $permissions,
             'controller' => $controller,
             'action' => $action
         ];
@@ -32,12 +35,19 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
 
         foreach ($this->routes as $route) {
-            if ($route['method'] == $method && preg_match($route['url'], $uri, $matches)) {
+            if ($route['method'] == $method and preg_match($route['url'], $uri, $matches)) {
 
                 if (!$middleware->is_authenticated() and $route['login_required']):
                     header("Location: /");
                     return;
                 elseif(isset($_SESSION['authenticated']) and $route['category'] === 'login'):
+                    header("Location: /dashboard/");
+                    return;
+                elseif(isset($_SESSION['active']) and !$_SESSION['active']):
+                    $loginController = new LoginController();
+                    $loginController->logout();
+                    return;
+                elseif(is_array($route['permissions']) and !in_array($_SESSION['permission_id'], $route['permissions'])):
                     header("Location: /dashboard/");
                     return;
                 endif;

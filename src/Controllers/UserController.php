@@ -10,10 +10,6 @@ use Statickidz\GoogleTranslate;
 
 class UserController extends BaseController
 {
-    public function updateUser($userId)
-    {
-
-    }
     public function index()
     {
         $functionController = new FunctionController();
@@ -35,6 +31,7 @@ class UserController extends BaseController
         $this->render('users', [
             'users' => $users_array,
             'permissions' => $permissions,
+            'button'=> 'add'
         ]);
     }
 
@@ -91,5 +88,108 @@ class UserController extends BaseController
             'user' => $user,
             'permissions' => $permissions,
         ]);
+    }
+
+    public function updateUser($userId)
+    {
+        $functionsController = new FunctionController();
+        $functionsController->api = true;
+        $response = $functionsController->baseResponse();
+        $status_code = 200;
+
+        $data = $functionsController->putStatement();
+        $userModel = new User();
+        $user_search = $userModel->find($userId);
+        $have_update = false;
+        $invalid_cpf = false;
+
+        foreach ($userModel->missingDataKeys as $key):
+            $key_name = $key['name'];
+
+            if (isset($data->$key_name)) :
+                $have_update = true;
+
+                if ($key_name === 'birthday'):
+                    if (!empty($data->$key_name)):
+                        $birthday = str_replace('/', '-', $data->$key_name);
+                        $birthday = date('Y-m-d', strtotime($birthday));
+
+                        $user_search->$key_name = $birthday;
+                        $user_search->age = $functionsController->timeDiff($birthday, date('Y-m-d'), 'years');
+                    endif;
+                elseif($key_name === 'cpf'):
+                    if(!$functionsController->validaCPF($data->$key_name)):
+                        $invalid_cpf = true;
+                        $have_update = false;
+                        break;
+                    else:
+                        $user_search->$key_name = $data->$key_name;
+                    endif;
+                elseif ($key_name === 'phone_number'):
+                    if (strlen($data->$key_name) >= 14):
+                        $user_search->$key_name = $data->$key_name;
+                    endif;
+                else:
+                    $user_search->$key_name = $data->$key_name;
+                endif;
+            endif;
+        endforeach;
+
+        $user_search->name = $data->name;
+        $user_search->email = $data->email;
+        $user_search->username = explode('@', $data->email)[0];
+        $user_search->language = $data->language;
+
+        if($user_search->permissions()->exists()):
+            $user_search->permissions()->detach();
+        endif;
+        $user_search->permissions()->attach($data->permission);
+
+
+        if ($have_update and $user_search->validate()):
+            $user_search->save();
+            $user_search->setLog('User', "Usuário atualizou seu cadastro");
+            $user_search->startSession();
+
+            $response->message = $functionsController->locale('register_success_update');
+            $response->status = "success";
+            $response->reload = true;
+
+        elseif ($invalid_cpf):
+            $response->message = $functionsController->locale('invalid_cpf');
+            $response->status = "warning";
+            $status_code = 400;
+
+        else:
+            $response->message = $functionsController->locale('redirecting');
+            $response->status = "info";
+
+        endif;
+
+        $functionsController->sendResponse($response, $status_code);
+    }
+
+    public function changeUser($userId)
+    {
+        $functionsController = new FunctionController();
+        $functionsController->api = true;
+        $response = $functionsController->baseResponse();
+        $status_code = 200;
+
+        $userModel = new User();
+        $user_search = $userModel->find($userId);
+
+        $user_search->active = !$user_search->active;
+        $user_search->setLog('User', "O status do usuário foi modificado para " . ($user_search->active ? "Ativo" : "Inativo") . " - {$_SESSION['name']}");
+        $user_search->save();
+
+        $response->message = $functionsController->locale('register_success_update');
+        $response->status = "success";
+
+        if ($userId === $_SESSION['id']):
+            $response->reload = true;
+            $user_search->startSession();
+        endif;
+        $functionsController->sendResponse($response, $status_code);
     }
 }

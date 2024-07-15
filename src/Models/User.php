@@ -12,6 +12,7 @@ class User extends Model {
     protected $table = 'users';
     protected $columns = [
         'id',
+        'active',
         'name',
         'email',
         'username',
@@ -64,7 +65,7 @@ class User extends Model {
 
     public function last_log_entry()
     {
-        return $this->belongsToMany(LogEntry::class);
+        return  $this->log_entry()->orderBy('created', 'desc')->first();
     }
 
     public function cookie_user_agent(): string|bool
@@ -108,6 +109,7 @@ class User extends Model {
             $_SESSION[$column] = $this->$column;
         }
 
+        $_SESSION['active'] = (bool)$this->active;
         $_SESSION['user_language'] = $this->language;
         $_SESSION['authenticated'] = true;
 

@@ -16,13 +16,17 @@ $functionController = new FunctionController();
         <div id="users">
 
             <!-- class="search" automagically makes an input a search field. -->
-            <div class="form-group boxed px-3">
-                <div class="input-wrapper">
-                    <input type="text" class="search form-control" id="search" placeholder="<?=$functionController->locale('input_search')?>">
-                    <i class="clear-input">
-                        <ion-icon name="close-circle"></ion-icon>
-                    </i>
-                </div>
+
+
+            <div class="px-3 pt-3">
+                <form class="search-form">
+                    <div class="form-group searchbox">
+                        <input type="text" class="form-control search">
+                        <i class="input-icon">
+                            <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
+                        </i>
+                    </div>
+                </form>
             </div>
             <!-- class="sort" automagically makes an element a sort buttons. The date-sort value decides what to sort by. -->
             <!--
@@ -34,7 +38,7 @@ $functionController = new FunctionController();
             <ul class="listview image-listview inset list mt-2">
                 <?php foreach ($users as $user): ?>
                 <li id="li-model">
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#actionSheetForm" onclick="userController(false, <?=$user->id?>)" class="item">
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#actionSheetFormUser" onclick="userController(false, <?=$user->id?>)" class="item">
                         <img src="/assets/img/sample/avatar/do-utilizador.png" alt="image" class="image">
                         <div class="in">
                             <div>
@@ -44,26 +48,26 @@ $functionController = new FunctionController();
                                     <?=$user->str_created?>
                                 </footer>
                             </div>
-                            <span class="text-muted">
-                                <?=$functionController->locale('action_edit')?>
-                            </span>
                         </div>
-
                     </a>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" value="<?=$user->id?>" <?=$user->active ? "checked" : ""?> id="SwitchCheckUser<?=$user->id?>" onchange="change('/users/change/', <?=$user->id?>, this)">
+                        <label class="form-check-label" for="SwitchCheckUser<?=$user->id?>"></label>
+                    </div>
                 </li>
                 <?php endforeach; ?>
             </ul>
 
-            <div class="modal fade modalbox" id="actionSheetForm" tabindex="-1" aria-hidden="true">
+            <div class="modal fade modalbox" id="actionSheetFormUser" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title"></h5>
-                            <a href="#" data-bs-dismiss="modal" class="btn-close btn-close-white">
+                            <a href="javascript:void(0);" data-bs-dismiss="modal" class="btn-close btn-close-white">
                             </a>
                         </div>
                         <div class="modal-body">
-                            <div id="child-global-custom-alert" class="my-2"></div>
+                            <div id="child-global-custom-alert"></div>
                             <div class="action-sheet-content" id="user-info">
                                 <div id="section-animation" class="w-100 d-flex justify-content-center"></div>
                             </div>
@@ -136,7 +140,12 @@ $functionController = new FunctionController();
 
             <div class="form-group basic">
                 <div class="input-wrapper">
-                    <label class="label" for="username">${locale.input_username}</label>
+                    <label class="label" for="username">
+                        ${locale.input_username}
+                        <span class="text-warning">
+                            (${locale.warning_automaticale_generated})
+                        </span>
+                    </label>
                     <input type="text" class="form-control" id="username" name="username" value="${response.user.username}" placeholder="${locale.input_username}" readonly required>
                     <i class="clear-input">
                         <ion-icon name="close-circle"></ion-icon>
@@ -154,13 +163,37 @@ $functionController = new FunctionController();
                 `
             }
 
+            let values_select_language = ""
+            let languages = [
+                {language: "pt", label: locale.language_system_pt},
+                {language: "en", label: locale.language_system_en},
+                {language: "es", label: locale.language_system_es}
+            ]
+
+            for (let language of languages){
+                values_select_language += `
+                    <option value="${language.language}" ${language.language == response.user.language ? "selected" : ""}>${language.label}</option>
+                `
+            }
+
             fields += `
             <div class="form-group boxed">
                 <div class="input-wrapper">
                     <label class="label" for="select-permission">${locale.permission_level}</label>
-                    <select class="form-control custom-select" id="select-permission" onchange="setLegend(this.value)" required>
+                    <select class="form-control custom-select" id="select-permission" name="permission" onchange="setLegend(this.value)" required>
                         <option value="" selected disabled>Selecione uma opção</option>
                         ${values_select}
+                    </select>
+                    <label class="text-warning label mt-1" id="legend-permission"></label>
+                </div>
+            </div>
+
+            <div class="form-group boxed">
+                <div class="input-wrapper">
+                    <label class="label" for="select-language">${locale.language_system}</label>
+                    <select class="form-control custom-select" id="select-language" name="language" required>
+                        <option value="" selected disabled>Selecione uma opção</option>
+                        ${values_select_language}
                     </select>
                     <label class="text-warning label mt-1" id="legend-permission"></label>
                 </div>
@@ -193,10 +226,19 @@ $functionController = new FunctionController();
             }
 
             $(`#user-info`).html(`
-                <form data-method="PUT" data-action="/users/${id}/" data-ajax="default" data-callback="">
+                <form data-method="PUT" data-action="/users/${response.user.id}/" data-ajax="default" data-callback="">
                     ${fields}
-                    <div class="form-group basic">
-                        <button type="button" class="btn btn-primary btn-block btn-lg" data-bs-dismiss="modal">Deposit</button>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-lg btn-cancel btn-outline-secondary btn-block" data-bs-dismiss="modal">
+                                ${locale.label_btn_cancel}
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-lg btn-primary btn-block btn-submit">
+                                ${locale.create_account}
+                            </button>
+                        </div>
                     </div>
                 </form>
             `)
@@ -219,14 +261,28 @@ $functionController = new FunctionController();
 
             $('#select-permission, #name, #email, #username').trigger('change')
 
-            $('.btn-close').on('click', () => {
+            $('.btn-close, .btn-cancel').on('click', () => {
                 $(".modal-title").html('')
                 $("#user-info").html('<div id="section-animation" class="w-100 d-flex justify-content-center"></div>')
+            })
+
+            $("form").on('submit', function (e){
+
+                let form = $(this);
+                const ajaxMod = $(form).data('ajax')
+                if (ajaxMod === "default"){
+
+                    e.preventDefault();
+                    processForm(form);
+
+                }
             })
         }
 
 
     }
+
+    window.systemPermissions = <?=$functionController->parseObjectToJson($permissions)?>;
     $(document).ready(() => {
         let options = {
             valueNames: [ 'permission', 'name', 'str_created' ]

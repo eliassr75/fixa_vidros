@@ -12,6 +12,11 @@ class FunctionController extends BaseController
 {
     public bool $api = false;
 
+    public function defaultPassword(): string
+    {
+        return "mudar@1234";
+    }
+
     public function replaceHyphensInKeys($array): array
     {
         $newArray = [];
