@@ -50,5 +50,11 @@ $router->addRoute('PUT', '/users/change/{userId}/', true, "system", [1],UserCont
 $router->addRoute('GET', '/users/json/', true, "system", [1],UserController::class, 'json');
 $router->addRoute('GET', '/users/json/{userId}/', true, "system", [1],UserController::class, 'json');
 
+$router->addRoute('GET', '/clients/', true, "system", [1],UserController::class, 'index');
+$router->addRoute('PUT', '/clients/{userId}/', true, "system", [1],UserController::class, 'updateUser');
+$router->addRoute('PUT', '/clients/change/{userId}/', true, "system", [1],UserController::class, 'changeUser');
+$router->addRoute('GET', '/clients/json/', true, "system", [1],UserController::class, 'json');
+$router->addRoute('GET', '/clients/json/{userId}/', true, "system", [1],UserController::class, 'json');
+
 $middleware->autoRedirect();
 $router->handleRequest();

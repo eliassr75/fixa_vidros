@@ -236,7 +236,7 @@ $functionController = new FunctionController();
                         </div>
                         <div class="col-6">
                             <button type="submit" class="btn btn-lg btn-primary btn-block btn-submit">
-                                ${locale.label_btn_save}
+                                ${locale.create_account}
                             </button>
                         </div>
                     </div>

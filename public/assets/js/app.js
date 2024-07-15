@@ -238,7 +238,8 @@ function actionForm(action){
 }
 
 function close_global_modal(){
-    $('.modal').modal('hide')
+    const actionSheetForm = new bootstrap.Modal('#actionSheetForm')
+    actionSheetForm.hide()
 }
 
 function global_alert(response, time){
@@ -602,6 +603,8 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
         if (callbackName && typeof window[callbackName] === 'function') {
             window[callbackName](response, callbackParams);
         }
+
+        close_global_modal();
 
         setTimeout(function() {
             progressContainer.hide(500);
