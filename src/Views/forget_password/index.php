@@ -1,7 +1,7 @@
 <?php
 
 use App\Controllers\FunctionController;
-$functionsController = new FunctionController();
+$functionController = new FunctionController();
 
 ?>
 
@@ -23,8 +23,8 @@ $functionsController = new FunctionController();
 
                     <div class="form-group basic animated">
                         <div class="input-wrapper">
-                            <label class="label" for="email"><?=$functionsController->locale('input_email')?></label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionsController->locale('input_email')?>" required>
+                            <label class="label" for="email"><?=$functionController->locale('input_email')?></label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="<?=$functionController->locale('input_email')?>" required>
                             <i class="clear-input">
                                 <ion-icon name="close-circle"></ion-icon>
                             </i>
@@ -36,9 +36,9 @@ $functionsController = new FunctionController();
 
                     <div class="form-group basic animated">
                         <div class="input-wrapper">
-                            <label class="label" for="username"><?=$functionsController->locale('input_email')?></label>
+                            <label class="label" for="username"><?=$functionController->locale('input_email')?></label>
                             <input type="email" class="form-control" id="username" name="username" autocomplete="username"
-                                   placeholder="<?=$functionsController->locale('input_email')?>"
+                                   placeholder="<?=$functionController->locale('input_email')?>"
                                    value="<?=$user->email?>"
                                    required disabled>
                             <i class="clear-input">
@@ -49,9 +49,9 @@ $functionsController = new FunctionController();
 
                     <div class="form-group basic animated">
                         <div class="input-wrapper">
-                            <label class="label" for="password"><?=$functionsController->locale('input_password')?></label>
+                            <label class="label" for="password"><?=$functionController->locale('input_password')?></label>
                             <input type="password" class="form-control" id="password" name="password" onkeyup="checkPassword()"
-                                   autocomplete="new-password" placeholder="<?=$functionsController->locale('input_password')?>" required>
+                                   autocomplete="new-password" placeholder="<?=$functionController->locale('input_password')?>" required>
                             <i class="clear-input">
                                 <ion-icon name="close-circle"></ion-icon>
                             </i>
@@ -60,9 +60,9 @@ $functionsController = new FunctionController();
 
                     <div class="form-group basic animated">
                         <div class="input-wrapper">
-                            <label class="label" for="confirm-password"><?=$functionsController->locale('input_confirm_password')?></label>
+                            <label class="label" for="confirm-password"><?=$functionController->locale('input_confirm_password')?></label>
                             <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
-                                   autocomplete="new-password" placeholder="<?=$functionsController->locale('input_confirm_password')?>" required>
+                                   autocomplete="new-password" placeholder="<?=$functionController->locale('input_confirm_password')?>" required>
                             <i class="clear-input">
                                 <ion-icon name="close-circle"></ion-icon>
                             </i>
@@ -78,16 +78,16 @@ $functionsController = new FunctionController();
 
         <div class="form-links mt-2">
             <div>
-                <a href="/new-account/"><?=$functionsController->locale('create_account')?></a>
+                <a href="/new-account/"><?=$functionController->locale('create_account')?></a>
             </div>
             <div>
-                <a href="/login/"><?=$functionsController->locale('exists_account')?></a>
+                <a href="/login/"><?=$functionController->locale('exists_account')?></a>
             </div>
         </div>
 
         <div class="form-button-group  transparent">
             <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
-                <?=$functionsController->locale('recovery_password')?>
+                <?=$functionController->locale('recovery_password')?>
             </button>
         </div>
 
@@ -100,7 +100,7 @@ $functionsController = new FunctionController();
 <?php if($expired): ?>
 <script>
     $(document).ready(() => {
-        global_alert(<?=$functionsController->parseObjectToJson($response)?>, 5)
+        global_alert(<?=$functionController->parseObjectToJson($response)?>, 5)
     })
 </script>
 <?php endif; ?>

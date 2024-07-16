@@ -1,7 +1,7 @@
 <?php
 
 use App\Controllers\FunctionController;
-$functionsController = new FunctionController();
+$functionController = new FunctionController();
 
 ?>
 
@@ -18,9 +18,9 @@ $functionsController = new FunctionController();
 
         <hr>
         <h1><?=$code?></h1>
-        <h2 class="mb-2"><?=$functionsController->locale("{$code}_error")?>!</h2>
+        <h2 class="mb-2"><?=$functionController->locale("{$code}_error")?>!</h2>
         <p>
-            <?=$functionsController->locale("{$code}_message")?>
+            <?=$functionController->locale("{$code}_message")?>
         </p>
     </div>
 </div>
@@ -29,7 +29,7 @@ $functionsController = new FunctionController();
     <div class="row justify-content-center">
         <div class="col-md-6 col-12">
             <a href="#" class="btn btn-lg btn-primary btn-block goBack" onclick="window.location.href='/dashboard/'">
-                <?=$functionsController->locale('go_back')?>
+                <?=$functionController->locale('go_back')?>
             </a>
         </div>
     </div>

@@ -30,7 +30,25 @@ function _alert(icon, message, type){
 
     $('.custom-alert').html(`
 
-    <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" role="alert">
+    <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" id="custom-alert" role="alert">
+        <div class="icon-wrap">
+            <ion-icon name="${icon}" role="img" class="md hydrated" aria-label="${icon}"></ion-icon>
+        </div>
+        <div>
+            ${message}
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    `)
+
+}
+
+function custom_alert(icon, message, type){
+
+    $('.sub-custom-alert').html(`
+
+    <div class="alert alert-imaged alert-${type} alert-dismissible fade show mb-2" id="sub-custom-alert" role="alert">
         <div class="icon-wrap">
             <ion-icon name="${icon}" role="img" class="md hydrated" aria-label="${icon}"></ion-icon>
         </div>
@@ -297,7 +315,6 @@ function global_alert(response, time){
             }
             window.use_global_alert = false;
             bsAlert.close()
-            $('.appHeader').show()
 
         }, time*1000)
 
@@ -312,7 +329,7 @@ function dialog(response, time) {
     switch (response.status) {
         case "success":
             dialogTheme = "primary";
-            icon = `<ion-icon name="alert-circle-outline"></ion-icon>`;
+            icon = `<ion-icon name="checkmark-circle-outline"></ion-icon>`;
             break;
         case "warning":
             dialogTheme = "warning";
@@ -358,8 +375,25 @@ function dialog(response, time) {
 }
 
 function auto_remove_alert(time) {
+
     setTimeout(() => {
-        $('.custom-alert').hide(250)
+
+        let bsAlertMain = new bootstrap.Alert('#custom-alert')
+        let bsAlertSub = new bootstrap.Alert('#sub-custom-alert')
+
+        try{
+            bsAlertMain.close()
+        }catch (e){
+
+        }
+
+        try{
+            bsAlertSub.close()
+        }catch (e){
+
+        }
+
+
     }, time * 1000)
 
 }
@@ -454,7 +488,7 @@ function change(url=false, id=false, el=false){
 
     if(el){
 
-        $('[id^="SwitchCheckUser"]').each(function() {
+        $('[id^="SwitchCheck"]').each(function() {
             let el = this
             prop = $(el).is(':checked')
             if (el.value === id){
@@ -476,7 +510,7 @@ function change(url=false, id=false, el=false){
 
     }else{
 
-        $('[id^="SwitchCheckUser"]').each(function() {
+        $('[id^="SwitchCheck"]').each(function() {
             let el = this
             prop = $(el).is(':checked')
 
@@ -573,7 +607,6 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
         window.bkp_html = $('.btn-submit').html()
         $('.btn-submit').html(spinner).addClass("disabled")
 
-        $('.appHeader').hide()
         progressContainer.css('z-index', 9999)
 
         if(progresBarEnabled){
@@ -627,14 +660,12 @@ function get_cep(cep){
             url: `https://viacep.com.br/ws/${cep.replace('-', '')}/json/`,
             success:function (data){
                 auto_remove_alert(0)
-                console.log(data)
 
                 $("#zone").val((data.bairro ? data.bairro : "")).trigger('change')
                 $("#complement").val((data.complemento ? data.complemento : "")).trigger('change')
                 $("#address").val((data.logradouro ? data.logradouro : "")).trigger('change')
                 $("#state").val((data.uf ? data.uf : "")).trigger('change')
                 $("#city").val((data.localidade ? data.localidade : "")).trigger('change')
-                $("#phone_number").val((data.ddd ? data.ddd : "")).trigger('change')
 
             },
             error: function (error){
@@ -642,7 +673,42 @@ function get_cep(cep){
             }
         })
     }else{
-        _alert("alert-circle-outline", "CEP inválido!", "danger")
+        _alert("alert-circle-outline", locale.invalid_cep, "danger")
+    }
+
+}
+
+function get_cnpj(cnpj){
+
+    if(cnpj.length === 18){
+
+        $.ajax({
+            url: `https://publica.cnpj.ws/cnpj/${cnpj.replace('-', '').replace('.', '').replace('.', '').replace('/', '')}`,
+            method: "GET",
+            success:function (data){
+                auto_remove_alert(0)
+
+                $("#zone").val((data.bairro ? data.bairro : "")).trigger('change')
+                $("#complement").val((data.complemento ? data.complemento : "")).trigger('change')
+                $("#address").val((data.logradouro ? data.logradouro : "")).trigger('change')
+                $("#state").val((data.estado ? data.estado.nome : "")).trigger('change')
+                $("#city").val((data.cidade ? data.cidade.nome : "")).trigger('change')
+                $("#phone_number").val((data.ddd1 && data.telefone1 ? `${data.ddd1}${data.telefone1}`  : "")).trigger('change')
+                $("#company_name").val((data.razao_social ? data.razao_social : "")).trigger('change')
+                $("#trading_name").val((data.nome_fantasia ? data.nome_fantasia : "")).trigger('change')
+                $("#zip_code").val((data.cep ? data.cep : "")).trigger('change')
+
+            },
+            error: function (error){
+            }
+        })
+
+    }else{
+
+        custom_alert("alert-circle-outline", locale.invalid_document, "danger")
+        if(cnpj.length === 14){
+            auto_remove_alert(0)
+        }
     }
 
 }

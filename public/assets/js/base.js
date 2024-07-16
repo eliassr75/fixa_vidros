@@ -602,7 +602,7 @@ function testMode() {
     var colorSuccess = "color: #1DCC70; font-weight:bold;"
 
     console.clear();
-    console.log("%cFINAPP", "font-size: 1.3em; font-weight: bold; color: #FFF; background-color: #6236FF; padding: 10px 120px; margin-bottom: 16px;")
+    console.log("%cFINAPP", "font-size: 1.3em; font-weight: bold; color: #FFF; background-color: #023088; padding: 10px 120px; margin-bottom: 16px;")
     console.log("%c🚀 TEST MODE ACTIVATED ..!", "font-size: 1em; font-weight: bold; margin: 4px 0;");
 
     function testModeMsg(value, msg) {
@@ -614,7 +614,7 @@ function testMode() {
         }
     }
     function testModeInfo(value, msg) {
-        console.log("%c|" + "%c " + msg + " : " + "%c" + value, "color: #444; font-size :1.2em; font-weight: bold;", "color: inherit", "color:#6236FF; font-weight: bold;");
+        console.log("%c|" + "%c " + msg + " : " + "%c" + value, "color: #444; font-size :1.2em; font-weight: bold;", "color: inherit", "color:#023088; font-weight: bold;");
     }
     function testModeSubtitle(msg) {
         console.log("%c # " + msg, "color: #FFF; background: #444; font-size: 1.2em; padding: 8px 16px; margin-top: 16px; border-radius: 12px 12px 0 0");

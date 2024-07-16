@@ -50,11 +50,15 @@ $router->addRoute('PUT', '/users/change/{userId}/', true, "system", [1],UserCont
 $router->addRoute('GET', '/users/json/', true, "system", [1],UserController::class, 'json');
 $router->addRoute('GET', '/users/json/{userId}/', true, "system", [1],UserController::class, 'json');
 
-$router->addRoute('GET', '/clients/', true, "system", [1],UserController::class, 'index');
-$router->addRoute('PUT', '/clients/{userId}/', true, "system", [1],UserController::class, 'updateUser');
-$router->addRoute('PUT', '/clients/change/{userId}/', true, "system", [1],UserController::class, 'changeUser');
-$router->addRoute('GET', '/clients/json/', true, "system", [1],UserController::class, 'json');
-$router->addRoute('GET', '/clients/json/{userId}/', true, "system", [1],UserController::class, 'json');
+$router->addRoute('GET', '/clients/', true, "system", [1, 2, 3],ClientController::class, 'index');
+$router->addRoute('GET', '/clients/json/', true, "system", [1, 2, 3],ClientController::class, 'json');
+
+$router->addRoute('GET', '/client/new/', true, "system", [1, 2, 3],ClientController::class, 'getClient');
+$router->addRoute('POST', '/client/new/', true, "system", [1, 2, 3],ClientController::class, 'newClient');
+$router->addRoute('GET', '/client/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'getClient');
+$router->addRoute('GET', '/client/json/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'json');
+$router->addRoute('PUT', '/client/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'updateClient');
+$router->addRoute('PUT', '/client/change/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'changeClient');
 
 $middleware->autoRedirect();
 $router->handleRequest();

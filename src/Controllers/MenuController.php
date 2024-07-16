@@ -12,38 +12,38 @@ class MenuController extends BaseController
     public function menu_options()
     {
 
-        $functionsController = new FunctionController();
+        $functionController = new FunctionController();
         $options = [
             [
-                "name" => $functionsController->locale('menu_item_client'),
+                "name" => $functionController->locale('menu_item_client'),
                 "permissions" => [1, 2, 3],
                 "url" => '/clients/',
                 "icon" => 'people-outline',
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_orders'),
+                "name" => $functionController->locale('menu_item_orders'),
                 "permissions" => [1, 2, 3, 4],
                 "url" => '/orders/',
                 "icon" => 'document-text-outline',
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_products'),
+                "name" => $functionController->locale('menu_item_products'),
                 "permissions" => [1, 2, 3],
                 "url" => '/products/',
                 "icon" => 'apps-outline',
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_financial'),
+                "name" => $functionController->locale('menu_item_financial'),
                 "permissions" => [1, 2, 3],
                 "url" => '/financial/',
                 "icon" => 'card-outline',
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_report'),
+                "name" => $functionController->locale('menu_item_report'),
                 "permissions" => [1, 2, 3, 4],
                 "url" => '/reports/',
                 "icon" => 'stats-chart-outline',
@@ -63,17 +63,17 @@ class MenuController extends BaseController
 
         }
 
-        return $functionsController->parseJsonToObject($obj_menu_options);
+        return $functionController->parseJsonToObject($obj_menu_options);
 
     }
 
     public function other_options()
     {
 
-        $functionsController = new FunctionController();
+        $functionController = new FunctionController();
         $options = [
             [
-                "name" => $functionsController->locale('menu_item_settings'),
+                "name" => $functionController->locale('menu_item_settings'),
                 "permissions" => [1, 2, 3],
                 "individual" => false,
                 "url" => '/settings/',
@@ -81,7 +81,7 @@ class MenuController extends BaseController
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_users'),
+                "name" => $functionController->locale('menu_item_users'),
                 "permissions" => [1],
                 "individual" => false,
                 "url" => '/users/',
@@ -89,7 +89,7 @@ class MenuController extends BaseController
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_support'),
+                "name" => $functionController->locale('menu_item_support'),
                 "permissions" => [1, 2, 3],
                 "individual" => false,
                 "url" => '/support/',
@@ -97,7 +97,7 @@ class MenuController extends BaseController
                 "badge" => false
             ],
             [
-                "name" => $functionsController->locale('menu_item_logout'),
+                "name" => $functionController->locale('menu_item_logout'),
                 "permissions" => [1, 2, 3, 4],
                 "individual" => false,
                 "url" => '/logout/',
@@ -118,7 +118,7 @@ class MenuController extends BaseController
 
         }
 
-        return $functionsController->parseJsonToObject($obj_menu_options);
+        return $functionController->parseJsonToObject($obj_menu_options);
 
     }
 }

@@ -56,14 +56,14 @@ class MissingDataController extends BaseController
     }
     public function missingData($userId)
     {
-        $functionsController= new FunctionController();
-        $functionsController->api = true;
+        $functionController= new FunctionController();
+        $functionController->api = true;
         $status_code = 200;
 
-        $response = $functionsController->baseResponse();
+        $response = $functionController->baseResponse();
 
         if ($userId === $_SESSION['user_register_missing_data']):
-            $data = $functionsController->putStatement();
+            $data = $functionController->putStatement();
 
             $userModel = new User();
             $user_search = $userModel->find($userId);
@@ -83,10 +83,10 @@ class MissingDataController extends BaseController
                             $birthday = date('Y-m-d', strtotime($birthday));
 
                             $user_search->$key_name = $birthday;
-                            $user_search->age = $functionsController->timeDiff($birthday, date('Y-m-d'), 'years');
+                            $user_search->age = $functionController->timeDiff($birthday, date('Y-m-d'), 'years');
                         endif;
                     elseif($key_name === 'cpf'):
-                        if(!$functionsController->validaCPF($data->$key_name)):
+                        if(!$functionController->validaCPF($data->$key_name)):
                             $invalid_cpf = true;
                             $have_update = false;
                             $error = true;
@@ -107,14 +107,14 @@ class MissingDataController extends BaseController
             if ($have_update):
                 $user_search->save();
                 $user_search->setLog('MissingData', "Usuário atualizou seu cadastro");
-                $response->message = $functionsController->locale('register_success_update');
+                $response->message = $functionController->locale('register_success_update');
                 $response->status = "success";
             elseif ($invalid_cpf):
-                $response->message = $functionsController->locale('invalid_cpf');
+                $response->message = $functionController->locale('invalid_cpf');
                 $response->status = "warning";
                 $status_code = 400;
             else:
-                $response->message = $functionsController->locale('redirecting');
+                $response->message = $functionController->locale('redirecting');
                 $response->status = "info";
             endif;
 
@@ -124,12 +124,12 @@ class MissingDataController extends BaseController
             endif;
 
         else:
-            $response->message = $functionsController->locale('operation_denied_user_register');
+            $response->message = $functionController->locale('operation_denied_user_register');
             $response->status = "error";
             $response->custom_timer = 5;
             $status_code = 403;
         endif;
 
-        $functionsController->sendResponse($response, $status_code);
+        $functionController->sendResponse($response, $status_code);
     }
 }

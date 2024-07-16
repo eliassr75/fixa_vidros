@@ -83,6 +83,46 @@ class FunctionController extends BaseController
         }
     }
 
+    public function validateCNPJ($cnpj)
+        {
+            // Remove caracteres não numéricos
+        $cnpj = preg_replace('/[^0-9]/', '', $cnpj);
+
+            // Verifica se o CNPJ tem 14 dígitos
+        if (strlen($cnpj) != 14) {
+        return false;
+        }
+
+        // Verifica se todos os dígitos são iguais
+        if (preg_match('/(\d)\1{13}/', $cnpj)) {
+            return false;
+        }
+
+        // Validação do primeiro dígito verificador
+        $weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $sum += $cnpj[$i] * $weights[$i];
+        }
+        $firstCheckDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
+        if ($cnpj[12] != $firstCheckDigit) {
+            return false;
+        }
+
+        // Validação do segundo dígito verificador
+        $weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        $sum = 0;
+        for ($i = 0; $i < 13; $i++) {
+            $sum += $cnpj[$i] * $weights[$i];
+        }
+        $secondCheckDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
+        if ($cnpj[13] != $secondCheckDigit) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     public function putStatement(): stdClass
     {
@@ -155,6 +195,11 @@ class FunctionController extends BaseController
     public function is_dashboard($is)
     {
         $_SESSION['dashboard'] = $is;
+    }
+
+    public function is_($label, $is)
+    {
+        $_SESSION[$label] = $is;
     }
 
     public function locale($key): string

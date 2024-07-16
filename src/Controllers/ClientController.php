@@ -2,11 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Models\Client;
 use App\Models\Permissions;
 use App\Models\User;
-use App\Models\ExplicitGenres;
+use Doctrine\Inflector\Rules\Transformation;
 use Exception;
-use Statickidz\GoogleTranslate;
 
 class ClientController extends BaseController
 {
@@ -14,28 +14,26 @@ class ClientController extends BaseController
     {
         $functionController = new FunctionController();
         $functionController->is_dashboard(false);
+        $functionController->is_('clients_page', true);
 
-        define('TITLE_PAGE', 'Fixa Vidros - Usuários');
-        define('SUBTITLE_PAGE', $functionController->locale('menu_item_users'));
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_client'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_client'));
 
-        $users = User::with('permissions')->orderBy('id', 'desc')->get();
-        $users_array = [];
-        foreach ($users as $user) {
-            $user->str_created = date('d/m/Y H:i', strtotime($user->created_at));
-            $user->current_permission = $user->current_permission();
-            $users_array[] = $user;
+        $clients = Client::orderBy('id', 'desc')->get();
+        $clients_array = [];
+        foreach ($clients as $client) {
+            $client->str_created = date('d/m/Y H:i', strtotime($client->created_at));
+            $clients_array[] = $client;
         }
 
-        $permissions = Permissions::orderBy('id', 'asc')->get();
-
         $this->render('clients', [
-            'users' => $users_array,
-            'permissions' => $permissions,
-            'button'=> 'add'
+            'clients' => $clients_array,
+            'button' => 'add',
+            'url' => '/client/new/'
         ]);
     }
 
-    public function json($userId=false)
+    public function json($clientId=false)
     {
         $functionController = new FunctionController();
         $functionController->api = true;
@@ -43,8 +41,8 @@ class ClientController extends BaseController
         $user = false;
         $users_array = [];
 
-        if($userId):
-            $user = User::find($userId);
+        if($clientId):
+            $user = Client::find($clientId);
             $user->str_created = date('d/m/Y H:i', strtotime($user->created_at));
             $user->current_permission = $user->current_permission();
 
@@ -62,7 +60,7 @@ class ClientController extends BaseController
             $user->missing_data = $newMissingDataKeys;
 
         else:
-            $users = User::with('permissions')->orderBy('id', 'desc')->get();
+            $users = Client::with('permissions')->orderBy('id', 'desc')->get();
             foreach ($users as $user_obj) {
                 $user_obj->str_created = date('d/m/Y H:i', strtotime($user_obj->created_at));
                 $user_obj->str_updated = date('d/m/Y H:i', strtotime($user_obj->updated_at));
@@ -90,106 +88,188 @@ class ClientController extends BaseController
         ]);
     }
 
-    public function updateUser($userId)
+    public function getClient($clientId=false)
     {
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
-        $response = $functionsController->baseResponse();
-        $status_code = 200;
+        $functionController = new FunctionController();
+        $functionController->is_dashboard(false);
+        $functionController->is_('clients_page', true);
 
-        $data = $functionsController->putStatement();
-        $userModel = new User();
-        $user_search = $userModel->find($userId);
-        $have_update = false;
-        $invalid_cpf = false;
-
-        foreach ($userModel->missingDataKeys as $key):
-            $key_name = $key['name'];
-
-            if (isset($data->$key_name)) :
-                $have_update = true;
-
-                if ($key_name === 'birthday'):
-                    if (!empty($data->$key_name)):
-                        $birthday = str_replace('/', '-', $data->$key_name);
-                        $birthday = date('Y-m-d', strtotime($birthday));
-
-                        $user_search->$key_name = $birthday;
-                        $user_search->age = $functionsController->timeDiff($birthday, date('Y-m-d'), 'years');
-                    endif;
-                elseif($key_name === 'cpf'):
-                    if(!$functionsController->validaCPF($data->$key_name)):
-                        $invalid_cpf = true;
-                        $have_update = false;
-                        break;
-                    else:
-                        $user_search->$key_name = $data->$key_name;
-                    endif;
-                elseif ($key_name === 'phone_number'):
-                    if (strlen($data->$key_name) >= 14):
-                        $user_search->$key_name = $data->$key_name;
-                    endif;
-                else:
-                    $user_search->$key_name = $data->$key_name;
-                endif;
-            endif;
-        endforeach;
-
-        $user_search->name = $data->name;
-        $user_search->email = $data->email;
-        $user_search->username = explode('@', $data->email)[0];
-        $user_search->language = $data->language;
-
-        if($user_search->permissions()->exists()):
-            $user_search->permissions()->detach();
-        endif;
-        $user_search->permissions()->attach($data->permission);
-
-
-        if ($have_update and $user_search->validate()):
-            $user_search->save();
-            $user_search->setLog('User', "Usuário atualizou seu cadastro");
-            $user_search->startSession();
-
-            $response->message = $functionsController->locale('register_success_update');
-            $response->status = "success";
-            $response->reload = true;
-
-        elseif ($invalid_cpf):
-            $response->message = $functionsController->locale('invalid_cpf');
-            $response->status = "warning";
-            $status_code = 400;
-
+        if($clientId):
+            $client = Client::find($clientId);
+            $client->str_created = date('d/m/Y H:i', strtotime($client->created_at));
         else:
-            $response->message = $functionsController->locale('redirecting');
-            $response->status = "info";
-
+            $client = new Client();
         endif;
 
-        $functionsController->sendResponse($response, $status_code);
+        $newMissingDataKeys = [];
+        foreach ($client->missingDataKeys as $missingDataKey) {
+            $key_name = $missingDataKey['name'];
+            $missingDataKey['label'] = ucfirst($functionController->locale("input_{$missingDataKey['name']}"));
+            if ($key_name === "birthday"):
+                $missingDataKey['value'] = $client->$key_name ? date('d/m/Y', strtotime($client->$key_name)) : null;
+            else:
+                $missingDataKey['value'] = $client->$key_name;
+            endif;
+            $newMissingDataKeys[] = $missingDataKey;
+        }
+        $client->missing_data = $newMissingDataKeys;
+
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_client'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_client'));
+
+        $this->render('client', [
+            'client' => $client,
+            'button' => "None"
+        ]);
     }
 
-    public function changeUser($userId)
+    public function newClient()
     {
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
-        $response = $functionsController->baseResponse();
+        $functionController = new FunctionController();
+        $functionController->api = true;
         $status_code = 200;
 
-        $userModel = new User();
-        $user_search = $userModel->find($userId);
+        $data = $functionController->postStatement($_POST);
+        $client = new Client();
 
-        $user_search->active = !$user_search->active;
-        $user_search->setLog('User', "O status do usuário foi modificado para " . ($user_search->active ? "Ativo" : "Inativo") . " - {$_SESSION['name']}");
-        $user_search->save();
+        $response = $functionController->baseResponse();
+        $invalid_document = false;
 
-        $response->message = $functionsController->locale('register_success_update');
-        $response->status = "success";
+        foreach ($client->missingDataKeys as $missingDataKey) {
+            $key_name = $missingDataKey['name'];
+            
+            if ($key_name === 'birthday'):
+                if (!empty($data->$key_name)):
+                    $birthday = str_replace('/', '-', $data->$key_name);
+                    $birthday = date('Y-m-d', strtotime($birthday));
 
-        if ($userId === $_SESSION['id']):
-            $response->reload = true;
-            $user_search->startSession();
+                    $client->$key_name = $birthday;
+                    $client->age = $functionController->timeDiff($birthday, date('Y-m-d'), 'years');
+                endif;
+            elseif($key_name === 'document'):
+
+                $cpf = $functionController->validaCPF($data->document);
+                $cnpj = $functionController->validateCNPJ($data->document);
+
+                if(!$cpf and !$cnpj):
+                    $invalid_document = true;
+                    break;
+                else:
+                    $client->$key_name = $data->$key_name;
+                endif;
+            elseif ($key_name === 'phone_number'):
+                if (strlen($data->$key_name) >= 14):
+                    $client->$key_name = $data->$key_name;
+                endif;
+            else:
+                $client->$key_name = $data->$key_name;
+            endif;
+        }
+
+        if ($invalid_document):
+
+            $response->message = $functionController->locale('invalid_document');
+            $response->dialog = true;
+            $response->status = "warning";
+            $status_code = 400;
+        else:
+
+            $client->validate();
+            $client->save();
+            $user = User::find($_SESSION['id']);
+            $user->setLog('Client', "Usuário criou o cliente {$client->id}");
+            $response->message = $functionController->locale('register_success_update');
+            $response->status = "success";
+            $response->url = "/clients/";
+            $response->dialog = true;
+            $response->spinner = true;
         endif;
-        $functionsController->sendResponse($response, $status_code);
+
+        $functionController->sendResponse($response, $status_code);
+    }
+
+    public function updateClient($clientId)
+    {
+        $functionController = new FunctionController();
+        $functionController->api = true;
+        $status_code = 200;
+
+        $data = $functionController->putStatement();
+        $client = Client::find($clientId);
+        $response = $functionController->baseResponse();
+        $invalid_document = false;
+
+        foreach ($client->missingDataKeys as $missingDataKey) {
+            $key_name = $missingDataKey['name'];
+
+            if ($key_name === 'birthday'):
+                if (!empty($data->$key_name)):
+                    $birthday = str_replace('/', '-', $data->$key_name);
+                    $birthday = date('Y-m-d', strtotime($birthday));
+
+                    $client->$key_name = $birthday;
+                    $client->age = $functionController->timeDiff($birthday, date('Y-m-d'), 'years');
+                endif;
+            elseif($key_name === 'document'):
+
+                $cpf = $functionController->validaCPF($data->document);
+                $cnpj = $functionController->validateCNPJ($data->document);
+
+                if(!$cpf and !$cnpj):
+                    $invalid_document = true;
+                    break;
+                else:
+                    $client->$key_name = $data->$key_name;
+                endif;
+            elseif ($key_name === 'phone_number'):
+                if (strlen($data->$key_name) >= 14):
+                    $client->$key_name = $data->$key_name;
+                endif;
+            else:
+                $client->$key_name = $data->$key_name;
+            endif;
+        }
+
+        if ($invalid_document):
+
+            $response->message = $functionController->locale('invalid_document');
+            $response->dialog = true;
+            $response->status = "warning";
+            $status_code = 400;
+        else:
+
+            $client->validate();
+            $client->save();
+            $user = User::find($_SESSION['id']);
+            $user->setLog('Client', "Usuário atualizou o cliente {$client->id}");
+            $response->message = $functionController->locale('register_success_update');
+            $response->status = "success";
+            $response->url = "/clients/";
+            $response->dialog = true;
+            $response->spinner = true;
+        endif;
+
+        $functionController->sendResponse($response, $status_code);
+    }
+
+    public function changeClient($clientId)
+    {
+        $functionController = new FunctionController();
+        $functionController->api = true;
+        $response = $functionController->baseResponse();
+        $status_code = 200;
+
+        $clientModel = new Client();
+        $client_search = $clientModel->find($clientId);
+
+        $client_search->active = !$client_search->active;
+        $user = User::find($_SESSION['id']);
+        $user->setLog('Client', "O status do client {$user->id} foi modificado para " . ($client_search->active ? "Ativo" : "Inativo") . " - {$_SESSION['name']}");
+        $client_search->save();
+
+        $response->message = $functionController->locale('register_success_update');
+        $response->status = "success";
+        $response->dialog = true;
+        $functionController->sendResponse($response, $status_code);
     }
 }

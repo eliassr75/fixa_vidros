@@ -1,4 +1,4 @@
-<body class="dark-mode">
+<body class="">
 
     <!-- loader -->
     <div id="loader">

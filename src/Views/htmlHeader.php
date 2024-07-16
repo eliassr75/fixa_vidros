@@ -29,7 +29,14 @@
         <?php switch($button){
             case 'add':
                 ?>
-                <a href="javascript:void(0)" class="headerButton" onclick="actionForm('addUser')" data-bs-toggle="modal" data-bs-target="#actionSheetForm">
+                <a class="headerButton"
+                    <?php if (!isset($url)): ?>
+                        href="javascript:void(0)" onclick="actionForm('addUser')"
+                        data-bs-toggle="modal" data-bs-target="#actionSheetForm"
+                    <?php else: ?>
+                        href="<?=$url?>"
+                    <?php endif; ?>
+                    >
                     <ion-icon role="img" class="md hydrated" name="add-outline"></ion-icon>
                 </a>
                 <?php

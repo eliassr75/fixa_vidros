@@ -38,17 +38,20 @@ class Client extends Model {
 
     protected $guarded = ['id'];
 
-    /*TODO: criar locale das chaves novas */
+    /*TODO: criar locale das chaves novas - ok */
     public $missingDataKeys = [
-        ['name' => 'document', 'type' => 'tel', "required" => true, "mask" => ["cpf" => "000.000.000-00", "cnpj" => "00.000.000/0000-00"]],
+        ['name' => 'document', 'type' => 'tel', "required" => true, "mask" =>
+            ["cpf" => "000.000.000-00",
+            "cnpj" => "00.000.000/0000-00"]
+        ],
         ['name' => 'rg_ins_state', 'type' => 'tel', "required" => false, "mask" => false],
         ['name' => 'birthday', 'type' => 'tel', "required" => false, "mask" => "00/00/0000"],
         ['name' => 'phone_number', 'type' => 'tel', "required" => true, "mask" => "(00) 00000-0000"],
         ['name' => 'zip_code', 'type' => 'tel', "required" => false, "mask" => "00000-000"],
         ['name' => 'email', 'type' => 'email', "required" => true, "mask" => false],
         ['name' => 'company_name', 'type' => 'text', "required" => true, "mask" => false],
-        ['name' => 'trading_name', 'type' => 'text', "required" => true, "mask" => false],
-        ['name' => 'name', 'type' => 'text', "required" => true, "mask" => false],
+        ['name' => 'trading_name', 'type' => 'text', "required" => false, "mask" => false],
+        ['name' => 'name', 'type' => 'text', "required" => false, "mask" => false],
         ['name' => 'address', 'type' => 'text', "required" => true, "mask" => false],
         ['name' => 'address_number', 'type' => 'tel', "required" => true, "mask" => "00000000"],
         ['name' => 'zone', 'type' => 'text', "required" => true, "mask" => false],
@@ -68,8 +71,7 @@ class Client extends Model {
         if(empty($this->token)){
             $this->token = Uuid::uuid4();
         }
-
-        return Validator::validateClient($this);
+        return true;
     }
 
 }

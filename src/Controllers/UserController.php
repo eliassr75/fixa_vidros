@@ -92,12 +92,12 @@ class UserController extends BaseController
 
     public function updateUser($userId)
     {
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
-        $response = $functionsController->baseResponse();
+        $functionController = new FunctionController();
+        $functionController->api = true;
+        $response = $functionController->baseResponse();
         $status_code = 200;
 
-        $data = $functionsController->putStatement();
+        $data = $functionController->putStatement();
         $userModel = new User();
         $user_search = $userModel->find($userId);
         $have_update = false;
@@ -115,10 +115,10 @@ class UserController extends BaseController
                         $birthday = date('Y-m-d', strtotime($birthday));
 
                         $user_search->$key_name = $birthday;
-                        $user_search->age = $functionsController->timeDiff($birthday, date('Y-m-d'), 'years');
+                        $user_search->age = $functionController->timeDiff($birthday, date('Y-m-d'), 'years');
                     endif;
                 elseif($key_name === 'cpf'):
-                    if(!$functionsController->validaCPF($data->$key_name)):
+                    if(!$functionController->validaCPF($data->$key_name)):
                         $invalid_cpf = true;
                         $have_update = false;
                         break;
@@ -149,31 +149,35 @@ class UserController extends BaseController
         if ($have_update and $user_search->validate()):
             $user_search->save();
             $user_search->setLog('User', "Usuário atualizou seu cadastro");
-            $user_search->startSession();
 
-            $response->message = $functionsController->locale('register_success_update');
+            if ($user_search->id === $_SESSION['id']):
+                $response->reload = true;
+                $response->spinner = true;
+                $user_search->startSession();
+            endif;
+
+            $response->message = $functionController->locale('register_success_update');
             $response->status = "success";
-            $response->reload = true;
 
         elseif ($invalid_cpf):
-            $response->message = $functionsController->locale('invalid_cpf');
+            $response->message = $functionController->locale('invalid_cpf');
             $response->status = "warning";
             $status_code = 400;
 
         else:
-            $response->message = $functionsController->locale('redirecting');
+            $response->message = $functionController->locale('redirecting');
             $response->status = "info";
 
         endif;
 
-        $functionsController->sendResponse($response, $status_code);
+        $functionController->sendResponse($response, $status_code);
     }
 
     public function changeUser($userId)
     {
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
-        $response = $functionsController->baseResponse();
+        $functionController = new FunctionController();
+        $functionController->api = true;
+        $response = $functionController->baseResponse();
         $status_code = 200;
 
         $userModel = new User();
@@ -183,13 +187,14 @@ class UserController extends BaseController
         $user_search->setLog('User', "O status do usuário foi modificado para " . ($user_search->active ? "Ativo" : "Inativo") . " - {$_SESSION['name']}");
         $user_search->save();
 
-        $response->message = $functionsController->locale('register_success_update');
+        $response->message = $functionController->locale('register_success_update');
         $response->status = "success";
+        $response->dialog = true;
 
         if ($userId === $_SESSION['id']):
             $response->reload = true;
             $user_search->startSession();
         endif;
-        $functionsController->sendResponse($response, $status_code);
+        $functionController->sendResponse($response, $status_code);
     }
 }

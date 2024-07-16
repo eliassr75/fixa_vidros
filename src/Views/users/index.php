@@ -16,8 +16,6 @@ $functionController = new FunctionController();
         <div id="users">
 
             <!-- class="search" automagically makes an input a search field. -->
-
-
             <div class="px-3 pt-3">
                 <form class="search-form">
                     <div class="form-group searchbox">
@@ -67,10 +65,12 @@ $functionController = new FunctionController();
                             </a>
                         </div>
                         <div class="modal-body">
-                            <div id="child-global-custom-alert"></div>
                             <div class="action-sheet-content" id="user-info">
                                 <div id="section-animation" class="w-100 d-flex justify-content-center"></div>
                             </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <div id="child-global-custom-alert"></div>
                         </div>
                     </div>
                 </div>

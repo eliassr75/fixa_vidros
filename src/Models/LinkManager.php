@@ -36,14 +36,14 @@ class LinkManager extends Model {
 
     public function getAction()
     {
-        $functionsController = new FunctionController();
-        return $functionsController->parseJsonToObject($this->action);
+        $functionController = new FunctionController();
+        return $functionController->parseJsonToObject($this->action);
     }
 
     public function setAction($action)
     {
-        $functionsController = new FunctionController();
-        $this->action = $functionsController->parseObjectToJson($action);
+        $functionController = new FunctionController();
+        $this->action = $functionController->parseObjectToJson($action);
     }
 
     public function check_expired(): bool

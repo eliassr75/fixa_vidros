@@ -1,7 +1,7 @@
 <?php
 
 use App\Controllers\FunctionController;
-$functionsController = new FunctionController();
+$functionController = new FunctionController();
 
 ?>
 
@@ -20,7 +20,7 @@ $functionsController = new FunctionController();
             <div class="card-body pb-1">
 
                 <div class="w-100 text-center pageTitle">
-                    <?=$functionsController->locale('missing_data')?>
+                    <?=$functionController->locale('missing_data')?>
                 </div>
 
                 <?php $requires = json_decode(json_encode($requires, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)); ?>
@@ -34,8 +34,8 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="<?=$require->name?>"><?=$functionsController->locale("input_{$require->name}")?></label>
-                        <input type="<?=$require->type?>" class="form-control" autocomplete="n-password" id="<?=$require->name?>" name="<?=$require->name?>" placeholder="<?=$functionsController->locale("input_{$require->name}")?>">
+                        <label class="label" for="<?=$require->name?>"><?=$functionController->locale("input_{$require->name}")?></label>
+                        <input type="<?=$require->type?>" class="form-control" autocomplete="n-password" id="<?=$require->name?>" name="<?=$require->name?>" placeholder="<?=$functionController->locale("input_{$require->name}")?>">
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -49,7 +49,7 @@ $functionsController = new FunctionController();
 
         <div class="form-button-group  transparent">
             <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
-                <?=$functionsController->locale('continue')?>
+                <?=$functionController->locale('continue')?>
             </button>
         </div>
 

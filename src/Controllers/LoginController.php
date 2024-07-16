@@ -256,19 +256,19 @@ class LoginController extends BaseController
     public function resetPassword($token)
     {
         $p_resetModel = new PasswordReset();
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
+        $functionController = new FunctionController();
+        $functionController->api = true;
         $status_code = 401;
 
-        $response = $functionsController->baseResponse();
-        $data = $functionsController->putStatement();
+        $response = $functionController->baseResponse();
+        $data = $functionController->putStatement();
 
         $p_reset_search = $p_resetModel->where('token', $token)->first();
         $user = $p_reset_search ? $p_reset_search->user() : false;
 
         if (!$p_reset_search || $p_reset_search->check_expired()):
 
-            $response->message = $functionsController->locale('expired_link');
+            $response->message = $functionController->locale('expired_link');
             $response->status = "warning";
             $response->custom_timer = 5;
             $response->spinner = true;
@@ -280,7 +280,7 @@ class LoginController extends BaseController
             $user->save();
             $user->setLog("Login", "Usuário redefiniu a própria senha pela página de login.");
 
-            $response->message = $functionsController->locale('password_updated');
+            $response->message = $functionController->locale('password_updated');
             $response->status = "success";
             $response->custom_timer = 3;
             $response->spinner = true;
@@ -288,18 +288,18 @@ class LoginController extends BaseController
 
         endif;
 
-        $functionsController->sendResponse($response, $status_code);
+        $functionController->sendResponse($response, $status_code);
     }
 
     public function forgetPassword($token=false)
     {
 
         $p_resetModel = new PasswordReset();
-        $functionsController = new FunctionController();
-        $functionsController->api = true;
+        $functionController = new FunctionController();
+        $functionController->api = true;
         $status_code = 406;
         $method = "POST";
-        $data = $functionsController->postStatement($_POST);
+        $data = $functionController->postStatement($_POST);
 
         if ($token && !empty($data)):
             return;
@@ -319,8 +319,8 @@ class LoginController extends BaseController
                     $expired = true;
                     $allowed_reset = false;
                     $method = "POST";
-                    $response = $functionsController->baseResponse();
-                    $response->message = $functionsController->locale('expired_link');
+                    $response = $functionController->baseResponse();
+                    $response->message = $functionController->locale('expired_link');
                     $response->status = "warning";
 
                 endif;
@@ -340,8 +340,8 @@ class LoginController extends BaseController
 
             if (!empty($data) and !$token):
 
-                $response = $functionsController->baseResponse();
-                $response->message = $functionsController->locale('invalid_email');
+                $response = $functionController->baseResponse();
+                $response->message = $functionController->locale('invalid_email');
                 $response->status = "warning";
 
                 $userModel = new User();
@@ -358,18 +358,18 @@ class LoginController extends BaseController
                         "log_id" => $user_search->setLog("Login", "Usuário solicitou recuperação de senha")
                     ]);
 
-                    $url_reset = $functionsController->generateCurrentUrl() . "{$user_reset->token}";
-                    $response_email = $functionsController->sendMail(
+                    $url_reset = $functionController->generateCurrentUrl() . "{$user_reset->token}";
+                    $response_email = $functionController->sendMail(
                         $data->email,
-                        $functionsController->locale('recovery_password'),
-                        "{$functionsController->locale('hello')}, {$user_search->name}! <br> {$functionsController->locale('recovery_password_email_message')}",
+                        $functionController->locale('recovery_password'),
+                        "{$functionController->locale('hello')}, {$user_search->name}! <br> {$functionController->locale('recovery_password_email_message')}",
                         $url_reset,
-                        $functionsController->locale('recovery_password')
+                        $functionController->locale('recovery_password')
                     );
 
                     if(gettype($response_email) == "boolean"):
 
-                        $response->message = $functionsController->locale('sent_email_recovery');
+                        $response->message = $functionController->locale('sent_email_recovery');
                         $response->status = "info";
                         $status_code = 200;
                     else:
@@ -379,7 +379,7 @@ class LoginController extends BaseController
                     endif;
                 endif;
 
-                $functionsController->sendResponse($response, $status_code);
+                $functionController->sendResponse($response, $status_code);
             else:
                 define('TITLE_PAGE', 'Fixa Vidros - Recuperação de Senha');
                 $this->render('forget_password', [

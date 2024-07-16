@@ -1,7 +1,7 @@
 <?php
 
 use App\Controllers\FunctionController;
-$functionsController = new FunctionController();
+$functionController = new FunctionController();
 
 ?>
 
@@ -21,8 +21,8 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="name"><?=$functionsController->locale('input_name')?></label>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="<?=$functionsController->locale('input_name')?>" required>
+                        <label class="label" for="name"><?=$functionController->locale('input_name')?></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="<?=$functionController->locale('input_name')?>" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -31,8 +31,8 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="username"><?=$functionsController->locale('input_email')?></label>
-                        <input type="email" class="form-control" id="username" name="username" autocomplete="username" placeholder="<?=$functionsController->locale('input_email')?>" required>
+                        <label class="label" for="username"><?=$functionController->locale('input_email')?></label>
+                        <input type="email" class="form-control" id="username" name="username" autocomplete="username" placeholder="<?=$functionController->locale('input_email')?>" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -41,9 +41,9 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="password"><?=$functionsController->locale('input_password')?></label>
+                        <label class="label" for="password"><?=$functionController->locale('input_password')?></label>
                         <input type="password" class="form-control" id="password" name="password" onkeyup="checkPassword()"
-                        autocomplete="new-password" placeholder="<?=$functionsController->locale('input_password')?>" required>
+                        autocomplete="new-password" placeholder="<?=$functionController->locale('input_password')?>" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -52,9 +52,9 @@ $functionsController = new FunctionController();
 
                 <div class="form-group basic animated">
                     <div class="input-wrapper">
-                        <label class="label" for="new-password"><?=$functionsController->locale('input_confirm_password')?></label>
+                        <label class="label" for="new-password"><?=$functionController->locale('input_confirm_password')?></label>
                         <input type="password" class="form-control" id="confirm-password" name="confirm-password" onkeyup="checkPassword()"
-                               autocomplete="new-password" placeholder="<?=$functionsController->locale('input_confirm_password')?>" required>
+                               autocomplete="new-password" placeholder="<?=$functionController->locale('input_confirm_password')?>" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -69,13 +69,13 @@ $functionsController = new FunctionController();
 
         <div class="form-links mt-2">
             <div>
-                <a href="/login/"><?=$functionsController->locale('exists_account')?></a>
+                <a href="/login/"><?=$functionController->locale('exists_account')?></a>
             </div>
         </div>
 
         <div class="form-button-group  transparent">
             <button type="submit" class="btn btn-primary btn-block btn-lg btn-submit">
-                <?=$functionsController->locale('create_account')?>
+                <?=$functionController->locale('create_account')?>
             </button>
         </div>
 

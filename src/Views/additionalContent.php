@@ -3,41 +3,41 @@
 use App\Controllers\FunctionController;
 use App\Controllers\MenuController;
 
-$functionsController = new FunctionController();
+$functionController = new FunctionController();
 $menuController = new MenuController();
 
 ?>
 
 <!-- App Bottom Menu -->
 <div class="appBottomMenu">
-    <a href="index.html" class="item active">
+    <a href="/dashboard/" class="item">
         <div class="col">
             <ion-icon name="pie-chart-outline"></ion-icon>
-            <strong>Overview</strong>
+            <strong>Dashboard</strong>
         </div>
     </a>
-    <a href="app-pages.html" class="item">
+    <a href="/clients/" class="item">
+        <div class="col">
+            <ion-icon name="people-outline"></ion-icon>
+            <strong><?=$functionController->locale('menu_item_client')?></strong>
+        </div>
+    </a>
+    <a href="/orders/" class="item">
         <div class="col">
             <ion-icon name="document-text-outline"></ion-icon>
-            <strong>Pages</strong>
+            <strong><?=$functionController->locale('menu_item_orders')?></strong>
         </div>
     </a>
-    <a href="app-components.html" class="item">
+    <a href="/products/" class="item">
         <div class="col">
             <ion-icon name="apps-outline"></ion-icon>
-            <strong>Components</strong>
+            <strong><?=$functionController->locale('menu_item_products')?></strong>
         </div>
     </a>
-    <a href="app-cards.html" class="item">
-        <div class="col">
-            <ion-icon name="card-outline"></ion-icon>
-            <strong>My Cards</strong>
-        </div>
-    </a>
-    <a href="app-settings.html" class="item">
+    <a href="/settings/" class="item">
         <div class="col">
             <ion-icon name="settings-outline"></ion-icon>
-            <strong>Settings</strong>
+            <strong><?=$functionController->locale('menu_item_settings')?></strong>
         </div>
     </a>
 </div>
