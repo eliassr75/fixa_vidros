@@ -33,7 +33,7 @@ $functionController = new FunctionController();
             </button>
             -->
 
-            <ul class="listview image-listview inset list mt-2">
+            <ul class="listview image-listview inset list my-2">
                 <?php foreach ($users as $user): ?>
                 <li id="li-model">
                     <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#actionSheetFormUser" onclick="userController(false, <?=$user->id?>)" class="item">
@@ -48,7 +48,7 @@ $functionController = new FunctionController();
                             </div>
                         </div>
                     </a>
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch me-2">
                         <input class="form-check-input" type="checkbox" value="<?=$user->id?>" <?=$user->active ? "checked" : ""?> id="SwitchCheckUser<?=$user->id?>" onchange="change('/users/change/', <?=$user->id?>, this)">
                         <label class="form-check-label" for="SwitchCheckUser<?=$user->id?>"></label>
                     </div>
