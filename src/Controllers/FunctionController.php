@@ -40,6 +40,221 @@ class FunctionController extends BaseController
         return json_encode($data, true, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
+    public function glassUnits()
+    {
+        $units = [
+            "linear_units" => [
+                "title" => [
+                    "pt" => "Unidades Lineares",
+                    "en" => "Linear Units",
+                    "es" => "Unidades Lineales"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "milímetro",
+                            "en" => "millimeter",
+                            "es" => "milímetro"
+                        ],
+                        "symbol" => "mm"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "centímetro",
+                            "en" => "centimeter",
+                            "es" => "centímetro"
+                        ],
+                        "symbol" => "cm"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "metro",
+                            "en" => "meter",
+                            "es" => "metro"
+                        ],
+                        "symbol" => "m"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "polegada",
+                            "en" => "inch",
+                            "es" => "pulgada"
+                        ],
+                        "symbol" => "in"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "pé",
+                            "en" => "foot",
+                            "es" => "pie"
+                        ],
+                        "symbol" => "ft"
+                    ]
+                ]
+            ],
+            "thickness_units" => [
+                "title" => [
+                    "pt" => "Unidades de Espessura",
+                    "en" => "Thickness Units",
+                    "es" => "Unidades de Espesor"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "milímetro",
+                            "en" => "millimeter",
+                            "es" => "milímetro"
+                        ],
+                        "symbol" => "mm"
+                    ]
+                ]
+            ],
+            "area_units" => [
+                "title" => [
+                    "pt" => "Unidades de Área",
+                    "en" => "Area Units",
+                    "es" => "Unidades de Área"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "centímetro quadrado",
+                            "en" => "square centimeter",
+                            "es" => "centímetro cuadrado"
+                        ],
+                        "symbol" => "cm²"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "metro quadrado",
+                            "en" => "square meter",
+                            "es" => "metro cuadrado"
+                        ],
+                        "symbol" => "m²"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "polegada quadrada",
+                            "en" => "square inch",
+                            "es" => "pulgada cuadrada"
+                        ],
+                        "symbol" => "in²"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "pé quadrado",
+                            "en" => "square foot",
+                            "es" => "pie cuadrado"
+                        ],
+                        "symbol" => "ft²"
+                    ]
+                ]
+            ],
+            "volume_units" => [
+                "title" => [
+                    "pt" => "Unidades de Volume",
+                    "en" => "Volume Units",
+                    "es" => "Unidades de Volumen"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "litro",
+                            "en" => "liter",
+                            "es" => "litro"
+                        ],
+                        "symbol" => "L"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "metro cúbico",
+                            "en" => "cubic meter",
+                            "es" => "metro cúbico"
+                        ],
+                        "symbol" => "m³"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "polegada cúbica",
+                            "en" => "cubic inch",
+                            "es" => "pulgada cúbica"
+                        ],
+                        "symbol" => "in³"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "pé cúbico",
+                            "en" => "cubic foot",
+                            "es" => "pie cúbico"
+                        ],
+                        "symbol" => "ft³"
+                    ]
+                ]
+            ],
+            "weight_units" => [
+                "title" => [
+                    "pt" => "Unidades de Peso",
+                    "en" => "Weight Units",
+                    "es" => "Unidades de Peso"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "grama",
+                            "en" => "gram",
+                            "es" => "gramo"
+                        ],
+                        "symbol" => "g"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "quilograma",
+                            "en" => "kilogram",
+                            "es" => "kilogramo"
+                        ],
+                        "symbol" => "kg"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "tonelada",
+                            "en" => "ton",
+                            "es" => "tonelada"
+                        ],
+                        "symbol" => "t"
+                    ],
+                    [
+                        "name" => [
+                            "pt" => "libra",
+                            "en" => "pound",
+                            "es" => "libra"
+                        ],
+                        "symbol" => "lb"
+                    ]
+                ]
+            ],
+            "other_units" => [
+                "title" => [
+                    "pt" => "Outras Unidades",
+                    "en" => "Other Units",
+                    "es" => "Otras Unidades"
+                ],
+                "units" => [
+                    [
+                        "name" => [
+                            "pt" => "micrômetro",
+                            "en" => "micrometer",
+                            "es" => "micrómetro"
+                        ],
+                        "symbol" => "µm"
+                    ]
+                ]
+            ]
+        ];
+
+        return $this->parseJsonToObject($units);
+
+    }
+
     public function validaCPF($cpf) {
 
         // Remove caracteres não numéricos

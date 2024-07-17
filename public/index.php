@@ -60,5 +60,15 @@ $router->addRoute('GET', '/client/json/{clientId}/', true, "system", [1, 2, 3],C
 $router->addRoute('PUT', '/client/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'updateClient');
 $router->addRoute('PUT', '/client/change/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'changeClient');
 
+$router->addRoute('GET', '/settings/', true, "system", [1], SettingsController::class, 'index');
+$router->addRoute('GET', '/settings/glass_type/', true, "system", [1], SettingsController::class, 'glass_type');
+$router->addRoute('GET', '/settings/glass_size/', true, "system", [1], SettingsController::class, 'glass_size');
+$router->addRoute('GET', '/settings/glass_colors/', true, "system", [1], SettingsController::class, 'glass_colors');
+$router->addRoute('GET', '/settings/glass_finish/', true, "system", [1], SettingsController::class, 'glass_finish');
+$router->addRoute('GET', '/settings/glass_clearances/', true, "system", [1], SettingsController::class, 'glass_clearances');
+$router->addRoute('GET', '/settings/print_templates/', true, "system", [1], SettingsController::class, 'print_templates');
+$router->addRoute('POST', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'create');
+$router->addRoute('PUT', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'update');
+
 $middleware->autoRedirect();
 $router->handleRequest();

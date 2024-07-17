@@ -7,7 +7,7 @@
         </a>
     </div>
     <div class="pageTitle" ondblclick="window.location.href='/logout/'">
-        <img src="/assets/img/logo-fixa.png" alt="logo" class="logo">
+        <img src="/assets/img/logo-fixa-old.png" alt="logo" class="logo">
     </div>
     <div class="right">
         <a href="/notifications/" class="headerButton">
@@ -31,7 +31,7 @@
                 ?>
                 <a class="headerButton"
                     <?php if (!isset($url)): ?>
-                        href="javascript:void(0)" onclick="actionForm('addUser')"
+                        href="javascript:void(0)" onclick="actionForm('<?=$actionForm?>')"
                         data-bs-toggle="modal" data-bs-target="#actionSheetForm"
                     <?php else: ?>
                         href="<?=$url?>"

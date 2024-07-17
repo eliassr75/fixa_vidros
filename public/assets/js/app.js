@@ -100,14 +100,18 @@ function input_phone_number(locale){
     });
 }
 
-function actionForm(action){
+function actionForm(action, data=false){
 
     let global_action_sheet_content = $('#global-action-sheet-content');
     let global_action_sheet_title = $('#global-action-sheet-title');
     let body = ``;
+    let route = "";
+    let method = "POST";
 
     switch (action){
         case 'addUser':
+
+            route = "/new-account/";
 
             //For legends
             window.permissions = window.systemPermissions
@@ -210,9 +214,8 @@ function actionForm(action){
     }
 
     global_action_sheet_content.html(`
-    <form data-method="POST" data-action="/new-account/" data-ajax="default" data-callback="">
+    <form data-method="${method}" data-action="${route}" data-ajax="default" data-callback="">
         <input type="hidden" name="generate-link" value="1">
-        
         ${body}
         <div class="row mt-2">
             <div class="col-6">

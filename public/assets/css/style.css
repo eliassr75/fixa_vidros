@@ -33,6 +33,11 @@ a:hover, a:active, a:focus {
   width: 0;
 }
 
+.rotate-50 {
+  display: inline-block;
+  transform: rotate(180deg);
+}
+
 .appHeader {
   height: 56px;
   display: flex;

@@ -31,7 +31,8 @@ class UserController extends BaseController
         $this->render('users', [
             'users' => $users_array,
             'permissions' => $permissions,
-            'button'=> 'add'
+            'button'=> 'add',
+            'actionForm' => 'addUser'
         ]);
     }
 
