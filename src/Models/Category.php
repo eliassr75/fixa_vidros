@@ -13,19 +13,17 @@ class Category extends Model {
     protected $columns = [
         'id',
         'name',
-        'cod',
-        'obs',
-        'image',
-        'glass_type_id',
-        'size_id',
-        'color_id',
-        'finish_id',
-        'glass_clearances_id',
+        'active',
         'created_at',
         'updated_at'
     ];
 
     protected $guarded = ['id'];
+
+    public function sub_categories()
+    {
+        return $this->hasMany(SubCategory::class);
+    }
 
     /**
      * @throws Exception

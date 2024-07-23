@@ -162,7 +162,7 @@ $menuController = new MenuController();
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add to Home Screen</h5>
+                <h5 class="modal-title"><?=$functionController->locale('install_app_android_message')?></h5>
                 <a href="#" class="close-button" data-bs-dismiss="modal">
                     <ion-icon name="close"></ion-icon>
                 </a>
@@ -172,13 +172,10 @@ $menuController = new MenuController();
                     <div class="mb-1"><img src="/assets/img/icon/192x192.png" alt="image" class="imaged w64 mb-2">
                     </div>
                     <div>
-                        Install <strong>Finapp</strong> on your iPhone's home screen.
-                    </div>
-                    <div>
-                        Tap <ion-icon name="share-outline"></ion-icon> and Add to homescreen.
+                        <?=$functionController->locale('install_app_iphone')?>
                     </div>
                     <div class="mt-2">
-                        <button class="btn btn-primary btn-block" data-bs-dismiss="modal">CLOSE</button>
+                        <button class="btn btn-primary btn-block" data-bs-dismiss="modal"><?=$functionController->locale('label_btn_cancel')?></button>
                     </div>
                 </div>
 
@@ -195,7 +192,7 @@ $menuController = new MenuController();
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add to Home Screen</h5>
+                <h5 class="modal-title"><?=$functionController->locale('install_app_android_message')?></h5>
                 <a href="#" class="close-button" data-bs-dismiss="modal">
                     <ion-icon name="close"></ion-icon>
                 </a>
@@ -206,13 +203,10 @@ $menuController = new MenuController();
                         <img src="/assets/img/icon/192x192.png" alt="image" class="imaged w64 mb-2">
                     </div>
                     <div>
-                        Install <strong>Finapp</strong> on your Android's home screen.
-                    </div>
-                    <div>
-                        Tap <ion-icon name="ellipsis-vertical"></ion-icon> and Add to homescreen.
+                        <?=$functionController->locale('install_app_android')?>
                     </div>
                     <div class="mt-2">
-                        <button class="btn btn-primary btn-block" data-bs-dismiss="modal">CLOSE</button>
+                        <button class="btn btn-primary btn-block" data-bs-dismiss="modal"><?=$functionController->locale('label_btn_cancel')?></button>
                     </div>
                 </div>
             </div>
@@ -220,7 +214,6 @@ $menuController = new MenuController();
     </div>
 </div>
 <!-- * Android Add to Home Action Sheet -->
-
 
 <div id="cookiesbox" class="offcanvas offcanvas-bottom cookies-box" tabindex="-1" data-bs-scroll="true"
      data-bs-backdrop="false">

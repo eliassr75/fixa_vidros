@@ -1,4 +1,5 @@
 const spinner = `<div class="loader"></div>`;
+const spinner_upload = `<div class="loader-upload"></div>`;
 
 let configDataTable = {
     stateSave: true,
@@ -25,6 +26,113 @@ let configDataTable = {
     paging: false
 }
 
+function uploadIMage(response = false) {
+
+    let el = ``;
+    console.log(response)
+    if ($(".send-image").length) {
+
+
+        if (response && response.responseJSON && response.responseJSON.image) {
+            el = `
+            <div class="card my-2">
+                <div class="card-body" id="card-body-image">
+                    <img src="${response.responseJSON.image ? response.responseJSON.image : "/assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid border border-1">
+                </div>
+            </div>
+            <hr>
+            `;
+            $(".send-image").html(el);
+            $("input[name='image']").val(response.responseJSON.image).trigger('change')
+        } else {
+            el = `
+            <div class="card my-2">
+                <div class="card-body" id="card-body-image">
+                    <form id="form-image" data-method="POST" data-action="/uploads/addImage/" data-ajax="default" data-callback="uploadIMage" enctype="multipart/form-data">
+                        <div class="custom-file-upload" id="fileUpload">
+                            <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg" required>
+                            <label for="image">
+                                <span>
+                                    <strong>
+                                        <ion-icon name="arrow-up-circle-outline" role="img" class="md hydrated" aria-label="arrow up circle outline"></ion-icon>
+                                        <i id="section-animation-image">${locale.upload_image}</i>
+                                    </strong>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="mt-2" id="progressContainerImage">
+                            <div class="progress rounded-0 mb-0" role="progressbar" id="progressDivImage" aria-label="progressDivImage" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" id="progressBarImage" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </form>            
+                </div>
+            </div>
+            <hr>
+            `;
+
+            $(".send-image").html(el);
+            $("#progressContainerImage").hide();
+
+            $('#form-image').on("submit", function (e) {
+                e.preventDefault();
+                let progressBarImage = $("#progressBarImage");
+                let progressDivImage = $("#progressDivImage");
+                let progressContainerImage = $("#progressContainerImage");
+
+                let form = $(this);
+                const method = $(form).data("method");
+                const url = $(form).data("action");
+                const callbackName = $(form).data("callback");
+
+                let params = {
+                    method: method,
+                    url: url,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    data: new FormData($(form)[0]),
+                    beforeSend: function() {
+                        $("#progressContainerImage").show(500);
+                        $("#section-animation-image").addClass('w-100 d-flex justify-content-center').html(spinner);
+                        window.bkp_html = $('.btn-submit').html();
+                        $('.btn-submit').html(spinner_upload).addClass("disabled");
+                        progressBarImage.removeClass('bg-danger');
+                        progressDivImage.prop('aria-valuenow', '0');
+                        progressBarImage.css("width", "0%");
+                    },
+                    xhr: function() {
+                        var xhr = new XMLHttpRequest();
+                        xhr.upload.addEventListener("progress", function(event) {
+                            if (event.lengthComputable) {
+                                var percentComplete = Math.round((event.loaded / event.total) * 100);
+                                progressBarImage.css("width", percentComplete + "%");
+                                progressDivImage.prop('aria-valuenow', percentComplete);
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    complete: function(response) {
+                        $('.btn-submit').html(window.bkp_html).removeClass("disabled");
+                        if (callbackName && typeof window[callbackName] === 'function') {
+                            window[callbackName](response);
+                        }
+                        setTimeout(function() {
+                            progressContainerImage.hide(500);
+                            $("#section-animation-image").html(locale.upload_image);
+                        }, 2000);
+                    }
+                };
+
+                $.ajax(params).then(function (response) {});
+            });
+
+            $('#image').on("change", function() {
+                $('#form-image').submit();
+            });
+        }
+    }
+}
 
 function _alert(icon, message, type){
 
@@ -108,6 +216,9 @@ function actionForm(action, data=false){
     let route = "";
     let method = "POST";
 
+    $("#child-global-custom-alert").remove()
+
+    // Only Create
     switch (action){
         case 'addUser':
 
@@ -213,7 +324,439 @@ function actionForm(action, data=false){
             break;
     }
 
+    //Only Update
+    switch (action){
+        case 'addSubCategory':
+        case 'editSubCategory':
+
+            route = `/settings/subcategory/${data.id}/`;
+            method = "PUT";
+            if (action === "addSubCategory"){
+                route = `/settings/subcategory/`;
+                method = "POST";
+            }
+
+
+            global_action_sheet_title.html(locale.menu_item_sub_category);
+
+            let select = "";
+            for (const glass_type of window.defaultValues.types) {
+                select += `
+                <option value="${glass_type.id}" ${(data.glass_type_id === glass_type.id) ? "selected" : "" }>
+                    ${glass_type.name}
+                </option>`;
+            }
+
+            body = `
+
+                <input type="hidden" name="category_id" value="${window.category_id}">
+                <input type="hidden" name="image" value="${data.image ? data.image : ""}">
+
+                <p class="form-check-label">
+                    ${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}
+                </p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active-subcategory" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active-subcategory">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="additional_name">${locale.input_additional_description}</label>
+                        <input type="text" class="form-control" id="additional_name" name="additional_name" value="${data.additional_name ? data.additional_name : ""}" placeholder="${locale.input_additional_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group boxed">
+                    <div class="input-wrapper">
+                        <label class="label" for="select-type">${locale.menu_item_glass_type}</label>
+                        <select class="form-control custom-select" id="select-type" name="type" required>
+                            <option value="" selected disabled>Selecione uma opção</option>
+                            ${select}
+                        </select>
+                        <label class="text-warning label mt-1" id="legend-permission"></label>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case 'addCategory':
+        case 'editCategory':
+
+            route = `/settings/category/${data.id}/`;
+            method = "PUT";
+            if (action === "addCategory"){
+                route = `/settings/category/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_category);
+
+            body = `
+                <p class="form-check-label">
+                    ${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}
+                </p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+            break;
+
+        case 'addFinish':
+        case "editFinish":
+
+            route = `/settings/glass_finish/${data.id}/`;
+            method = "PUT";
+            if (action === "addFinish"){
+                route = `/settings/glass_finish/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_glass_finish);
+
+            body = `
+                <p class="form-check-label" >${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}</p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case 'addType':
+        case "editType":
+
+            route = `/settings/glass_type/${data.id}/`;
+            method = "PUT";
+            if (action === "addType"){
+                route = `/settings/glass_type/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_glass_type);
+
+            body = `
+                <p class="form-check-label" >${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}</p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case "addThickness":
+        case "editThickness":
+
+            route = `/settings/glass_thickness/${data.id}/`;
+            method = "PUT";
+            if (action === "addThickness"){
+                route = `/settings/glass_thickness/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_glass_thickness);
+
+            // Criar o select com as opções dinâmicas
+            let selectHtml = '';
+            for (const category in window.units) {
+                if (window.units.hasOwnProperty(category)) {
+                    selectHtml += `<optgroup label="${window.units[category].title[window.locale]}">`;
+
+                    window.units[category].units.forEach(unit => {
+                        selectHtml += `<option value="${category}/${unit.symbol}" ${(data.category === category && data.type === unit.symbol) ? "selected" : "" }>${unit.name[window.locale]} (${unit.symbol})</option>`;
+                    });
+
+                    selectHtml += '</optgroup>';
+                }
+            }
+
+            body = `
+                <p class="form-check-label">
+                    ${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}
+                </p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group boxed">
+                    <div class="input-wrapper">
+                        <label class="label" for="select-type">${locale.input_unit}</label>
+                        <select class="form-control custom-select" id="select-type" name="type" required>
+                            <option value="" selected disabled>Selecione uma opção</option>
+                            ${selectHtml}
+                        </select>
+                        <label class="text-warning label mt-1" id="legend-permission"></label>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="price">${locale.input_price}</label>
+                        <input type="text" class="form-control" id="price" name="price" value="${data.price ? data.price : ""}" placeholder="${locale.input_price}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case "addColor":
+        case "editColor":
+
+            route = `/settings/glass_colors/${data.id}/`;
+            method = "PUT";
+
+            global_action_sheet_title.html(locale.menu_item_glass_colors);
+
+            body = `
+                <p class="form-check-label">
+                    ${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}
+                </p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="percent">${locale.input_percent}</label>
+                        <input type="number" class="form-control" id="percent" name="percent" value="${data.percent ? data.percent : 0}" placeholder="${locale.input_percent}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case "addClearance":
+        case "editClearance":
+
+            route = `/settings/glass_clearances/${data.id}/`;
+            method = "PUT";
+            if (action === "addFinish"){
+                route = `/settings/glass_clearances/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_glass_clearances);
+            body = `
+                <p class="form-check-label">
+                    ${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}
+                </p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="width">${locale.input_width} (cm)</label>
+                        <input type="number" class="form-control" id="width" name="width" value="${data.width ? data.width : 0}" placeholder="${locale.input_width}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="width">${locale.input_height} (cm)</label>
+                        <input type="number" class="form-control" id="height" name="height" value="${data.height ? data.height : 0}" placeholder="${locale.input_height}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
+        case "addPrintTemplates":
+        case "editPrintTemplates":
+
+            route = `/settings/print_templates/${data.id}/`;
+            method = "PUT";
+            if (action === "addPrintTemplates"){
+                route = `/settings/print_templates/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(locale.menu_item_print_templates);
+
+            let iframe = ``
+            if (data.width && data.height && data.spacing){
+                iframe = `
+                <div class="my-2">
+                    <iframe id="printIframe" style="width: 100%" height="auto" src="__url__"></iframe>
+                </div>
+                `;
+            }
+
+            body = `
+                <p class="form-check-label" >${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}</p>
+                <hr>
+                
+                <div class="form-check my-2">
+                    <input type="checkbox" class="form-check-input" id="active" name="active" ${data.active ? "checked" : ""}>
+                    <label class="form-check-label" for="active">${locale.input_active}</label>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name">${locale.input_description}</label>
+                        <input type="text" class="form-control" id="name" name="name" value="${data.name ? data.name : ""}" placeholder="${locale.input_description}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="width">${locale.input_width} (mm)</label>
+                        <input type="tel" class="form-control" id="width" name="width" value="${data.width ? data.width*100 : ""}" placeholder="${locale.input_width}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="height">${locale.input_height} (mm)</label>
+                        <input type="tel" class="form-control" id="height" name="height" value="${data.height ? data.height*100 : ""}" placeholder="${locale.input_height}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="spacing">${locale.input_spacing} (mm)</label>
+                        <input type="tel" class="form-control" id="spacing" name="spacing" value="${data.spacing ? data.spacing : ""}" placeholder="${locale.input_spacing}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                ${iframe ? iframe.replace('__url__', "/print/teste/1/1") : ""}
+                
+                <!--
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="model">${locale.input_model} (html)</label>
+                        <textarea class="form-control" rows="6" id="model" name="model" placeholder="${locale.input_model}" required>${data.model ? data.model : ""}</textarea>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                -->
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+    }
+
     global_action_sheet_content.html(`
+
+    <div class="send-image"></div>
+
     <form data-method="${method}" data-action="${route}" data-ajax="default" data-callback="">
         <input type="hidden" name="generate-link" value="1">
         ${body}
@@ -244,6 +787,17 @@ function actionForm(action, data=false){
 
     })
 
+    function adjustIframeHeight() {
+        var iframe = document.getElementById('printIframe');
+        iframe.style.height = iframe.contentWindow.document.documentElement.scrollHeight + 'px';
+    }
+
+    if($('#printIframe').length){
+        document.getElementById('printIframe').onload = adjustIframeHeight;
+    }
+
+    $(`input[type="tel"]`).mask('000.00', { reverse: true })
+
     $("form").on('submit', function (e){
 
         let form = $(this);
@@ -255,6 +809,11 @@ function actionForm(action, data=false){
 
         }
     })
+
+    if($("input[name='image']").length){
+        uploadIMage();
+    }
+
 
 }
 
@@ -300,7 +859,7 @@ function global_alert(response, time){
     
     `;
 
-    if (document.querySelector('#child-global-custom-alert') && !window.use_global_alert) {
+    if ($('#child-global-custom-alert').length && !window.use_global_alert) {
         $('#child-global-custom-alert').html(alert_html).hide().show(500)
     }else{
         $('#global-custom-alert').html(alert_html).hide().show(500)
@@ -313,7 +872,7 @@ function global_alert(response, time){
             close_global_modal();
 
             let bsAlert = new bootstrap.Alert('#global-alert-container')
-            if (document.querySelector('#child-global-custom-alert') && !window.use_global_alert) {
+            if ($('#child-global-custom-alert').length && !window.use_global_alert) {
                 bsAlert = new bootstrap.Alert('#child-global-custom-alert')
             }
             window.use_global_alert = false;
@@ -348,6 +907,8 @@ function dialog(response, time) {
             break;
     }
 
+    close_global_modal();
+
     $('#dialog-container').html(`
         <div class="modal fade dialogbox" id="DialogIconed" data-bs-backdrop="static" tabIndex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -372,7 +933,6 @@ function dialog(response, time) {
     if(time){
         auto_remove_alert(time)
     }
-
     $("#DialogIconed").modal('toggle')
 
 }
@@ -653,6 +1213,20 @@ function processForm(form=false, params=false, callbackName=false, callbackParam
     sendGlobalAjax(params, progressBar).then(function (response){
         toast_alert(response);
     })
+}
+
+function searchElements(searchTerm, containerClass, itemClass) {
+    const containers = document.querySelectorAll(`.${containerClass}`);
+    containers.forEach(container => {
+        const items = container.querySelectorAll(`.${itemClass}`);
+        items.forEach(item => {
+            if (item.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    });
 }
 
 function get_cep(cep){

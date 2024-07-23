@@ -8,18 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 use App\Controllers\CookieController;
 use Ramsey\Uuid\Uuid;
 
-class GlassSize extends Model {
-    protected $table = 'glass_size';
+class SubCategory extends Model {
+    protected $table = 'sub_category';
     protected $columns = [
         'id',
         'name',
-        'type',
-        'price',
+        'additional_name',
+        'active',
+        'image',
+        'category_id',
+        'glass_type_id',
         'created_at',
         'updated_at'
     ];
 
     protected $guarded = ['id'];
+
+    public function glass_thickness()
+    {
+        return $this->hasMany(GlassThickness::class);
+    }
 
     /**
      * @throws Exception

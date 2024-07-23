@@ -35,6 +35,12 @@ class FunctionController extends BaseController
         return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
+    public function getStatement($data)
+    {
+        $data = $this->replaceHyphensInKeys($data);
+        return json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+
     public function parseObjectToJson($data): string
     {
         return json_encode($data, true, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -251,7 +257,7 @@ class FunctionController extends BaseController
             ]
         ];
 
-        return $this->parseJsonToObject($units);
+        return $units;
 
     }
 

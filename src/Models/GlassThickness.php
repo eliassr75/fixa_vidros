@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 use App\Controllers\CookieController;
 use Ramsey\Uuid\Uuid;
 
-class GlassClearances extends Model {
-    protected $table = 'glass_clearances';
+class GlassThickness extends Model {
+    protected $table = 'glass_thickness';
     protected $columns = [
         'id',
         'name',
-        'width',
-        'height',
         'type',
+        'category',
+        'price',
         'active',
+        'sub_category_id',
+        'glass_type_id',
         'created_at',
         'updated_at'
     ];

@@ -61,14 +61,20 @@ $router->addRoute('PUT', '/client/{clientId}/', true, "system", [1, 2, 3],Client
 $router->addRoute('PUT', '/client/change/{clientId}/', true, "system", [1, 2, 3],ClientController::class, 'changeClient');
 
 $router->addRoute('GET', '/settings/', true, "system", [1], SettingsController::class, 'index');
+$router->addRoute('GET', '/settings/category/', true, "system", [1], SettingsController::class, 'category');
+$router->addRoute('GET', '/settings/category/{categoryId}/', true, "system", [1], SettingsController::class, 'category');
+$router->addRoute('GET', '/settings/category/{categoryId}/{json}', true, "system", [1], SettingsController::class, 'category');
 $router->addRoute('GET', '/settings/glass_type/', true, "system", [1], SettingsController::class, 'glass_type');
-$router->addRoute('GET', '/settings/glass_size/', true, "system", [1], SettingsController::class, 'glass_size');
+$router->addRoute('GET', '/settings/glass_thickness/', true, "system", [1], SettingsController::class, 'glass_thickness');
 $router->addRoute('GET', '/settings/glass_colors/', true, "system", [1], SettingsController::class, 'glass_colors');
 $router->addRoute('GET', '/settings/glass_finish/', true, "system", [1], SettingsController::class, 'glass_finish');
 $router->addRoute('GET', '/settings/glass_clearances/', true, "system", [1], SettingsController::class, 'glass_clearances');
 $router->addRoute('GET', '/settings/print_templates/', true, "system", [1], SettingsController::class, 'print_templates');
-$router->addRoute('POST', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'create');
+$router->addRoute('POST', '/settings/{routeName}/', true, "system", [1], SettingsController::class, 'create');
 $router->addRoute('PUT', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'update');
+
+$router->addRoute('POST', '/uploads/addImage/', true, "system", [1, 2, 3], SettingsController::class, 'addImage');
+$router->addRoute('GET', '/print/{routeName}/{Id}/{printId}/', true, "system", [1, 2, 3, 4], SettingsController::class, 'print');
 
 $middleware->autoRedirect();
 $router->handleRequest();

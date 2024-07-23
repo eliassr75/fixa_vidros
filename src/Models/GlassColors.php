@@ -14,6 +14,7 @@ class GlassColors extends Model {
         'id',
         'name',
         'percent',
+        'active',
         'created_at',
         'updated_at'
     ];

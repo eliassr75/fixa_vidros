@@ -11,23 +11,32 @@ $functionController = new FunctionController();
 
 <div class="section mt-2">
     <ul class="listview image-listview inset list my-2">
-        <?php if(count($type)): foreach ($type as $item):
+        <?php if(count($thickness)): foreach ($thickness as $item):
 
+            $item->units = $functionController->glassUnits();
             $item->created_text = date('d/m/Y H:i', strtotime($item->created_at));
+            $item->locale = $_SESSION['user_language'];
 
             ?>
             <li id="li-model">
-                <a href="javascript:void(0)" onclick='actionForm("editType", <?=$functionController->parseObjectToJson($item)?>)'
+                <a href="javascript:void(0)" onclick='actionForm("editThickness", <?=$functionController->parseObjectToJson($item)?>)'
                    data-bs-toggle="modal" data-bs-target="#actionSheetForm" class="item">
                     <div class="icon-box bg-<?=$item->active ? "primary" : "danger"?>">
-                        <ion-icon name="help-circle-outline"></ion-icon>
+                        <ion-icon name="layers-outline"></ion-icon>
                     </div>
                     <div class="in">
-                        <?=$item->name?>
+                        <?=$item->name?> <?=$item->type?>
+                        <div>
+                            <?php if($item->price): ?>
+                                <span class="badge badge-primary">
+                                    R$ <?=$item->price?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </a>
             </li>
-        <?php endforeach; else: ?>
+        <?php endforeach;  else: ?>
             <div class="alert alert-primary" role="alert">
                 <?= $functionController->locale('not_found_results') ?>
             </div>
@@ -36,4 +45,10 @@ $functionController = new FunctionController();
 </div>
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
+
+<script>
+    window.units = <?=$functionController->parseObjectToJson($functionController->glassUnits())?>;
+    window.locale = "<?=$_SESSION['user_language']?>";
+</script>
+
 <?php require_once __DIR__ . '/../htmlEnd.php';?>
