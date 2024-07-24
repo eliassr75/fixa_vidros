@@ -13,7 +13,7 @@ $functionController = new FunctionController();
 
     <div class="card">
 
-        <div id="clients">
+        <div id="products">
 
             <!-- class="search" automagically makes an input a search field. -->
 
@@ -36,23 +36,21 @@ $functionController = new FunctionController();
             -->
 
             <ul class="listview image-listview inset list my-2">
-                <?php if (count($clients) > 0): foreach ($clients as $client): ?>
+                <?php if (count($products) > 0): foreach ($products as $product): ?>
                 <li id="li-model">
-                    <a href="/client/<?=$client->id?>/" class="item">
-                        <img src="/assets/img/sample/avatar/do-utilizador.png" alt="image" class="image">
-                        <div class="in">
-                            <div>
-                                <header class="document"><?=$client->document?></header>
-                                <span class="name"><?=$client->name?></span>
+                    <a href="/product/<?=$product->id?>/" class="item">
+                        <div class="in" style="max-width: 55vw">
+                            <div class="w-100 text-truncate">
+                                <span class="name"><?=$product->name?></span>
                                 <footer class="str_created">
-                                    <?=$client->str_created?>
+                                    <?=$product->str_created?>
                                 </footer>
                             </div>
                         </div>
                     </a>
                     <div class="form-check form-switch me-2">
-                        <input class="form-check-input" type="checkbox" value="<?=$client->id?>" <?=$client->active ? "checked" : ""?> id="SwitchCheckClient<?=$client->id?>" onchange="change('/client/change/', <?=$client->id?>, this)">
-                        <label class="form-check-label" for="SwitchCheckClient<?=$client->id?>"></label>
+                        <input class="form-check-input" type="checkbox" value="<?=$product->id?>" <?=$product->active ? "checked" : ""?> id="SwitchCheckClient<?=$product->id?>" onchange="change('/product/change/', <?=$product->id?>, this)">
+                        <label class="form-check-label" for="SwitchCheckClient<?=$product->id?>"></label>
                     </div>
                 </li>
                 <?php endforeach; else: ?>
@@ -72,12 +70,12 @@ $functionController = new FunctionController();
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
 
 <script>
-    <?php if (count($clients) > 0): ?>
+    <?php if (count($products) > 0): ?>
         $(document).ready(() => {
             let options = {
                 valueNames: [ 'document', 'name', 'str_created' ]
             };
-            window.clientList = new List('clients', options);
+            window.clientList = new List('products', options);
         })
     <?php endif;?>
 </script>

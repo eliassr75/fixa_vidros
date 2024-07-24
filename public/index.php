@@ -73,7 +73,20 @@ $router->addRoute('GET', '/settings/print_templates/', true, "system", [1], Sett
 $router->addRoute('POST', '/settings/{routeName}/', true, "system", [1], SettingsController::class, 'create');
 $router->addRoute('PUT', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'update');
 
-$router->addRoute('POST', '/uploads/addImage/', true, "system", [1, 2, 3], SettingsController::class, 'addImage');
+$router->addRoute('GET', '/products/', true, "system", [1, 2, 3],ProductController::class, 'index');
+$router->addRoute('POST', '/products/', true, "system", [1, 2, 3],ProductController::class, 'product');
+$router->addRoute('PUT', '/products/', true, "system", [1, 2, 3],ProductController::class, 'product');
+
+$router->addRoute('GET', '/product/new/', true, "system", [1, 2, 3],ProductController::class, 'getProduct');
+$router->addRoute('POST', '/product/new/', true, "system", [1, 2, 3],ProductController::class, 'newProduct');
+$router->addRoute('GET', '/product/{productId}/', true, "system", [1, 2, 3],ProductController::class, 'getProduct');
+$router->addRoute('GET', '/product/json/{productId}/', true, "system", [1, 2, 3],ProductController::class, 'json');
+$router->addRoute('GET', '/product/category/{Id}/json/', true, "system", [1, 2, 3],ProductController::class, 'categoriesJson');
+
+$router->addRoute('PUT', '/product/{productId}/', true, "system", [1, 2, 3],ProductController::class, 'updateProduct');
+$router->addRoute('PUT', '/product/change/{productId}/', true, "system", [1, 2, 3],ProductController::class, 'changeProduct');
+
+$router->addRoute('POST', '/uploads/addImage/', true, "system", [1, 2, 3], UploadsController::class, 'addImage');
 $router->addRoute('GET', '/print/{routeName}/{Id}/{printId}/', true, "system", [1, 2, 3, 4], SettingsController::class, 'print');
 
 $middleware->autoRedirect();

@@ -10,6 +10,7 @@ use App\Models\GlassSize;
 use App\Models\GlassThickness;
 use App\Models\GlassType;
 use App\Models\PrintTemplates;
+use App\Models\Product;
 use App\Models\SubCategory;
 use App\Models\User;
 use Exception;
@@ -315,7 +316,7 @@ class SettingsController extends BaseController
             endif;
 
             $thickness = GlassThickness::where('glass_type_id', null)
-                ->where('sub_category_id', null)->orderBy('id', 'desc')->get();
+                ->where('products_id', null)->orderBy('id', 'desc')->get();
             $types = GlassType::where('active', true)->get();
 
             if($json):
@@ -333,16 +334,45 @@ class SettingsController extends BaseController
                     $categories = $category->sub_categories()->get();
                 }
 
+                $newProducts = [];
                 foreach ($categories as $subCategory):
                     $subCategory->glass_type = GlassType::find($subCategory->glass_type_id);
                     $subCategory->created_text = date('d/m/Y H:i', strtotime($subCategory->created_at));
+
+                    if($subCategory->glass_type_id):
+                        $product = Product::updateOrCreate(
+                            [
+                                'category_id' => $subCategory->category_id,
+                                'sub_category_id' => $subCategory->id,
+                                'glass_type_id' => $subCategory->glass_type_id,
+                            ],
+                            [
+                                'name' => "{$category->name} {$subCategory->name} " . ($subCategory->glass_type->name ? "({$subCategory->glass_type->name })" : ""),
+                                'custom_name' => $subCategory->additional_name
+                            ]
+                        );
+
+                        foreach ($thickness as $thick):
+                            GlassThickness::updateOrCreate(
+                                [
+                                    'products_id' => $product->id,
+                                    'name' => $thick->name,
+                                    'price' => $thick->price
+                                ],
+                                ['name' => $thick->name]
+                            );
+                        endforeach;
+
+                    endif;
+
                     $values[] =  $subCategory;
                 endforeach;
 
                 $response->values = [
                     "subCategories" => $values,
                     "thickness" => $thickness,
-                    "types" => $types
+                    "types" => $types,
+                    "newProducts" => $newProducts,
                 ];
                 $functionController->sendResponse($response, $status_code);
 
@@ -404,7 +434,7 @@ class SettingsController extends BaseController
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_thickness'));
 
         $thickness = GlassThickness::where('glass_type_id', null)->
-            where('sub_category_id', null)->orderBy('id', 'desc')->get();
+            where('products_id', null)->orderBy('id', 'desc')->get();
 
         $this->render(
             "glass_thickness", [

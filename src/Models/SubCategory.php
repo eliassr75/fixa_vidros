@@ -24,9 +24,9 @@ class SubCategory extends Model {
 
     protected $guarded = ['id'];
 
-    public function glass_thickness()
+    public function categories()
     {
-        return $this->hasMany(GlassThickness::class);
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
     /**

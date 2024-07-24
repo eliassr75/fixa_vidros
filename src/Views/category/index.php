@@ -138,8 +138,8 @@ $functionController = new FunctionController();
                     <div class="border border-1 p-1 my-1 rounded-2 search-item">
                         <div class="text-truncate font-weight-bold ">${values.name}</div>
                         <div class="text-truncate">
-                            <span class="">${values.glass_type.name}</span> -
-                            <span class="">${values.additional_name}</span>
+                            <span class="">${values.glass_type ? values.glass_type.name : ""}</span> -
+                            <span class="">${values.additional_name ? values.additional_name : ""}</span>
                         </div>
                         <img src="${values.image ? values.image : "assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid">
                     </div>

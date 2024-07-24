@@ -373,7 +373,7 @@ function actionForm(action, data=false){
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <label class="label" for="additional_name">${locale.input_additional_description}</label>
-                        <input type="text" class="form-control" id="additional_name" name="additional_name" value="${data.additional_name ? data.additional_name : ""}" placeholder="${locale.input_additional_description}" required>
+                        <input type="text" class="form-control" id="additional_name" name="additional_name" value="${data.additional_name ? data.additional_name : ""}" placeholder="${locale.input_additional_description}">
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -382,7 +382,7 @@ function actionForm(action, data=false){
                 <div class="form-group boxed">
                     <div class="input-wrapper">
                         <label class="label" for="select-type">${locale.menu_item_glass_type}</label>
-                        <select class="form-control custom-select" id="select-type" name="type" required>
+                        <select class="form-control custom-select" id="select-type" name="type">
                             <option value="" selected disabled>Selecione uma opção</option>
                             ${select}
                         </select>

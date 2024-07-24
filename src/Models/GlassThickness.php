@@ -17,7 +17,7 @@ class GlassThickness extends Model {
         'category',
         'price',
         'active',
-        'sub_category_id',
+        'products_id',
         'glass_type_id',
         'created_at',
         'updated_at'
