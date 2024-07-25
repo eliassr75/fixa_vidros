@@ -13,7 +13,7 @@ use App\Models\User;
 use Doctrine\Inflector\Rules\Transformation;
 use Exception;
 
-class ProductController extends BaseController
+class OrdersController extends BaseController
 {
     public function index()
     {
@@ -49,11 +49,12 @@ class ProductController extends BaseController
 
         $this->render('products', [
             'products' => $products_array,
-            'button' => 'None',
+            'button' => 'add',
+            'url' => '/product/new/'
         ]);
     }
 
-    public function getProduct($productId=false)
+    public function getOrder($productId=false)
     {
         $functionController = new FunctionController();
         $functionController->is_dashboard(false);
@@ -113,14 +114,14 @@ class ProductController extends BaseController
         ]);
     }
 
-    public function updateProduct($productId)
+    public function updateOrder($clientId)
     {
         $functionController = new FunctionController();
         $functionController->api = true;
         $status_code = 200;
 
         $data = $functionController->putStatement();
-        $product = Product::find($productId);
+        $product = Product::find($clientId);
         $response = $functionController->baseResponse();
 
         $product->obs = $data->obs;
@@ -138,7 +139,7 @@ class ProductController extends BaseController
         $functionController->sendResponse($response, $status_code);
     }
 
-    public function changeProduct($productId)
+    public function changeOrder($productId)
     {
         $functionController = new FunctionController();
         $functionController->api = true;

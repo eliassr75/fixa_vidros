@@ -33,26 +33,6 @@ $functionController = new FunctionController();
 
                 <div class="form-group basic">
                     <div class="input-wrapper">
-                        <label class="label" for="name"><?=$functionController->locale('input_description')?></label>
-                        <input type="text" class="form-control" id="name" name="name" value="<?=$product->name?>" placeholder="<?=$functionController->locale('input_description')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
-
-                <div class="form-group basic">
-                    <div class="input-wrapper">
-                        <label class="label" for="custom_name"><?=$functionController->locale('input_additional_description')?></label>
-                        <input type="text" class="form-control" id="custom_name" name="custom_name" value="<?=$product->custom_name?>" placeholder="<?=$functionController->locale('input_additional_description')?>" required>
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
-
-                <div class="form-group basic">
-                    <div class="input-wrapper">
                         <textarea type="text" class="form-control" id="obs" name="obs" rows="6" placeholder="<?=$functionController->locale('input_observation')?>"><?=$product->obs?></textarea>
                     </div>
                 </div>
@@ -68,6 +48,31 @@ $functionController = new FunctionController();
                 </div>
 
                 <hr>
+
+                <p class="text-warning d-flex align-items-center">
+                    <ion-icon name="information-circle-outline"></ion-icon>
+                    <?=$functionController->locale('warning_automaticale_generated')?>
+                </p>
+
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="name"><?=$functionController->locale('input_description')?></label>
+                        <input type="text" class="form-control" id="name" name="name" value="<?=$product->name?>" placeholder="<?=$functionController->locale('input_description')?>" readonly>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="custom_name"><?=$functionController->locale('input_additional_description')?></label>
+                        <input type="text" class="form-control" id="custom_name" name="custom_name" value="<?=$product->custom_name?>" placeholder="<?=$functionController->locale('input_additional_description')?>" readonly>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
 
                 <div class="form-group boxed">
                     <div class="input-wrapper">
@@ -117,63 +122,4 @@ $functionController = new FunctionController();
 </div>
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
-
-<script>
-
-    function changeFilter(el){
-        window.glassType = el.value
-        categoryController()
-    }
-
-    function categoryController(response=false){
-
-        if (!response){
-
-            params = {
-                method: "GET",
-                url: `/product/category/${window.glassType}/json/`,
-                dataType: 'json',
-            }
-            processForm(false, params, "categoryController", false, true)
-        }
-
-        if (response) {
-            response = response.responseJSON;
-            console.log(response)
-
-            let fields = ``
-            for (let values of response.values.subCategories){
-
-                fields += `
-
-                <div onclick='editSubCategory(${JSON.stringify(values)})' class="col-lg-2 col-md-4 col-6 searchable">
-                    <div class="border border-1 p-1 my-1 rounded-2 search-item">
-                        <div class="text-truncate font-weight-bold ">${values.name}</div>
-                        <div class="text-truncate">
-                            <span class="">${values.glass_type.name}</span> -
-                            <span class="">${values.additional_name}</span>
-                        </div>
-                        <img src="${values.image ? values.image : "assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid">
-                    </div>
-                </div>
-
-                `;
-
-            }
-
-            $('#rows').html(fields)
-
-            document.getElementById('searchInput').addEventListener('input', function() {
-                const searchTerm = this.value;
-                searchElements(searchTerm, 'searchable', 'search-item');
-            });
-        }
-
-    }
-
-    $(document).ready(() => {
-
-    })
-</script>
-
 <?php require_once __DIR__ . '/../htmlEnd.php';?>

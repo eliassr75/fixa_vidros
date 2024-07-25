@@ -200,15 +200,20 @@ class SettingsController extends BaseController
         switch ($routeName) {
             case 'subcategory':
 
-                $subCategory = new SubCategory();
-
-                $subCategory->name = $data->name;
-                $subCategory->additional_name = $data->additional_name;
-                $subCategory->image = $data->image;
-                $subCategory->category_id = $data->category_id;
-                $subCategory->glass_type_id = $data->type;
-
-                $subCategory->save();
+                SubCategory::createOrUpdate(
+                    [
+                    'name' => $data->name,
+                    'additional_name' => $data->additional_name,
+                    'image' => $data->image,
+                    'category_id' => $data->category_id,
+                    ],
+                    [
+                        'name' => $data->name,
+                        'additional_name' => $data->additional_name,
+                        'image' => $data->image,
+                        'glass_type_id' => $data->glass_type_id,
+                    ]
+                );
                 $response->dialog = false;
 
                 break;
@@ -352,7 +357,7 @@ class SettingsController extends BaseController
                             ]
                         );
 
-                        foreach ($thickness as $thick):
+                        /*foreach ($thickness as $thick):
                             GlassThickness::updateOrCreate(
                                 [
                                     'products_id' => $product->id,
@@ -361,7 +366,7 @@ class SettingsController extends BaseController
                                 ],
                                 ['name' => $thick->name]
                             );
-                        endforeach;
+                        endforeach;*/
 
                     endif;
 
