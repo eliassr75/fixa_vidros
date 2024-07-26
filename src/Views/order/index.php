@@ -99,12 +99,6 @@ $functionController = new FunctionController();
         let data = getLocalStorageData();
         console.log(data);
 
-        // Verificar se category_id está presente nos dados
-        if (!data.category_id || !subCategorias[data.category_id]) {
-            console.error("Category ID is missing or invalid");
-            return;
-        }
-
         //SELECT CATEGORIES
         let categories_select_values = "";
         for (let item of categories){
@@ -125,29 +119,32 @@ $functionController = new FunctionController();
         `;
 
         // Gerar opções para o select de subcategorias
-        let subcategory_select_values = "";
-        for (let item of subCategorias[data.category_id]) {
-            subcategory_select_values += `
-            <option value="${item.id}" ${data.sub_category_id && data.sub_category_id === item.id ? "selected" : ""}>${item.name}</option>
-        `;
-        }
 
-        // Construir o HTML do formulário
-        nextFormBody += `
-           ${categories_select_values}
-            <div class="form-group boxed">
-                <div class="input-wrapper">
-                    <label class="label" for="select-sub-category">${locale.menu_item_sub_category}</label>
-                    <select class="form-control custom-select" id="select-sub-category" name="sub-category">
-                        <option value="" selected disabled>${locale.select_2_placeholder}</option>
-                        ${subcategory_select_values}
-                    </select>
+        let subcategory_select_values = "";
+        if(data.category_id) {
+            for (let item of subCategorias[data.category_id]) {
+                subcategory_select_values += `
+                <option value="${item.id}" ${data.sub_category_id && data.sub_category_id === item.id ? "selected" : ""}>${item.name}</option>
+            `;
+                }
+
+                // Construir o HTML do formulário
+                nextFormBody += `
+                <div class="form-group boxed">
+                    <div class="input-wrapper">
+                        <label class="label" for="select-sub-category">${locale.menu_item_sub_category}</label>
+                        <select class="form-control custom-select" id="select-sub-category" name="sub-category">
+                            <option value="" selected disabled>${locale.select_2_placeholder}</option>
+                            ${subcategory_select_values}
+                        </select>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
 
         // Atualizar o conteúdo do formulário e inicializar o select2
         nextForm.html(`
+            ${categories_select_values}
             ${nextFormBody}
         `);
 
