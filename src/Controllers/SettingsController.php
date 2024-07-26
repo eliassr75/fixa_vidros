@@ -19,6 +19,8 @@ use Statickidz\GoogleTranslate;
 class SettingsController extends BaseController
 {
 
+    public $only_return = false;
+
     public function addImage()
     {
         $functionController = new FunctionController();
@@ -415,10 +417,14 @@ class SettingsController extends BaseController
         $functionController->is_dashboard(false);
         $functionController->is_('settings_page', true);
 
+        $type = GlassType::all();
+
+        if($this->only_return){
+            return $type;
+        }
+
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_type'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_type'));
-
-        $type = GlassType::all();
 
         $this->render(
             "glass_type", [
@@ -435,11 +441,15 @@ class SettingsController extends BaseController
         $functionController->is_dashboard(false);
         $functionController->is_('settings_page', true);
 
-        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_thickness'));
-        define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_thickness'));
-
         $thickness = GlassThickness::where('glass_type_id', null)->
             where('products_id', null)->orderBy('id', 'desc')->get();
+
+        if($this->only_return){
+            return $thickness;
+        }
+
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_thickness'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_thickness'));
 
         $this->render(
             "glass_thickness", [
@@ -456,10 +466,14 @@ class SettingsController extends BaseController
         $functionController->is_dashboard(false);
         $functionController->is_('settings_page', true);
 
+        $colors = GlassColors::all();
+
+        if($this->only_return){
+            return $colors;
+        }
+
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_colors'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_colors'));
-
-        $colors = GlassColors::all();
 
         $this->render(
             "glass_colors", [
@@ -476,10 +490,14 @@ class SettingsController extends BaseController
         $functionController->is_dashboard(false);
         $functionController->is_('settings_page', true);
 
+        $finish = GlassFinish::all();
+
+        if($this->only_return){
+            return $finish;
+        }
+
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_finish'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_finish'));
-
-        $finish = GlassFinish::all();
 
         $this->render(
             "glass_finish", [
@@ -496,10 +514,14 @@ class SettingsController extends BaseController
         $functionController->is_dashboard(false);
         $functionController->is_('settings_page', true);
 
+        $clearances = GlassClearances::all();
+
+        if($this->only_return){
+            return $clearances;
+        }
+
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_glass_clearances'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_glass_clearances'));
-
-        $clearances = GlassClearances::all();
 
         $this->render(
             "glass_clearances", [

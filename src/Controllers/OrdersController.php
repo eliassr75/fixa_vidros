@@ -6,9 +6,8 @@ use App\Models\Category;
 use App\Models\Client;
 use App\Models\GlassThickness;
 use App\Models\GlassType;
-use App\Models\Permissions;
+use App\Models\Orders;
 use App\Models\Product;
-use App\Models\SubCategory;
 use App\Models\User;
 use Doctrine\Inflector\Rules\Transformation;
 use Exception;
@@ -19,98 +18,114 @@ class OrdersController extends BaseController
     {
         $functionController = new FunctionController();
         $functionController->is_dashboard(false);
-        $functionController->is_('products_page', true);
+        $functionController->is_('orders_page', true);
 
-        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_products'));
-        define('SUBTITLE_PAGE', $functionController->locale('menu_item_products'));
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_orders'));
+
+        $orders = Orders::orderBy('orders.id', 'desc')
+        ->select(
+            'orders.*',
+            'client.name as client_name',
+            'users.name as user_name'
+        )
+        ->join('client', 'client.id', '=', 'orders.client_id')
+        ->join('users', 'users.id', '=', 'orders.user_id')
+        ->get();
+        $orders_array = [];
+        foreach ($orders as $order) {
+            $order->str_created = date('d/m/Y H:i', strtotime($order->created_at));
+            $order->total_items = $order->loadCount('order_items');
+            $orders_array[] = $order;
+        }
+
+        $this->render('orders', [
+            'orders' => $orders_array,
+            'button' => 'add',
+            'url' => '/order/new/'
+        ]);
+    }
+
+    public function getOrder($orderId=false)
+    {
+        $functionController = new FunctionController();
+        $functionController->is_dashboard(false);
+        $functionController->is_('orders_page', true);
+
+
+        $clients = Client::orderBy('id', 'desc')->get();
+        $clients_array = [];
+        foreach ($clients as $client) {
+            $client->str_created = date('d/m/Y H:i', strtotime($client->created_at));
+            $clients_array[] = $client;
+        }
+
+        $settingsController = new SettingsController();
+        $settingsController->only_return = true;
+
+        $categories = Category::where('active', true)->get();
+
+        $subCategorias = [];
+        foreach ($categories as $category) {
+            $subCategorias[$category->id] = $category->sub_categories()->where('active', true)->get();
+        }
 
         $products = Product::orderBy('products.id', 'desc')
-        ->select(
-            'products.*',
-            'category.name as category_name',
-            'category.id as category_id',
-            'category.active as category_active',
-            'glass_type.name as glass_type_name',
-            'glass_type.id as glass_type_id',
-            'glass_type.active as glass_type_active',
-            'sub_category.name as sub_category_name',
-            'sub_category.id as sub_category_id',
-            'sub_category.active as sub_category_active',
-        )
-        ->join('category', 'category.id', '=', 'products.category_id')
-        ->join('sub_category', 'sub_category.id', '=', 'products.sub_category_id')
-        ->join('glass_type', 'glass_type.id', '=', 'products.glass_type_id')
-        ->get();
+            ->select(
+                'products.*',
+                'category.name as category_name',
+                'category.id as category_id',
+                'category.active as category_active',
+                'glass_type.name as glass_type_name',
+                'glass_type.id as glass_type_id',
+                'glass_type.active as glass_type_active',
+                'sub_category.name as sub_category_name',
+                'sub_category.id as sub_category_id',
+                'sub_category.active as sub_category_active',
+                'sub_category.image as image'
+            )
+            ->join('category', 'category.id', '=', 'products.category_id')
+            ->join('sub_category', 'sub_category.id', '=', 'products.sub_category_id')
+            ->join('glass_type', 'glass_type.id', '=', 'products.glass_type_id')
+            ->get();
         $products_array = [];
         foreach ($products as $product) {
             $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
             $products_array[] = $product;
         }
 
-        $this->render('products', [
-            'products' => $products_array,
-            'button' => 'add',
-            'url' => '/product/new/'
-        ]);
-    }
+        if($orderId):
 
-    public function getOrder($productId=false)
-    {
-        $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
-        $functionController->is_('products_page', true);
-
-        $defaultThickness = GlassThickness::where('glass_type_id', null)
-            ->where('active', true)
-            ->where('products_id', null)->orderBy('id', 'desc')->get();
-        $types = GlassType::where('active', true)->get();
-        $categories = Category::where('active', true)->get();
-        $category = false;
-
-        if($productId):
-
-            $data = $functionController->postStatement($_POST);
-            if(!empty($data)):
-
-                $product = Product::find($productId);
-
-            endif;
-
-            $product = Product::where('products.id', $productId)->
-            select(
-                    'products.*',
-                    'category.name as category_name',
-                    'category.id as category_id',
-                    'category.active as category_active',
-                    'glass_type.name as glass_type_name',
-                    'glass_type.id as glass_type_id',
-                    'glass_type.active as glass_type_active',
-                    'sub_category.name as sub_category_name',
-                    'sub_category.id as sub_category_id',
-                    'sub_category.active as sub_category_active',
-                    'sub_category.image as image'
+            $order = Orders::where('orders.id', $orderId)
+                ->select(
+                    'orders.*',
+                    'client.name as client_name',
+                    'users.name as user_name'
                 )
-                ->join('category', 'category.id', '=', 'products.category_id')
-                ->join('sub_category', 'sub_category.id', '=', 'products.sub_category_id')
-                ->join('glass_type', 'glass_type.id', '=', 'products.glass_type_id')
+                ->join('client', 'client.id', '=', 'orders.client_id')
+                ->join('users', 'users.id', '=', 'orders.user_id')
                 ->first();
-            $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
-            $category = Category::find($product->category_id);
+            $order->str_created = date('d/m/Y H:i', strtotime($order->created_at));
 
         else:
-            $product = new Product();
+            $order = new Orders();
         endif;
 
-        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_products'));
-        define('SUBTITLE_PAGE', $functionController->locale('menu_item_products'));
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_orders'));
 
-        $this->render('product', [
-            'product' => $product,
+        $this->render('order', [
+            'order' => $order,
             'button' => "None",
-            'defaultThickness' => $defaultThickness,
-            'types' => $types,
             'categories' => $categories,
-            'category' => $category,
+            'subCategorias' => $subCategorias,
+            'products' => $products_array,
+            'clients_array' => $clients_array,
+            'thickness' => $settingsController->glass_thickness(),
+            'types' => $settingsController->glass_type(),
+            'colors' => $settingsController->glass_colors(),
+            'clearances' => $settingsController->glass_clearances(),
+            'finish' => $settingsController->glass_finish(),
         ]);
     }
 
@@ -121,38 +136,38 @@ class OrdersController extends BaseController
         $status_code = 200;
 
         $data = $functionController->putStatement();
-        $product = Product::find($clientId);
+        $order = Orders::find($clientId);
         $response = $functionController->baseResponse();
 
-        $product->obs = $data->obs;
-        $product->active = (isset($data->active) and $data->active === 'on');
-        $product->save();
+        $order->obs = $data->obs;
+        $order->active = (isset($data->active) and $data->active === 'on');
+        $order->save();
 
         $user = User::find($_SESSION['id']);
-        $user->setLog('Product', "Usuário atualizou o produto {$product->id}");
+        $user->setLog('Orders', "Usuário atualizou o produto {$order->id}");
         $response->message = $functionController->locale('register_success_update');
         $response->status = "success";
-        $response->url = "/products/";
+        $response->url = "/orders/";
         $response->dialog = true;
         $response->spinner = true;
 
         $functionController->sendResponse($response, $status_code);
     }
 
-    public function changeOrder($productId)
+    public function changeOrder($orderId)
     {
         $functionController = new FunctionController();
         $functionController->api = true;
         $response = $functionController->baseResponse();
         $status_code = 200;
 
-        $productModel = new Product();
-        $product_search = $productModel->find($productId);
+        $orderModel = new Orders();
+        $order_search = $orderModel->find($orderId);
 
-        $product_search->active = !$product_search->active;
+        $order_search->status = "Cancelado";
         $user = User::find($_SESSION['id']);
-        $user->setLog('Product', "O status do produto {$product_search->id} foi modificado para " . ($product_search->active ? "Ativo" : "Inativo") . " - {$_SESSION['name']}");
-        $product_search->save();
+        $user->setLog('Orders', "O status do pedido {$order_search->id} foi modificado para " . ($order_search->status) . " - {$_SESSION['name']}");
+        $order_search->save();
 
         $response->message = $functionController->locale('register_success_update');
         $response->status = "success";

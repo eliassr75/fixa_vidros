@@ -36,6 +36,7 @@ class ProductController extends BaseController
             'sub_category.name as sub_category_name',
             'sub_category.id as sub_category_id',
             'sub_category.active as sub_category_active',
+            'sub_category.image as image'
         )
         ->join('category', 'category.id', '=', 'products.category_id')
         ->join('sub_category', 'sub_category.id', '=', 'products.sub_category_id')
@@ -67,13 +68,6 @@ class ProductController extends BaseController
         $category = false;
 
         if($productId):
-
-            $data = $functionController->postStatement($_POST);
-            if(!empty($data)):
-
-                $product = Product::find($productId);
-
-            endif;
 
             $product = Product::where('products.id', $productId)->
             select(

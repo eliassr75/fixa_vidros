@@ -26,6 +26,28 @@ let configDataTable = {
     paging: false
 }
 
+function updateLocalStorage(keyOrObject, newValue) {
+    const storageKey = 'jsonStorage';
+    let storedData = localStorage.getItem(storageKey);
+
+    let jsonData = storedData ? JSON.parse(storedData) : {};
+
+    if (typeof keyOrObject === 'object') {
+        jsonData = { ...jsonData, ...keyOrObject };
+    } else {
+        jsonData[keyOrObject] = newValue;
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(jsonData));
+}
+
+function getLocalStorageData() {
+    const storageKey = 'jsonStorage';
+    let storedData = localStorage.getItem(storageKey);
+    return storedData ? JSON.parse(storedData) : {};
+}
+
+
 function uploadIMage(response = false) {
 
     let el = ``;
@@ -751,14 +773,73 @@ function actionForm(action, data=false){
             `;
 
             break;
+
+        case 'showDescriptionProduct':
+            global_action_sheet_title.html(locale.product_description);
+
+            body = `
+            
+            <div class="form-check-label">
+                <b>${locale.input_description}:</b> 
+                <br> ${data.name ? data.name : ""}
+            </div>
+            <div class="form-check-label my-2">
+                <b>${locale.input_additional_description}:</b> 
+                <br> ${data.custom_name ? data.custom_name : ""}
+            </div>
+            <div class="form-check-label my-2">
+                <b>${locale.menu_item_glass_type}:</b> 
+                <br> ${data.glass_type_name ? data.glass_type_name : ""}
+            </div>
+            <div class="form-check-label my-2">
+                <b>${locale.menu_item_category}:</b> 
+                <br> ${data.category_name ? data.category_name : ""}
+            </div>
+            <div class="form-check-label my-2">
+                <b>${locale.menu_item_sub_category}:</b> 
+                <br> ${data.sub_category_name ? data.sub_category_name : ""}
+            </div>
+            <div class="form-check-label my-2">
+                ${data.str_created ? `${locale.label_created} ${data.str_created}`: locale.label_new_registry}
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12">
+                    <img src="${data.image ? data.image : "/assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid border border-1">
+                </div>            
+            </div>
+            
+            `;
+            break;
     }
 
-    global_action_sheet_content.html(`
+    let formBody = ``;
+    if(!data.is_order){
 
-    <div class="send-image"></div>
+        formBody = `
 
-    <form data-method="${method}" data-action="${route}" data-ajax="default" data-callback="">
-        <input type="hidden" name="generate-link" value="1">
+            <div class="send-image"></div>
+        
+            <form data-method="${method}" data-action="${route}" data-ajax="default" data-callback="">
+                <input type="hidden" name="generate-link" value="1">
+                ${body}
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-lg btn-cancel btn-outline-secondary btn-block" data-bs-dismiss="modal">
+                            ${locale.label_btn_cancel}
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-lg btn-primary btn-block btn-submit">
+                            ${locale.label_btn_save}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        `;
+    }else{
+        formBody = `
+        
         ${body}
         <div class="row mt-2">
             <div class="col-6">
@@ -767,13 +848,16 @@ function actionForm(action, data=false){
                 </button>
             </div>
             <div class="col-6">
-                <button type="submit" class="btn btn-lg btn-primary btn-block btn-submit">
-                    ${locale.label_btn_save}
+                <button type="submit" class="btn btn-lg btn-primary btn-block btn-import">
+                    ${locale.label_btn_import}
                 </button>
             </div>
         </div>
-    </form>
-    `);
+        
+        `;
+    }
+
+    global_action_sheet_content.html(formBody)
 
     $("#suggestPassword").on("change", function(){
 
@@ -785,6 +869,10 @@ function actionForm(action, data=false){
             $('input[type="password"]').prop('required', true)
         }
 
+    })
+
+    $(".btn-import").on('click', function (){
+        importData(data);
     })
 
     function adjustIframeHeight() {
@@ -1221,9 +1309,9 @@ function searchElements(searchTerm, containerClass, itemClass) {
         const items = container.querySelectorAll(`.${itemClass}`);
         items.forEach(item => {
             if (item.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
-                item.classList.remove('hidden');
+                $(item).show();
             } else {
-                item.classList.add('hidden');
+                $(item).hide();
             }
         });
     });
