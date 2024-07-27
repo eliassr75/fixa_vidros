@@ -26,6 +26,13 @@ let configDataTable = {
     paging: false
 }
 
+function scrollToBottom() {
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'auto'
+    });
+}
+
 function updateLocalStorage(keyOrObject, newValue) {
     const storageKey = 'jsonStorage';
     let storedData = localStorage.getItem(storageKey);
@@ -47,6 +54,55 @@ function getLocalStorageData() {
     return storedData ? JSON.parse(storedData) : {};
 }
 
+function updateItemsOrderList(newItem) {
+    const storageKey = 'itemsOrderList';
+    const idKey = 'itemsOrderListIdCounter';
+
+    let storedData = localStorage.getItem(storageKey);
+    let itemsArray = storedData ? JSON.parse(storedData) : [];
+
+    let idCounter = localStorage.getItem(idKey);
+    idCounter = idCounter ? parseInt(idCounter, 10) : 0;
+
+    if (newItem.id) {
+        // Se o item já tiver um ID, atualize o item existente
+        itemsArray = itemsArray.map(item => item[newItem.id] ? { [newItem.id]: newItem } : item);
+    } else {
+        // Caso contrário, atribua um novo ID e adicione o item
+        newItem.id = ++idCounter;
+        itemsArray.push({ [newItem.id]: newItem });
+    }
+
+    localStorage.setItem(idKey, itemsArray.length);
+    localStorage.setItem(storageKey, JSON.stringify(itemsArray));
+}
+
+function getItemsOrderList() {
+    const storageKey = 'itemsOrderList';
+    let storedData = localStorage.getItem(storageKey);
+    return storedData ? JSON.parse(storedData) : [];
+}
+
+function removeItemById(id) {
+    const storageKey = 'itemsOrderList';
+
+    let storedData = localStorage.getItem(storageKey);
+    let itemsArray = storedData ? JSON.parse(storedData) : [];
+
+    // Filtra o array removendo o item com o ID correspondente
+    itemsArray = itemsArray.filter(item => !item[id]);
+
+    localStorage.setItem(storageKey, JSON.stringify(itemsArray));
+    orderController();
+}
+
+function clearOrders(){
+    localStorage.removeItem('itemsOrderList');
+    localStorage.removeItem('jsonStorage');
+    localStorage.removeItem('selected_client_id');
+    localStorage.removeItem('itemsOrderListIdCounter');
+    orderController();
+}
 
 function uploadIMage(response = false) {
 
@@ -777,6 +833,10 @@ function actionForm(action, data=false){
         case 'showDescriptionProduct':
             global_action_sheet_title.html(locale.product_description);
 
+            data.product_id = data.id;
+            data.id = false
+
+
             body = `
             
             <div class="form-check-label">
@@ -1377,7 +1437,6 @@ function get_cnpj(cnpj){
     }
 
 }
-
 
 $(document).ready(() => {
 

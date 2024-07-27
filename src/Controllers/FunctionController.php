@@ -423,6 +423,22 @@ class FunctionController extends BaseController
         $_SESSION[$label] = $is;
     }
 
+    public function exportVarsToJS($data)
+    {
+        $jsContent = ""; // Inicializa a variável para armazenar o conteúdo do JavaScript
+
+        foreach ($data as $key => $value) { // Corrige a sintaxe do foreach
+            // Concatena o conteúdo do JavaScript
+            $jsContent .= "const $key = " . json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . ";\n";
+        }
+
+        // Caminho do arquivo JavaScript
+        $jsFilePath = "../public/assets/js/custom_vars.js";
+
+        // Escrever no arquivo JavaScript
+        file_put_contents($jsFilePath, $jsContent);
+    }
+
     public function locale($key): string
     {
         if(!isset($_SESSION['user_language'])){

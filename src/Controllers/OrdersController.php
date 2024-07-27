@@ -8,6 +8,7 @@ use App\Models\GlassThickness;
 use App\Models\GlassType;
 use App\Models\Orders;
 use App\Models\Product;
+use App\Models\SubCategory;
 use App\Models\User;
 use Doctrine\Inflector\Rules\Transformation;
 use Exception;
@@ -67,7 +68,15 @@ class OrdersController extends BaseController
 
         $subCategorias = [];
         foreach ($categories as $category) {
-            $subCategorias[$category->id] = $category->sub_categories()->where('active', true)->get();
+            $subCategorias[$category->id] = SubCategory::where('sub_category.active', true)
+                ->where('sub_category.category_id', $category->id)
+                ->select(
+                    'sub_category.*',
+                    'glass_type.name as glass_type_name',
+                    'glass_type.id as glass_type_id',
+                )
+                ->join('glass_type', 'glass_type.id', '=', 'sub_category.glass_type_id')
+                ->get();
         }
 
         $products = Product::orderBy('products.id', 'desc')
@@ -114,9 +123,9 @@ class OrdersController extends BaseController
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_orders'));
 
-        $this->render('order', [
+        $data = [
+            'showPrice' => in_array($_SESSION['permission_id'], [1, 2, 3]),
             'order' => $order,
-            'button' => "None",
             'categories' => $categories,
             'subCategorias' => $subCategorias,
             'products' => $products_array,
@@ -126,7 +135,10 @@ class OrdersController extends BaseController
             'colors' => $settingsController->glass_colors(),
             'clearances' => $settingsController->glass_clearances(),
             'finish' => $settingsController->glass_finish(),
-        ]);
+        ];
+
+        $functionController->exportVarsToJS($data);
+        $this->render('order', ['button' => "None"]);
     }
 
     public function updateOrder($clientId)
