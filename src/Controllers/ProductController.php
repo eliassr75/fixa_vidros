@@ -46,6 +46,8 @@ class ProductController extends BaseController
         foreach ($products as $product) {
             $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
             $products_array[] = $product;
+
+
         }
 
         $this->render('products', [
@@ -90,6 +92,24 @@ class ProductController extends BaseController
             $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
             $category = Category::find($product->category_id);
 
+            $thickness = GlassThickness::where('glass_type_id', null)
+                ->where('products_id', null)->orderBy('id', 'desc')->get();
+            $values = [];
+            if (!$product->thickness()->exists()):
+                foreach ($thickness as $thick):
+                    $values[] = [
+                        'name' => $thick->name,
+                        'price' => $thick->price,
+                        'type' => $thick->type,
+                        'category' => $thick->category,
+                        'active' => $thick->active,
+                    ];
+                endforeach;
+                $product->thickness()->createMany($values);
+            endif;
+
+            $thickness = GlassThickness::where('products_id', $product->id)->orderBy('id', 'desc')->get();
+
         else:
             $product = new Product();
         endif;
@@ -99,6 +119,7 @@ class ProductController extends BaseController
 
         $this->render('product', [
             'product' => $product,
+            'thickness' => $thickness,
             'button' => "None",
             'defaultThickness' => $defaultThickness,
             'types' => $types,
@@ -119,6 +140,13 @@ class ProductController extends BaseController
 
         $product->obs = $data->obs;
         $product->active = (isset($data->active) and $data->active === 'on');
+        foreach ($product->thickness()->get() as $thick) {
+            $key = "input-{$thick->name}{$thick->type}";
+            if (isset($data->$key)) {
+                $thick->update(['price' => $data->$key]);
+            }
+        }
+
         $product->save();
 
         $user = User::find($_SESSION['id']);

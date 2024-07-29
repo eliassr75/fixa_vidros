@@ -120,7 +120,12 @@ class MissingDataController extends BaseController
 
             if(!$error):
                 $user_search->startSession();
-                $response->url = "/dashboard/";
+                if(isset($_SESSION["redirect"])){
+                    $response->url = $_SESSION["redirect"];
+                    unset($_SESSION["redirect"]);
+                }else{
+                    $response->url = '/dashboard/';
+                }
             endif;
 
         else:

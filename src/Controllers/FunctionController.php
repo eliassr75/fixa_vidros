@@ -29,6 +29,27 @@ class FunctionController extends BaseController
         return $newArray;
     }
 
+    public function customPutStatement()
+    {
+        $input = file_get_contents('php://input');
+        // Deserializar os dados
+        parse_str($input, $data);
+
+        function arrayToObject($array) {
+            if (is_array($array)) {
+                $object = new stdClass();
+                foreach ($array as $key => $value) {
+                    $object->$key = arrayToObject($value);
+                }
+                return $object;
+            } else {
+                return $array;
+            }
+        }
+
+        return arrayToObject($data);
+    }
+
     public function postStatement($data)
     {
         $data = $this->replaceHyphensInKeys($data);

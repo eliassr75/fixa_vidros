@@ -37,18 +37,25 @@ $functionController = new FunctionController();
                 <?php if (count($orders) > 0): foreach ($orders as $order): ?>
                 <li id="li-model">
                     <a href="/order/<?=$order->id?>/" class="item">
-                        <div class="in" style="max-width: 55vw">
+                        <div class="in">
                             <div class="w-100 text-truncate">
-                                <span class="name"><?=$order->name?></span>
+                                <span class="name">
+                                    <?=$order->id?> - <?=$order->client_name?>
+                                    (<?=$order->str_created?>)
+                                </span>
                                 <footer class="str_created">
-                                    <?=$order->str_created?>
+                                    <span class="badge badge-primary">
+                                        <?=$order->type_status_name?>
+                                    </span>
+                                    <span class="badge badge-primary">
+                                        <?=$order->type_status_finance_name?>
+                                    </span>
                                 </footer>
                             </div>
                         </div>
                     </a>
                     <div class="form-check form-switch me-2">
-                        <input class="form-check-input" type="checkbox" value="<?=$order->id?>" <?=$order->active ? "checked" : ""?> id="SwitchCheckClient<?=$order->id?>" onchange="change('/order/change/', <?=$order->id?>, this)">
-                        <label class="form-check-label" for="SwitchCheckClient<?=$order->id?>"></label>
+
                     </div>
                 </li>
                 <?php endforeach; else: ?>

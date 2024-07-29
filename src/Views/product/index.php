@@ -14,7 +14,7 @@ $functionController = new FunctionController();
         <div class="card-body" id="client">
 
             <form data-method="<?=isset($product->id) ? "PUT" : "POST"?>"
-                  data-action="/settings/product/<?=isset($product->id) ? $product->id : "new"?>"
+                  data-action="/product/<?=isset($product->id) ? $product->id : "new"?>"
                   data-ajax="default" data-callback="">
                 <p class="form-check-label">
                     <?php if($product->created_at):?>
@@ -30,6 +30,19 @@ $functionController = new FunctionController();
                     <input type="checkbox" class="form-check-input" id="active" name="active" <?=$product->active ? "checked" : ""?>>
                     <label class="form-check-label" for="active"><?=$functionController->locale('input_active')?></label>
                 </div>
+
+                <?php foreach ($thickness as $thick): ?>
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="input-<?=$thick->name?><?=$thick->type?>"><?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?></label>
+                        <input type="tel" class="form-control" id="input-<?=$thick->name?><?=$thick->type?>" name="input-<?=$thick->name?><?=$thick->type?>"
+                               value="<?=$thick->price*100?>" placeholder="<?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?>">
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                <?php endforeach; ?>
 
                 <div class="form-group basic">
                     <div class="input-wrapper">
@@ -112,7 +125,11 @@ $functionController = new FunctionController();
 
                 <div class="card my-2">
                     <div class="card-body" id="card-body-image">
-                        <img src="<?=$product->image ? $product->image : "/assets/img/sample/photo/1.jpg"?>" alt="image" class="imaged img-fluid border border-1">
+                        <div class="row">
+                            <div class=" col-lg-3 col-md-5 col-12">
+                                <img src="<?=$product->image ? $product->image : "/assets/img/sample/photo/1.jpg"?>" alt="image" class="imaged img-fluid border border-1">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -122,4 +139,11 @@ $functionController = new FunctionController();
 </div>
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
+
+<script>
+    $(document).ready(() => {
+        $(`input[type="tel"]`).mask('000,000.00', { reverse: true })
+    })
+</script>
+
 <?php require_once __DIR__ . '/../htmlEnd.php';?>

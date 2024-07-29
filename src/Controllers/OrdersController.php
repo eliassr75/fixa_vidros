@@ -6,7 +6,10 @@ use App\Models\Category;
 use App\Models\Client;
 use App\Models\GlassThickness;
 use App\Models\GlassType;
+use App\Models\OrderFinance;
 use App\Models\Orders;
+use App\Models\OrdersItems;
+use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\SubCategory;
 use App\Models\User;
@@ -28,15 +31,21 @@ class OrdersController extends BaseController
         ->select(
             'orders.*',
             'client.name as client_name',
-            'users.name as user_name'
+            'users.name as user_name',
+            'type_status_orders.name as type_status_name',
+            'type_status_orders.id as type_status_id',
+            'type_status_finance.id as type_status_finance_id',
+            'type_status_finance.name as type_status_finance_name',
         )
         ->join('client', 'client.id', '=', 'orders.client_id')
         ->join('users', 'users.id', '=', 'orders.user_id')
+        ->join('type_status_orders', 'type_status_orders.id', '=', 'orders.status_id')
+        ->join('type_status_finance', 'type_status_finance.id', '=', 'orders.finance_id')
         ->get();
         $orders_array = [];
         foreach ($orders as $order) {
             $order->str_created = date('d/m/Y H:i', strtotime($order->created_at));
-            $order->total_items = $order->loadCount('order_items');
+            $order->total_items = count($order->items()->get());
             $orders_array[] = $order;
         }
 
@@ -47,12 +56,20 @@ class OrdersController extends BaseController
         ]);
     }
 
-    public function getOrder($orderId=false)
+    public function prepareOrderData($orderId)
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
-        $functionController->is_('orders_page', true);
-
+        $orderStatus = [];
+        $orderFinance = [];
+        $existsOrder = [];
+        if($orderId){
+            $orderStatus = OrderStatus::all();
+            $orderFinance = OrderFinance::all();
+            $order = Orders::find($orderId);
+            $orderItems = $order->items()->get();
+            $existsOrder['order'] = $order;
+            $existsOrder['items'] = $orderItems;
+        }
 
         $clients = Client::orderBy('id', 'desc')->get();
         $clients_array = [];
@@ -65,7 +82,6 @@ class OrdersController extends BaseController
         $settingsController->only_return = true;
 
         $categories = Category::where('active', true)->get();
-
         $subCategorias = [];
         foreach ($categories as $category) {
             $subCategorias[$category->id] = SubCategory::where('sub_category.active', true)
@@ -100,6 +116,7 @@ class OrdersController extends BaseController
         $products_array = [];
         foreach ($products as $product) {
             $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
+            $product->thickness = GlassThickness::where('products_id', $product->id)->get();
             $products_array[] = $product;
         }
 
@@ -120,12 +137,14 @@ class OrdersController extends BaseController
             $order = new Orders();
         endif;
 
-        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
-        define('SUBTITLE_PAGE', $functionController->locale('menu_item_orders'));
-
         $data = [
+            'existsOrder' => $existsOrder,
+            'readOnly' => !in_array($_SESSION['permission_id'], [1, 2, 3]),
             'showPrice' => in_array($_SESSION['permission_id'], [1, 2, 3]),
+            'min_date' => date('Y-m-d'),
             'order' => $order,
+            'orderStatus' => $orderStatus,
+            'orderFinance' => $orderFinance,
             'categories' => $categories,
             'subCategorias' => $subCategorias,
             'products' => $products_array,
@@ -138,32 +157,150 @@ class OrdersController extends BaseController
         ];
 
         $functionController->exportVarsToJS($data);
+    }
+
+    public function getOrder($orderId=false)
+    {
+        $functionController = new FunctionController();
+        $functionController->is_dashboard(false);
+        $functionController->is_('orders_page', true);
+
+        $this->prepareOrderData($orderId);
+
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_orders'));
         $this->render('order', ['button' => "None"]);
     }
 
-    public function updateOrder($clientId)
+    public function newOrder()
     {
         $functionController = new FunctionController();
         $functionController->api = true;
         $status_code = 200;
 
-        $data = $functionController->putStatement();
-        $order = Orders::find($clientId);
         $response = $functionController->baseResponse();
+        $data = $functionController->postStatement($_POST);
 
-        $order->obs = $data->obs;
-        $order->active = (isset($data->active) and $data->active === 'on');
+        $order = new Orders();
+        $order->client_id = $data->client_id;
+        $order->user_id = $_SESSION['id'];
+        $order->total_price = $data->total_price;
+        $order->obs_client = $data->obs_client;
+        $order->date_delivery = $data->date_delivery;
         $order->save();
 
-        $user = User::find($_SESSION['id']);
-        $user->setLog('Orders', "Usuário atualizou o produto {$order->id}");
-        $response->message = $functionController->locale('register_success_update');
-        $response->status = "success";
-        $response->url = "/orders/";
-        $response->dialog = true;
-        $response->spinner = true;
+        $items = [];
+        foreach ($data->items as $key => $value) {
+            foreach ($value as $item) {
+                $base = [];
+                $base['order_id'] = $order->id;
+                $base['category_id'] = $item->category_id;
+                $base['sub_category_id'] = $item->sub_category_id;
+                $base['product_id'] = $item->product_id;
+                $base['glass_thickness_id'] = $item->glass_thickness_id;
+                $base['glass_color_id'] = $item->glass_color_id;
+                $base['glass_finish_id'] = $item->glass_finish_id;
+                $base['glass_clearances_id'] = $item->glass_clearances_id;
+                $base['quantity'] = $item->quantity;
+                $base['width'] = $item->width;
+                $base['height'] = $item->height;
+                $base['obs_factory'] = $item->obs_factory;
+                $base['obs_client'] = $item->obs_client;
+                $base['obs_tempera'] = $item->obs_tempera;
+                $base['price'] = $item->price;
+                $items[] = $base;
+            }
+        }
 
+        $order = Orders::find($order->id);
+        try{
+            $order->items()->createMany($items);
+            $response->message = $functionController->locale('register_success_created');
+        }catch (Exception $e){
+            $response->message = $e->getMessage();
+        }
+
+        $response->status = "success";
+        $response->dialog = true;
+        $response->url = "/order/{$order->id}";
+        $response->spinner = true;
         $functionController->sendResponse($response, $status_code);
+    }
+
+    public function updateOrder($orderId)
+    {
+        $functionController = new FunctionController();
+        $functionController->api = true;
+        $status_code = 200;
+
+        try{
+
+            $data = $functionController->customPutStatement();
+            $response = $functionController->baseResponse();
+
+            $order = Orders::find($orderId);
+            $order->status_id = $data->status_id;
+            $order->finance_id = $data->finance_id;
+            $order->total_price = $data->total_price;
+            $order->client_id = $data->client_id;
+            $order->obs_client = $data->obs_client;
+            $order->date_delivery = $data->date_delivery;
+
+
+            if (!empty($data->ids_to_remove)) {
+                $ids = explode(',', $data->ids_to_remove);
+                $order->items()->whereIn('id', $ids)->delete();
+            }
+
+            $order->save();
+
+            $needsCreate = [];
+            foreach ($data->items as $key => $value) {
+                foreach ($value as $item) {
+                    $base = [];
+                    $base['category_id'] = $item->category_id;
+                    $base['sub_category_id'] = $item->sub_category_id;
+                    $base['product_id'] = $item->product_id;
+                    $base['glass_thickness_id'] = $item->glass_thickness_id;
+                    $base['glass_color_id'] = $item->glass_color_id;
+                    $base['glass_finish_id'] = $item->glass_finish_id;
+                    $base['glass_clearances_id'] = $item->glass_clearances_id;
+                    $base['quantity'] = $item->quantity;
+                    $base['width'] = $item->width;
+                    $base['height'] = $item->height;
+                    $base['obs_factory'] = $item->obs_factory;
+                    $base['obs_client'] = $item->obs_client;
+                    $base['obs_tempera'] = $item->obs_tempera;
+                    $base['price'] = $item->price;
+                    if (!$order->items()->where('id', $item->id)->exists()) {
+                        $needsCreate[] = $base;
+                    }else{
+                        OrdersItems::where('id', $item->id)->update($base);
+                    }
+
+                }
+            }
+
+            $response->message = $functionController->locale('register_success_update');
+            if ($needsCreate) {
+                $order->items()->createMany($needsCreate);
+            }
+
+    //        $user = User::find($_SESSION['id']);
+    //        $user->setLog('Orders', "Usuário atualizou o pedido {$order->id}");
+
+            $response->status = "success";
+            $response->reload = true;
+            $response->dialog = true;
+            $response->spinner = true;
+
+            $functionController->sendResponse($response, $status_code);
+
+        }catch (Exception $e){
+            $response->message = $e->getMessage();
+            $functionController->sendResponse($response, $status_code);
+            return;
+        }
     }
 
     public function changeOrder($orderId)

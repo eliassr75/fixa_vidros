@@ -115,7 +115,13 @@ class LoginController extends BaseController
                     $user_search->startSession();
                     $missingDataController = new MissingDataController();
                     if($missingDataController->verify($user_search->id)){
-                        $message['url'] = '/dashboard/';
+
+                        if(isset($_SESSION["redirect"])){
+                            $message['url'] = $_SESSION["redirect"];
+                            unset($_SESSION["redirect"]);
+                        }else{
+                            $message['url'] = '/dashboard/';
+                        }
                     }else{
                         $message['url'] = "/missing-data/{$user_search->id}/";
                     }

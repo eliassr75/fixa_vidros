@@ -6,30 +6,41 @@ use Exception;
 use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
 use App\Controllers\CookieController;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Ramsey\Uuid\Uuid;
 
-class GlassThickness extends Model {
-    protected $table = 'glass_thickness';
+class OrderStatus extends Model {
+    protected $table = 'type_status_orders';
     protected $columns = [
         'id',
         'name',
-        'type',
-        'category',
-        'price',
         'active',
-        'products_id',
-        'glass_type_id',
         'created_at',
         'updated_at'
     ];
 
     protected $guarded = ['id'];
 
-    public function products(): BelongsTo
+    /**
+     * @throws Exception
+     */
+    public function validate(): bool
     {
-        return $this->belongsTo(Product::class, 'products_id', 'id');
+        return true;
     }
+
+}
+
+class OrderFinance extends Model {
+    protected $table = 'type_status_finance';
+    protected $columns = [
+        'id',
+        'name',
+        'active',
+        'created_at',
+        'updated_at'
+    ];
+
+    protected $guarded = ['id'];
 
     /**
      * @throws Exception

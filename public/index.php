@@ -7,6 +7,11 @@ require '../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === "GET"){
     header("Content-type: text/html; charset=utf-8");
+
+    if(isset($_GET['redirect']) && !empty($_GET['url'])){
+        $_SESSION["redirect"] = $_GET['url'];
+    }
+
 }else{
     header("Content-type: application/json; charset=utf-8");
 }
@@ -85,6 +90,7 @@ $router->addRoute('GET', '/order/{orderId}/', true, "system", [1, 2, 3, 4],Order
 $router->addRoute('PUT', '/order/{orderId}/', true, "system", [1, 2, 3],OrdersController::class, 'updateOrder');
 
 $router->addRoute('POST', '/uploads/addImage/', true, "system", [1, 2, 3], UploadsController::class, 'addImage');
+$router->addRoute('GET', '/print/{routeName}/{Id}/', true, "system", [1, 2, 3, 4], SettingsController::class, 'print');
 $router->addRoute('GET', '/print/{routeName}/{Id}/{printId}/', true, "system", [1, 2, 3, 4], SettingsController::class, 'print');
 
 $middleware->autoRedirect();

@@ -66,20 +66,27 @@ class SettingsController extends BaseController
         $functionController->sendResponse($response, $status_code);
     }
 
-    public function print($routeName, $Id, $printId)
+    public function print($routeName, $Id, $printId=false)
     {
         $functionController = new FunctionController();
 
+        $urlQrCode = "";
         switch ($routeName) {
+            case 'order':
+                $urlQrCode = "/order/{$Id}/";
+                break;
+            case 'products':
+                $urlQrCode = "/order/{$Id}/";
             default:
                 break;
         }
 
         $print = PrintTemplates::find($printId);
-
         $this->render(
             "print_preview", [
-                "print" => $print
+                "print" => $print,
+                "urlQrCode" => $urlQrCode,
+                "routeName" => $routeName,
             ]
         );
 
@@ -93,6 +100,8 @@ class SettingsController extends BaseController
         $status_code = 200;
         $response = $functionController->baseResponse();
         $data = $functionController->putStatement();
+        $error = false;
+
 
         switch ($routeName) {
             case 'subcategory':
@@ -104,6 +113,13 @@ class SettingsController extends BaseController
                 $subCategory->image = $data->image;
                 $subCategory->category_id = $data->category_id;
                 $subCategory->glass_type_id = $data->type;
+                $subCategory->active = (isset($data->active) and $data->active === 'on');
+
+                if($subCategory->products()->exists()){
+                    $subCategory->products()->update([
+                        "active" => $subCategory->active,
+                    ]);
+                }
 
                 $subCategory->save();
 
@@ -113,6 +129,18 @@ class SettingsController extends BaseController
 
                 $category->name = $data->name;
                 $category->active = (isset($data->active) and $data->active === 'on');
+
+                if($category->products()->exists()){
+                    $category->products()->update([
+                        "active" => $category->active,
+                    ]);
+                }
+
+                if($category->sub_categories()->exists()){
+                    $category->sub_categories()->update([
+                        "active" => $category->active,
+                    ]);
+                }
 
                 $category->save();
                 break;
@@ -126,14 +154,69 @@ class SettingsController extends BaseController
                 break;
             case 'glass_thickness':
                 $thickness = GlassThickness::find($Id);
+                $old_thickness = GlassThickness::find($Id);
 
+                $needsUpdate = false;
+                if($thickness->name != $data->name){
+                    $needsUpdate = true;
+                }
                 $thickness->name = $data->name;
+
+                if($thickness->price != $data->price){
+                    $needsUpdate = true;
+                }
                 $thickness->price = $data->price;
+
+                if($thickness->active != (isset($data->active) and $data->active === 'on')){
+                    $needsUpdate = true;
+                }
                 $thickness->active = (isset($data->active) and $data->active === 'on');
 
                 $array = explode("/", $data->type);
+                if($thickness->type != end($array)){
+                    $needsUpdate = true;
+                }
                 $thickness->type = end($array);
+
+                if($thickness->category != $array[0]){
+                    $needsUpdate = true;
+                }
                 $thickness->category = $array[0];
+
+
+                try {
+                    if ($needsUpdate) {
+                        foreach (Product::all() as $product) {
+                            $thick = $product->thickness()
+                                ->where('name', $old_thickness->name)
+                                ->where('price', $old_thickness->price)
+                                ->where('type', $old_thickness->type)
+                                ->where('category', $old_thickness->category)
+                                ->where('active', $old_thickness->active)
+                                ->first();
+
+                            if (!$thick) {
+                                $product->thickness()->create([
+                                    'name' => $thickness->name,
+                                    'price' => $thickness->price,
+                                    'type' => $thickness->type,
+                                    'category' => $thickness->category,
+                                    'active' => $thickness->active,
+                                ]);
+                            } else {
+                                $thick->update([
+                                    'name' => $thickness->name,
+                                    'price' => $thickness->price,
+                                    'type' => $thickness->type,
+                                    'category' => $thickness->category,
+                                    'active' => $thickness->active,
+                                ]);
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                    $error = $e->getMessage();
+                }
 
                 $thickness->save();
                 break;
@@ -171,7 +254,6 @@ class SettingsController extends BaseController
                 $template->width = $data->width;
                 $template->height = $data->height;
                 $template->spacing = $data->spacing;
-                $template->model = $data->model;
                 $template->active = (isset($data->active) and $data->active === 'on');
 
                 $template->save();
@@ -182,6 +264,7 @@ class SettingsController extends BaseController
         $response->status = "success";
         $response->reload = true;
         $response->spinner = true;
+        $response->dialog = true;
 
         $functionController->sendResponse($response, $status_code);
     }
@@ -241,6 +324,11 @@ class SettingsController extends BaseController
             case 'glass_thickness':
                 $thickness = new GlassThickness();
 
+                $needsCreate = false;
+                if($thickness->name != $data->name) {
+                    $needsCreate = true;
+                }
+
                 $thickness->name = $data->name;
                 $thickness->price = $data->price;
                 $thickness->active = (isset($data->active) and $data->active === 'on');
@@ -250,6 +338,19 @@ class SettingsController extends BaseController
                 $thickness->category = $array[0];
 
                 $thickness->save();
+
+                if($needsCreate){
+                    foreach (Product::all() as $product):
+                        $product->thickness()->create([
+                            'name' => $thickness->name,
+                            'price' => $thickness->price,
+                            'type' => $thickness->type,
+                            'category' => $thickness->category,
+                            'active' => $thickness->active,
+                        ]);
+                    endforeach;
+                }
+
                 $response->dialog = false;
                 break;
             case 'glass_colors':
@@ -290,7 +391,6 @@ class SettingsController extends BaseController
                 $template->width = $data->width;
                 $template->height = $data->height;
                 $template->spacing = $data->spacing;
-                $template->model = $data->model;
                 $template->active = (isset($data->active) and $data->active === 'on');
 
                 $template->save();
@@ -359,17 +459,20 @@ class SettingsController extends BaseController
                             ]
                         );
 
-                        /*foreach ($thickness as $thick):
-                            GlassThickness::updateOrCreate(
-                                [
-                                    'products_id' => $product->id,
+                        $values = [];
+                        if (!$product->thickness()->exists()):
+                            foreach ($thickness as $thick):
+                                $values[] = [
                                     'name' => $thick->name,
-                                    'price' => $thick->price
-                                ],
-                                ['name' => $thick->name]
-                            );
-                        endforeach;*/
-
+                                    'price' => $thick->price,
+                                    'type' => $thick->type,
+                                    'category' => $thick->category,
+                                    'active' => $thick->active,
+                                ];
+                            endforeach;
+                            $product->thickness()->createMany($values);
+                        endif;
+                        $values = [];
                     endif;
 
                     $values[] =  $subCategory;

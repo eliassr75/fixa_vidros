@@ -56,24 +56,34 @@ function getLocalStorageData() {
 
 function updateItemsOrderList(newItem) {
     const storageKey = 'itemsOrderList';
-    const idKey = 'itemsOrderListIdCounter';
 
     let storedData = localStorage.getItem(storageKey);
     let itemsArray = storedData ? JSON.parse(storedData) : [];
 
-    let idCounter = localStorage.getItem(idKey);
-    idCounter = idCounter ? parseInt(idCounter, 10) : 0;
+    // Gerar um ID aleatório entre 10000 e 99999
+    function generateRandomId() {
+        return Math.floor(Math.random() * 90000) + 10000;
+    }
 
     if (newItem.id) {
         // Se o item já tiver um ID, atualize o item existente
-        itemsArray = itemsArray.map(item => item[newItem.id] ? { [newItem.id]: newItem } : item);
+        let itemIndex = itemsArray.findIndex(item => item[newItem.id]);
+        if (itemIndex !== -1) {
+            itemsArray[itemIndex][newItem.id] = newItem;
+        } else {
+            itemsArray.push({ [newItem.id]: newItem });
+        }
     } else {
-        // Caso contrário, atribua um novo ID e adicione o item
-        newItem.id = ++idCounter;
+        // Caso contrário, atribua um novo ID aleatório e adicione o item
+        let newId;
+        do {
+            newId = generateRandomId();
+        } while (itemsArray.some(item => item[newId])); // Garante que o ID seja único
+
+        newItem.id = newId;
         itemsArray.push({ [newItem.id]: newItem });
     }
 
-    localStorage.setItem(idKey, itemsArray.length);
     localStorage.setItem(storageKey, JSON.stringify(itemsArray));
 }
 
@@ -84,7 +94,18 @@ function getItemsOrderList() {
 }
 
 function removeItemById(id) {
+
     const storageKey = 'itemsOrderList';
+    const removeKey = 'itemsToRemove';
+
+    let idsToRemove = localStorage.getItem(removeKey);
+    idsToRemove = idsToRemove ? JSON.parse(idsToRemove) : [];
+
+    // Adiciona o ID à lista, se ainda não estiver presente
+    if (!idsToRemove.includes(id)) {
+        idsToRemove.push(id);
+        localStorage.setItem(removeKey, JSON.stringify(idsToRemove));
+    }
 
     let storedData = localStorage.getItem(storageKey);
     let itemsArray = storedData ? JSON.parse(storedData) : [];
@@ -93,14 +114,6 @@ function removeItemById(id) {
     itemsArray = itemsArray.filter(item => !item[id]);
 
     localStorage.setItem(storageKey, JSON.stringify(itemsArray));
-    orderController();
-}
-
-function clearOrders(){
-    localStorage.removeItem('itemsOrderList');
-    localStorage.removeItem('jsonStorage');
-    localStorage.removeItem('selected_client_id');
-    localStorage.removeItem('itemsOrderListIdCounter');
     orderController();
 }
 
@@ -637,7 +650,7 @@ function actionForm(action, data=false){
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <label class="label" for="price">${locale.input_price}</label>
-                        <input type="text" class="form-control" id="price" name="price" value="${data.price ? data.price : ""}" placeholder="${locale.input_price}" required>
+                        <input type="tel" class="form-control" id="price" name="price" value="${data.price ? data.price*100 : ""}" placeholder="${locale.input_price}" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -679,7 +692,7 @@ function actionForm(action, data=false){
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <label class="label" for="percent">${locale.input_percent}</label>
-                        <input type="number" class="form-control" id="percent" name="percent" value="${data.percent ? data.percent : 0}" placeholder="${locale.input_percent}" required>
+                        <input type="tel" class="form-control" id="percent" name="percent" value="${data.percent ? data.percent*100 : 0}" placeholder="${locale.input_percent}" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -724,7 +737,7 @@ function actionForm(action, data=false){
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <label class="label" for="width">${locale.input_width} (cm)</label>
-                        <input type="number" class="form-control" id="width" name="width" value="${data.width ? data.width : 0}" placeholder="${locale.input_width}" required>
+                        <input type="tel" class="form-control" id="width" name="width" value="${data.width ? data.width*100 : 0}" placeholder="${locale.input_width}" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -733,7 +746,7 @@ function actionForm(action, data=false){
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <label class="label" for="width">${locale.input_height} (cm)</label>
-                        <input type="number" class="form-control" id="height" name="height" value="${data.height ? data.height : 0}" placeholder="${locale.input_height}" required>
+                        <input type="tel" class="form-control" id="height" name="height" value="${data.height ? data.height*100 : 0}" placeholder="${locale.input_height}" required>
                         <i class="clear-input">
                             <ion-icon name="close-circle"></ion-icon>
                         </i>
@@ -944,7 +957,7 @@ function actionForm(action, data=false){
         document.getElementById('printIframe').onload = adjustIframeHeight;
     }
 
-    $(`input[type="tel"]`).mask('000.00', { reverse: true })
+    $(`input[type="tel"]`).mask('000,000.00', { reverse: true })
 
     $("form").on('submit', function (e){
 
@@ -1083,6 +1096,58 @@ function dialog(response, time) {
     }
     $("#DialogIconed").modal('toggle')
 
+}
+
+function dialogQuestion(response){
+
+    let dialogTheme = "";
+    let icon = "";
+    switch (response.status) {
+        case "success":
+            dialogTheme = "primary";
+            icon = `<ion-icon name="checkmark-circle-outline"></ion-icon>`;
+            break;
+        case "warning":
+            dialogTheme = "warning";
+            icon = `<ion-icon name="warning-outline"></ion-icon>`
+            break;
+        case "error":
+            dialogTheme = "danger";
+            icon = `<ion-icon name="close-circle"></ion-icon>`;
+            break;
+        default:
+            dialogTheme = "info";
+            icon = `<ion-icon name="information-circle-outline"></ion-icon>`;
+            break;
+    }
+
+    $('#dialog-container').html(`
+    
+    <div class="modal fade dialogbox" id="DialogQuestion" data-bs-backdrop="static" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-icon text-${dialogTheme}">
+                    ${icon}
+                </div>
+                <div class="modal-header pt-2">
+                    <h5 class="modal-title">${response.title}</h5>
+                </div>
+                <div class="modal-body">
+                    ${response.question}
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-inline">
+                        <a href="#" class="btn btn-text-secondary" data-bs-dismiss="modal">${locale.label_btn_cancel}</a>
+                        <a href="#" class="btn btn-text-primary" data-bs-dismiss="modal" onclick="saveOrder(true, false)">OK</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    `)
+
+    $("#DialogQuestion").modal('toggle')
 }
 
 function auto_remove_alert(time) {

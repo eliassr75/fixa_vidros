@@ -16,7 +16,6 @@ class PrintTemplates extends Model {
         'width',
         'height',
         'spacing',
-        'model',
         'created_at',
         'updated_at'
     ];

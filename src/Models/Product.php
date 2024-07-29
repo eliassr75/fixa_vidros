@@ -27,12 +27,17 @@ class Product extends Model {
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
+
+    public function sub_category()
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id', 'id');
     }
 
     public function thickness()
     {
-        return $this->hasMany(GlassThickness::class);
+        return $this->hasMany(GlassThickness::class, 'products_id', 'id');
     }
 
     /**
