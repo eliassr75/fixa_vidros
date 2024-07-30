@@ -815,6 +815,11 @@ function orderController(data=false){
         localStorage.setItem('selected_status_id', this.value);
     })
 
+    $("#select-finance").on('change', function () {
+        updateLocalStorage('finance_id', this.value);
+        localStorage.setItem('selected_finance_id', this.value);
+    })
+
     if(data) {
 
         $('#orderItems, #products > #rows-images').hide();

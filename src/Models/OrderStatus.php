@@ -20,6 +20,11 @@ class OrderStatus extends Model {
 
     protected $guarded = ['id'];
 
+    public function orders()
+    {
+        return $this->hasMany(Orders::class, 'status_id', 'id');
+    }
+
     /**
      * @throws Exception
      */
@@ -41,6 +46,11 @@ class OrderFinance extends Model {
     ];
 
     protected $guarded = ['id'];
+
+    public function orders()
+    {
+        return $this->hasMany(Orders::class, 'finance_id', 'id');
+    }
 
     /**
      * @throws Exception

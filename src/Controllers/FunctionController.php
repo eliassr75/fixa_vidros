@@ -29,6 +29,10 @@ class FunctionController extends BaseController
         return $newArray;
     }
 
+    public function formatCurrencyBR($value) {
+        return 'R$ ' . number_format($value, 2, ',', '.');
+    }
+
     public function customPutStatement()
     {
         $input = file_get_contents('php://input');

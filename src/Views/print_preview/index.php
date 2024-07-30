@@ -23,10 +23,9 @@
                     height: <?=$print->height?>mm;
                     max-width: <?=$print->width?>mm !important;
                     max-height: <?=$print->height?>mm !important;
-                    margin-bottom: <?=$print->spacing?>mm;
                     padding-right: 5mm;
                     padding-left: 5mm;
-                    border: 1px solid #000;
+                    border: 1px solid #FFFFFF;
                     page-break-inside: avoid;
                     display: flex;
                     justify-content: space-between;
@@ -225,13 +224,13 @@ case 'order': ?>
                         <p style="margin-left: 5mm;">QTD: ${item.quantity || 0}</p>
                         <p style="margin-left: 5mm;">PED: ${existsOrder.order.id || 0}</p>
                         <p style="margin-left: 8mm;">O.C.: </p>
-                        <p>${item.obs_client.toUpperCase() || existsOrder.order.obs_client.toUpperCase()}</p>
+                        <p>${(item.obs_client ? item.obs_client.toUpperCase() : "") || (existsOrder.order.obs_client ? existsOrder.order.obs_client.toUpperCase() : "")}</p>
                         <br>
                         <p>ENT: ${formatDate(existsOrder.order.date_delivery)}</p>
                         <p style="margin-left: 10mm; font-size: 25px"><b>(${item.width}X${item.height})</b></p>
                     </div>
                     <div>
-                        <div id="qrcode-${item.id}" style="height: 45mm; width: 15vw;"></div>
+                        <div id="qrcode-${item.id}" style="height: 65mm; width: 35vw;"></div>
                     </div>
                 </div>
             `);
@@ -240,7 +239,8 @@ case 'order': ?>
                 const qrcode = new QRCode(document.getElementById(`qrcode-${item.id}`), {
                     width: 100,
                     height: 100,
-                    useSVG: true
+                    useSVG: true,
+                    correctLevel: QRCode.CorrectLevel.L
                 });
                 makeCode(qrcode);
             });
@@ -299,7 +299,8 @@ case 'order': ?>
         const qrcode = new QRCode(document.getElementById(`qrcode`), {
             width: 100,
             height: 100,
-            useSVG: true
+            useSVG: true,
+            correctLevel: QRCode.CorrectLevel.L
         });
         makeCode(qrcode);
 

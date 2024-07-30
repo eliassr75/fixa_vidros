@@ -196,7 +196,9 @@ class OrdersController extends BaseController
                 $base['order_id'] = $order->id;
                 $base['category_id'] = $item->category_id;
                 $base['sub_category_id'] = $item->sub_category_id;
-                $base['product_id'] = $item->product_id;
+                if (intval($item->product_id)):
+                    $base['product_id'] = $item->product_id;
+                endif;
                 $base['glass_thickness_id'] = $item->glass_thickness_id;
                 $base['glass_color_id'] = $item->glass_color_id;
                 $base['glass_finish_id'] = $item->glass_finish_id;
@@ -260,7 +262,9 @@ class OrdersController extends BaseController
                     $base = [];
                     $base['category_id'] = $item->category_id;
                     $base['sub_category_id'] = $item->sub_category_id;
-                    $base['product_id'] = $item->product_id;
+                    if (intval($item->product_id)):
+                        $base['product_id'] = $item->product_id;
+                    endif;
                     $base['glass_thickness_id'] = $item->glass_thickness_id;
                     $base['glass_color_id'] = $item->glass_color_id;
                     $base['glass_finish_id'] = $item->glass_finish_id;
@@ -298,6 +302,8 @@ class OrdersController extends BaseController
 
         }catch (Exception $e){
             $response->message = $e->getMessage();
+            $response->dialog = true;
+            $response->spinner = true;
             $functionController->sendResponse($response, $status_code);
             return;
         }
