@@ -93,7 +93,7 @@ class MenuController extends BaseController
                 "name" => $functionController->locale('menu_item_support'),
                 "permissions" => [1, 2, 3],
                 "individual" => false,
-                "url" => '/support/',
+                "url" => 'http://api.whatsapp.com/send?phone=5554993276132',
                 "icon" => 'chatbubble-outline',
                 "badge" => false
             ],
