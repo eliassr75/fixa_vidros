@@ -35,11 +35,6 @@ class Product extends Model {
         return $this->belongsTo(SubCategory::class, 'sub_category_id', 'id');
     }
 
-    public function thickness()
-    {
-        return $this->hasMany(GlassThickness::class, 'products_id', 'id');
-    }
-
     /**
      * @throws Exception
      */

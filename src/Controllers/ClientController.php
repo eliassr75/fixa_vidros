@@ -13,7 +13,7 @@ class ClientController extends BaseController
     public function index()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('clients_page', true);
 
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_client'));

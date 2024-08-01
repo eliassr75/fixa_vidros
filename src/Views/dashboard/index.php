@@ -58,6 +58,7 @@ $functionController = new FunctionController();
                             <div class="text-center fw-bold border-bottom py-2">
                                 <?=$functionController->locale('menu_item_orders')?>s
                             </div>
+                            <?php if($orderStatus->count()) : ?>
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
@@ -90,22 +91,24 @@ $functionController = new FunctionController();
                                         </span>
                                     </td>
                                 </tr>
-                                <?php
-
-
-
-                                endforeach;
-
-                                ?>
+                                <?php endforeach; ?>
                                 </tbody>
 
                             </table>
+
                             <div class="text-center fw-bold border-bottom py-2 w-100">
                                 <a href="/orders/" class="d-flex align-items-center justify-content-center">
                                     <?=$functionController->locale('label_show_all_orders')?>
                                     <ion-icon name="arrow-forward-circle-outline" class="ms-1"></ion-icon>
                                 </a>
                             </div>
+                            <?php else: ?>
+                                <div class="text-center fw-bold border-bottom py-2 w-100">
+                                    <a href="javascript:void(0)" class="d-flex text-warning align-items-center justify-content-center">
+                                        <?=$functionController->locale('not_found_results')?>
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                     </div>
@@ -121,6 +124,7 @@ $functionController = new FunctionController();
                 <div class="text-center rounded fw-bold bg-white border-bottom py-2">
                     <?=$functionController->locale('label_financial_movements')?>
                 </div>
+                <?php if($financeTotalsPrices): ?>
                 <div class="row justify-content-center">
                     <?php foreach ($financeTotalsPrices as $name => $value): ?>
                         <?php foreach ($value as $item): ?>
@@ -133,6 +137,11 @@ $functionController = new FunctionController();
                         <?php endforeach; ?>
                     <?php endforeach; ?>
                 </div>
+                <?php else: ?>
+                <div class="text-center mb-2 rounded fw-bold bg-white border-bottom py-2">
+                    <?=$functionController->locale('not_found_results')?>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

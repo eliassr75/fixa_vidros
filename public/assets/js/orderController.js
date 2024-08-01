@@ -1,4 +1,5 @@
 const actionSheetForm = new bootstrap.Modal('#actionSheetForm')
+const required_string = `<ion-icon name="alert-circle-outline"></ion-icon>`;
 function getNameItem(category_id, sub_category_id){
 
     let listNamesCategories = {};
@@ -105,10 +106,11 @@ function addOrderItem(){
             ${!data.glass_color_id ? `<span class="text-warning">${locale.menu_item_glass_colors}</span> <br>` : ""}
             ${!data.glass_finish_id ? `<span class="text-warning">${locale.menu_item_glass_finish}</span> <br>` : ""}
             ${!data.glass_clearances_id ? `<span class="text-warning">${locale.menu_item_glass_clearances}</span> <br>` : ""}
+            ${!data.glass_type_id ? `<span class="text-warning">${locale.menu_item_glass_type}</span> <br>` : ""}
         `,
     };
 
-    if (!data.quantity || !data.width || !data.height || !data.category_id || !data.sub_category_id || !data.glass_thickness_id || !data.glass_color_id || !data.glass_finish_id) {
+    if (!data.quantity || !data.width || !data.height || !data.category_id || !data.sub_category_id || !data.glass_thickness_id || !data.glass_color_id || !data.glass_finish_id || !data.glass_type_id) {
         dialog(response);
         return;
     }
@@ -122,6 +124,7 @@ function addOrderItem(){
         glass_color_id: data.glass_color_id,
         glass_finish_id: data.glass_finish_id,
         glass_clearances_id: data.glass_clearances_id,
+        glass_type_id: data.glass_type_id,
         product_id: data.product_id ? data.product_id : null,
         quantity: data.quantity,
         width: data.width,
@@ -245,12 +248,30 @@ function getOrderItems() {
     let total_price_order = 0.00
     const general_obs_client = localStorage.getItem('general_obs_client') ? localStorage.getItem('general_obs_client') : false
     const date_delivery = localStorage.getItem('date_delivery') ? localStorage.getItem('date_delivery') : false
+    const order_id = localStorage.getItem('order_id') ? parseInt(localStorage.getItem('order_id')) : false
 
     itemsTemplate += `
-        <button class="btn btn-primary btn-sm btn-icon">
-            <ion-icon role="img" class="md hydrated fs-4 me-1" name="print-outline" ${!existsOrder.order ? "" : `onclick="print('products');"`}></ion-icon>
-        </button>
-        
+
+        <div class="d-flex w-100 align-items-center justify-content-between">
+            <div>
+                <p>
+                    ${locale.form_order_item}
+                </p>
+            </div>
+            <div>
+                <button class="px-1 btn btn-primary" type="button" ${readOnly ? "" : `onclick="orderController(true);"`}>
+                    <ion-icon name="add-outline"></ion-icon>
+                    ${locale.label_btn_add}
+                </button>
+                ${ order_id ? `
+                    <button class="px-1 btn btn-primary" type="button" ${!existsOrder.order ? "" : `onclick="print('products');"`}>
+                        <ion-icon name="print-outline"></ion-icon>
+                        ${locale.label_tags}
+                    </button>
+                ` : ""}
+            </div>
+        </div>
+
         <ul class="listview image-listview my-2">
     `;
 
@@ -279,7 +300,7 @@ function getOrderItems() {
     } else {
         itemsTemplate += `
             <div class="alert alert-primary" role="alert">
-                ${locale.not_found_results}
+                ${locale.not_items_founded}
             </div>
         `;
     }
@@ -289,7 +310,7 @@ function getOrderItems() {
         <br>
         <div class="form-group basic">
             <div class="input-wrapper">
-                <label class="label" for="date-delivery">${locale.input_date_delivery}</label>
+                <label class="label" for="date-delivery">${required_string} ${locale.input_date_delivery}</label>
                 <input type="date" class="form-control" id="date-delivery" min="${min_date}" ${readOnly ? "disabled" : ""}
                 name="date-delivery" placeholder="${locale.input_date_delivery}" value="${date_delivery ? date_delivery : ""}" required>
                 <i class="clear-input">
@@ -299,7 +320,7 @@ function getOrderItems() {
         </div>
         <div class="form-group basic">
             <div class="input-wrapper">
-                <label class="label" for="general-obs-client">${locale.input_obs_client}</label>
+                <label class="label" for="general-obs-client">${required_string} ${locale.input_obs_client}</label>
                 <textarea class="form-control" rows="6" id="general-obs-client" name="general-obs-client" ${readOnly ? "disabled" : ""}
                 placeholder="${locale.input_obs_client}" required>${general_obs_client ? general_obs_client : ""}</textarea>
                 <i class="clear-input">
@@ -356,35 +377,58 @@ function prepareOrderForm() {
     let nextFormBody = "";
     nextForm.html("");
 
+    $("#select-client").parent().parent().hide();
+    $("#title-page").text(locale.label_item)
+
     let data = getLocalStorageData();
 
     //SELECT CATEGORIES
     let categories_select_values = "";
+    let customPrices = {};
     for (let item of categories){
+        customPrices[item.id] = item.thickness;
         categories_select_values += `
             <option value="${item.id}" ${data.category_id && parseInt(data.category_id) === item.id ? "selected" : ""}>${item.name}</option>
         `;
     }
-    categories_select_values = `
-        <div class="form-group boxed" id="categories">
-            <div class="input-wrapper">
-                <label class="label" for="select-category">${locale.menu_item_category}</label>
-                <select class="form-control custom-select" id="select-category" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'category_id', 'sub_category_id')" name="category">
-                    <option value="" selected disabled>${locale.select_2_placeholder}</option>
-                    ${categories_select_values}
-                </select>
-            </div>
-        </div>
-    `;
+    localStorage.setItem('customPrices', JSON.stringify(customPrices))
 
     let subcategory_select_values = "";
+    let types_select_values = "";
     let images = [];
     if(data.category_id) {
+
+        categories_select_values = `
+            <div class="form-group boxed" id="categories">
+                <div class="input-wrapper">
+                    <label class="label" for="select-category">${required_string} ${locale.menu_item_category}</label>
+                    <select class="form-control custom-select" id="select-category" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'category_id', 'sub_category_id')" name="category">
+                        <option value="" selected disabled>${locale.select_2_placeholder}</option>
+                        ${categories_select_values}
+                    </select>
+                </div>
+            </div>
+        `;
+
         for (let item of subCategorias[data.category_id]) {
             images[item.id] = item.image;
+
+            if (data.sub_category_id && parseInt(data.sub_category_id) === item.id && !data.glass_type_id){
+                updateLocalStorage('glass_type_id', item.glass_type_id)
+            }
             subcategory_select_values += `
                 <option value="${item.id}" ${data.sub_category_id && parseInt(data.sub_category_id) === item.id ? "selected" : ""}>
-                    ${item.name} - ${item.glass_type_name}
+                    ${item.name}
+                </option>
+            `;
+        }
+
+        data = getLocalStorageData();
+
+        for (let item of types) {
+            types_select_values += `
+                <option value="${item.id}" ${data.glass_type_id && parseInt(data.glass_type_id) === item.id ? "selected" : ""}>
+                    ${item.name}
                 </option>
             `;
         }
@@ -392,10 +436,20 @@ function prepareOrderForm() {
         nextFormBody += `
             <div class="form-group boxed">
                 <div class="input-wrapper">
-                    <label class="label" for="select-sub-category">${locale.menu_item_sub_category}</label>
+                    <label class="label" for="select-sub-category">${required_string} ${locale.menu_item_sub_category}</label>
                     <select class="form-control custom-select" id="select-sub-category" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'sub_category_id', 'glass_type_id')" name="sub-category">
                         <option value="" selected disabled>${locale.select_2_placeholder}</option>
                         ${subcategory_select_values}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group boxed">
+                <div class="input-wrapper">
+                    <label class="label" for="select-glass-type">${required_string} ${locale.menu_item_glass_type}</label>
+                    <select class="form-control custom-select" id="select-glass-type" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'glass_type_id', '--')" name="glass-type">
+                        <option value="" selected disabled>${locale.select_2_placeholder}</option>
+                        ${types_select_values}
                     </select>
                 </div>
             </div>
@@ -406,16 +460,18 @@ function prepareOrderForm() {
             </div>
 
         `;
+    }else{
+        categories_select_values = "";
     }
 
     let thickness_select_values = "";
     let thickness_prices = [];
     if(data.sub_category_id) {
 
-        if (data.product_id){
+        if (data.category_id){
             let storedData = localStorage.getItem('customPrices');
             let itemsArray = storedData ? JSON.parse(storedData) : [];
-            for (let item of itemsArray[data.product_id]) {
+            for (let item of itemsArray[data.category_id]) {
                 thickness_prices[item.id] = parseFloat(item.price);
                 thickness_select_values += `
                 <option value="${item.id}" ${data.glass_thickness_id && parseInt(data.glass_thickness_id) === item.id ? "selected" : ""}>
@@ -640,7 +696,7 @@ function orderController(data=false){
         status_select_values = `
             <div class="form-group boxed">
                 <div class="input-wrapper">
-                    <label class="label" for="select-status">${locale.menu_item_status}</label>
+                    <label class="label" for="select-status">${required_string} ${locale.menu_item_status}</label>
                     <select class="form-control custom-select" id="select-status" name="status">
                         <option value="" selected disabled>${locale.select_2_placeholder}</option>
                         ${status_select_values}
@@ -662,7 +718,7 @@ function orderController(data=false){
         finance_select_values = `
             <div class="form-group boxed">
                 <div class="input-wrapper">
-                    <label class="label" for="select-finance">${locale.menu_item_finance}</label>
+                    <label class="label" for="select-finance">${required_string} ${locale.menu_item_finance}</label>
                     <select class="form-control custom-select" id="select-finance" name="finance" ${readOnly ? "disabled" : ""}>
                         <option value="" selected disabled>${locale.select_2_placeholder}</option>
                         ${finance_select_values}
@@ -683,7 +739,7 @@ function orderController(data=false){
     clients_select_values = `
         <div class="form-group boxed">
             <div class="input-wrapper">
-                <label class="label" for="select-client">${locale.menu_item_client}</label>
+                <label class="label" for="select-client">${required_string} ${locale.menu_item_client}</label>
                 <select class="form-control custom-select" id="select-client" name="client" ${readOnly ? "disabled" : ""}>
                     <option value="" selected disabled>${locale.select_2_placeholder}</option>
                     ${clients_select_values}
@@ -714,7 +770,7 @@ function orderController(data=false){
                 <div id="products">
                     <form class="search-form">
                         <div class="form-group searchbox">
-                            <input type="text" class="form-control search" placeholder="${locale.menu_item_products} (${products.length})" id="searchInput" ${readOnly ? "disabled" : ""}>
+                            <input type="text" class="form-control search" placeholder="${locale.input_label_search} ${locale.menu_item_category}" id="searchInput" ${readOnly ? "disabled" : ""}>
                             <i class="input-icon">
                                 <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
                             </i>
@@ -724,17 +780,14 @@ function orderController(data=false){
                         <div class="row overflow-scroll overflow-visible d-flex" style="max-height: 45vh">
             `;
 
-        let customPrices = {};
         for (let item of products){
-
-            customPrices[item.id] = item.thickness
             products_select_values += `
 
                         <div onclick='showDescriptionProduct(${JSON.stringify(item)})' class="col-lg-2 col-md-4 col-6 custom-item searchable">
                             <div class="border border-1 p-1 my-1 rounded-2 search-item">
                                 <div class="text-truncate font-weight-bold ">${item.name}</div>
                                 <div class="text-truncate">
-                                    <span class="">${item.glass_type_name ? item.glass_type_name : ""}</span> -
+                                    <span class="">${item.glass_type_name ? item.glass_type_name : ""}</span>
                                 </div>
                                 <img src="${item.image ? item.image : "assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid">
                             </div>
@@ -747,7 +800,6 @@ function orderController(data=false){
                 </div>
             </div>
             `;
-        localStorage.setItem('customPrices', JSON.stringify(customPrices))
 
         formBory = `
             <div>
@@ -784,15 +836,28 @@ function orderController(data=false){
     }
 
     orderBody.html(`
-
-        <p class="w-100 p-0 m-0 form-check-label d-inline-flex justify-content-between">
-        ${locale.form_order_item}
-            <a class="headerButton" id="headerButton" href="javascript:void(0)">
-                <ion-icon role="img" class="md hydrated fs-4 me-1" name="print-outline" ${!existsOrder.order ? "" : `onclick="print('order');"`}></ion-icon>
-                <ion-icon role="img" class="md hydrated fs-4 me-1" name="reload-outline" ${readOnly ? "" : `onclick="clearOrders();"`}></ion-icon>
-                <ion-icon role="img" class="md hydrated fs-4 ms-1" name="add-outline" ${readOnly ? "" : `onclick="orderController(true);"`}></ion-icon>
-            </a>
-        </p>
+        
+        <div class="d-flex w-100 align-items-center justify-content-between">
+            <div>
+                <p id="title-page">${locale.menu_item_orders}</p>
+            </div>
+            <div>       
+                ${ existsOrder.order ? `
+                    <button class="px-1 btn btn-primary" type="button" ${!existsOrder.order ? "" : `onclick="print('order');"`}>
+                        <ion-icon name="print-outline"></ion-icon>
+                        ${locale.menu_item_orders}
+                    </button>
+                ` : "" }
+                
+                ${ client_id ? `
+                    <button class="px-1 btn btn-primary" type="button" ${readOnly ? "" : `onclick="clearOrders();"`}>
+                        <ion-icon name="reload-outline"></ion-icon>
+                        ${locale.label_clear}
+                    </button>
+                ` : ""}
+            </div>
+        </div>
+        
     
         ${status_select_values}
         ${finance_select_values}

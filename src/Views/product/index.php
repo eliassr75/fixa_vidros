@@ -31,19 +31,6 @@ $functionController = new FunctionController();
                     <label class="form-check-label" for="active"><?=$functionController->locale('input_active')?></label>
                 </div>
 
-                <?php foreach ($thickness as $thick): ?>
-                <div class="form-group basic">
-                    <div class="input-wrapper">
-                        <label class="label" for="input-<?=$thick->name?><?=$thick->type?>"><?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?></label>
-                        <input type="tel" class="form-control" id="input-<?=$thick->name?><?=$thick->type?>" name="input-<?=$thick->name?><?=$thick->type?>"
-                               value="<?=$thick->price*100?>" placeholder="<?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?>">
-                        <i class="clear-input">
-                            <ion-icon name="close-circle"></ion-icon>
-                        </i>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-
                 <div class="form-group basic">
                     <div class="input-wrapper">
                         <textarea type="text" class="form-control" id="obs" name="obs" rows="6" placeholder="<?=$functionController->locale('input_observation')?>"><?=$product->obs?></textarea>
@@ -139,11 +126,4 @@ $functionController = new FunctionController();
 </div>
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>
-
-<script>
-    $(document).ready(() => {
-        $(`input[type="tel"]`).mask('000,000.00', { reverse: true })
-    })
-</script>
-
 <?php require_once __DIR__ . '/../htmlEnd.php';?>

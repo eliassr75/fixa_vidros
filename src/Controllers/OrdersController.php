@@ -21,7 +21,7 @@ class OrdersController extends BaseController
     public function index()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('orders_page', true);
 
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_orders'));
@@ -34,8 +34,10 @@ class OrdersController extends BaseController
             'users.name as user_name',
             'type_status_orders.name as type_status_name',
             'type_status_orders.id as type_status_id',
+            'type_status_orders.color as type_status_color',
             'type_status_finance.id as type_status_finance_id',
             'type_status_finance.name as type_status_finance_name',
+            'type_status_finance.color as type_status_finance_color',
         )
         ->join('client', 'client.id', '=', 'orders.client_id')
         ->join('users', 'users.id', '=', 'orders.user_id')
@@ -83,41 +85,37 @@ class OrdersController extends BaseController
 
         $categories = Category::where('active', true)->get();
         $subCategorias = [];
+        $products_array = [];
+
         foreach ($categories as $category) {
-            $subCategorias[$category->id] = SubCategory::where('sub_category.active', true)
+            $category->thickness = $category->thickness()->get();
+            $subcategories = SubCategory::where('sub_category.active', true)
                 ->where('sub_category.category_id', $category->id)
                 ->select(
                     'sub_category.*',
-                    'glass_type.name as glass_type_name',
-                    'glass_type.id as glass_type_id',
+                    'glass_type.name as glass_type_name'
                 )
                 ->join('glass_type', 'glass_type.id', '=', 'sub_category.glass_type_id')
                 ->get();
-        }
 
-        $products = Product::orderBy('products.id', 'desc')
-            ->select(
-                'products.*',
-                'category.name as category_name',
-                'category.id as category_id',
-                'category.active as category_active',
-                'glass_type.name as glass_type_name',
-                'glass_type.id as glass_type_id',
-                'glass_type.active as glass_type_active',
-                'sub_category.name as sub_category_name',
-                'sub_category.id as sub_category_id',
-                'sub_category.active as sub_category_active',
-                'sub_category.image as image'
-            )
-            ->join('category', 'category.id', '=', 'products.category_id')
-            ->join('sub_category', 'sub_category.id', '=', 'products.sub_category_id')
-            ->join('glass_type', 'glass_type.id', '=', 'products.glass_type_id')
-            ->get();
-        $products_array = [];
-        foreach ($products as $product) {
-            $product->str_created = date('d/m/Y H:i', strtotime($product->created_at));
-            $product->thickness = GlassThickness::where('products_id', $product->id)->get();
-            $products_array[] = $product;
+            $subCategorias[$category->id] = $subcategories;
+
+            foreach ($subcategories as $subcategory) {
+
+                $products_array[] = [
+                    "name" => $category->name . " " . $subcategory->name,
+                    "str_created" => date('d/m/Y H:i', strtotime($subcategory->created_at)),
+                    "custom_name" => $subcategory->additional_name,
+                    "glass_type_name" => $subcategory->glass_type_name,
+                    "glass_type_id" => $subcategory->glass_type_id,
+                    "category_id" => $category->id,
+                    "sub_category_id" => $subcategory->id,
+                    "obs" => null,
+                    "category_name" => $category->name,
+                    "sub_category_name" => $subcategory->name,
+                    "image" => $subcategory->image,
+                ];
+            }
         }
 
         if($orderId):
@@ -203,6 +201,7 @@ class OrdersController extends BaseController
                 $base['glass_color_id'] = $item->glass_color_id;
                 $base['glass_finish_id'] = $item->glass_finish_id;
                 $base['glass_clearances_id'] = $item->glass_clearances_id;
+                $base['glass_type_id'] = $item->glass_type_id;
                 $base['quantity'] = $item->quantity;
                 $base['width'] = $item->width;
                 $base['height'] = $item->height;

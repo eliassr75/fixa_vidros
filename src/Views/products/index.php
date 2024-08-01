@@ -21,7 +21,7 @@ $functionController = new FunctionController();
             <div class="px-3 pt-3">
                 <form class="search-form">
                     <div class="form-group searchbox">
-                        <input type="text" class="form-control search">
+                        <input type="text" class="form-control search" placeholder="<?=$functionController->locale('input_label_search')?>">
                         <i class="input-icon">
                             <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
                         </i>
@@ -35,6 +35,9 @@ $functionController = new FunctionController();
             </button>
             -->
 
+            <h3 class="inset text-center text-warning mt-2">
+                <?=$functionController->locale('warning_automaticale_generated')?>
+            </h3>
             <ul class="listview image-listview inset list my-2">
                 <?php if (count($products) > 0): foreach ($products as $product): ?>
                 <li id="li-model">

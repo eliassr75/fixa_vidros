@@ -73,7 +73,11 @@ $functionController = new FunctionController();
                     get_cep(this.value)
                 })
             <?php else: ?>
-                $("#<?=$require->name?>").mask("<?=$require->mask?>").attr('required', <?=$require->required ? "true" : "false"?>)
+                <?php if ($require->mask): ?>
+                    $("#<?=$require->name?>").mask("<?=$require->mask?>").attr('required', <?=$require->required ? "true" : "false"?>)
+                <?php else: ?>
+                    $("#<?=$require->name?>").attr('required', <?=$require->required ? "true" : "false"?>)
+                <?php endif; ?>
             <?php endif; ?>
         <?php endforeach; ?>
     })

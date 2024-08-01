@@ -10,9 +10,8 @@
         <img src="/assets/img/logo-fixa-old.png" alt="logo" class="logo">
     </div>
     <div class="right">
-        <a href="/notifications/" class="headerButton">
-            <ion-icon class="icon" name="notifications-outline"></ion-icon>
-            <span class="badge badge-danger">4</span>
+        <a href="/logout/" class="headerButton">
+            <ion-icon class="icon" name="exit-outline"></ion-icon>
         </a>
     </div>
 </div>

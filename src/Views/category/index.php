@@ -34,6 +34,35 @@ $functionController = new FunctionController();
                 </div>
             </div>
 
+            <div class="section full my-2">
+                <div class="accordion border-0" id="accordionManager">
+                    <div class="accordion-item border">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-price-manager" aria-expanded="false">
+                                <ion-icon name="wallet-outline" role="img" class="md hydrated" aria-label="wallet outline"></ion-icon>
+                                <?=$functionController->locale('label_price_manager')?>
+                            </button>
+                        </h2>
+                        <div id="accordion-price-manager" class="accordion-collapse collapse" data-bs-parent="#accordionManager" style="">
+                            <div class="accordion-body">
+                                <?php foreach ($thickness as $thick): ?>
+                                    <div class="form-group basic">
+                                        <div class="input-wrapper">
+                                            <label class="label" for="input-<?=$thick->name?><?=$thick->type?>"><?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?></label>
+                                            <input type="tel" class="form-control" id="input-<?=$thick->name?><?=$thick->type?>" name="input-<?=$thick->name?><?=$thick->type?>"
+                                                   value="<?=$thick->price*100?>" placeholder="<?=$functionController->locale('input_price')?> - <?=$thick->name?><?=$thick->type?>">
+                                            <i class="clear-input">
+                                                <ion-icon name="close-circle"></ion-icon>
+                                            </i>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="child-global-custom-alert" class="custom-alert my-2"></div>
 
             <div class="row mt-2">
@@ -49,14 +78,15 @@ $functionController = new FunctionController();
 
     <br>
     <div class="card card-body">
-        <p class="form-check-label d-inline-flex justify-content-between">
+        <p class="form-check-label d-inline-flex align-items-center justify-content-between">
             <?=$functionController->locale('menu_item_sub_category')?>
-            <a class="headerButton" id="headerButton" href="javascript:void(0)" onclick="actionForm('addSubCategory')"
+            <a class="btn btn-primary" id="headerButton" href="javascript:void(0)" onclick="actionForm('addSubCategory')"
                 data-bs-toggle="modal" data-bs-target="#actionSheetForm">
-                <ion-icon role="img" class="md hydrated fs-4" name="add-outline"></ion-icon>
+                <ion-icon name="add-outline"></ion-icon>
+                <?=$functionController->locale('label_btn_add')?>
             </a>
         </p>
-        <div class="form-group boxed">
+        <div class="form-group boxed border-top">
             <div class="input-wrapper">
                 <label class="label" for="select-glass-type"><?=$functionController->locale('menu_item_glass_type')?></label>
                 <select class="form-control custom-select" id="select-glass-type" name="glass-type" onchange="changeFilter(this)">
@@ -70,7 +100,7 @@ $functionController = new FunctionController();
 
         <form class="search-form">
             <div class="form-group searchbox">
-                <input type="text" class="form-control search" id="searchInput">
+                <input type="text" class="form-control search" id="searchInput" placeholder="<?=$functionController->locale('input_label_search')?>">
                 <i class="input-icon">
                     <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
                 </i>
@@ -161,6 +191,7 @@ $functionController = new FunctionController();
 
     $(document).ready(() => {
         categoryController();
+        $(`input[type="tel"]`).mask('000,000.00', { reverse: true })
     })
 
 </script>

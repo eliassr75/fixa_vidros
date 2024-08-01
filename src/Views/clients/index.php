@@ -18,15 +18,19 @@ $functionController = new FunctionController();
             <!-- class="search" automagically makes an input a search field. -->
 
 
-            <div class="px-3 pt-3">
+            <div class="px-3 pt-3 d-flex">
                 <form class="search-form">
                     <div class="form-group searchbox">
-                        <input type="text" class="form-control search">
+                        <input type="text" class="form-control search" placeholder="<?=$functionController->locale('input_label_search')?>">
                         <i class="input-icon">
                             <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
                         </i>
                     </div>
                 </form>
+                <a href="<?=$url?>" class=" ms-2 btn btn-primary">
+                    <ion-icon name="add-outline"></ion-icon>
+                    <?=$functionController->locale('label_btn_add')?>
+                </a>
             </div>
             <!-- class="sort" automagically makes an element a sort buttons. The date-sort value decides what to sort by. -->
             <!--

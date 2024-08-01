@@ -28,12 +28,14 @@ $menuController = new MenuController();
             <strong><?=$functionController->locale('menu_item_orders')?></strong>
         </div>
     </a>
+    <!--
     <a href="/products/" class="item">
         <div class="col">
             <ion-icon name="apps-outline"></ion-icon>
             <strong><?=$functionController->locale('menu_item_products')?></strong>
         </div>
     </a>
+    -->
     <a href="/settings/" class="item">
         <div class="col">
             <ion-icon name="settings-outline"></ion-icon>
@@ -214,19 +216,3 @@ $menuController = new MenuController();
     </div>
 </div>
 <!-- * Android Add to Home Action Sheet -->
-
-<div id="cookiesbox" class="offcanvas offcanvas-bottom cookies-box" tabindex="-1" data-bs-scroll="true"
-     data-bs-backdrop="false">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title">We use cookies</h5>
-    </div>
-    <div class="offcanvas-body">
-        <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla non lacinia quam. Nulla facilisi.
-            <a href="#" class="text-secondary"><u>Learn more</u></a>
-        </div>
-        <div class="buttons">
-            <a href="#" class="btn btn-primary btn-block" data-bs-dismiss="offcanvas">I understand</a>
-        </div>
-    </div>
-</div>

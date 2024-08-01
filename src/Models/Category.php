@@ -30,6 +30,11 @@ class Category extends Model {
         return $this->hasMany(SubCategory::class, 'category_id', 'id');
     }
 
+    public function thickness()
+    {
+        return $this->hasMany(GlassThickness::class, 'category_id', 'id');
+    }
+
     /**
      * @throws Exception
      */

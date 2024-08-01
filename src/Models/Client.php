@@ -51,7 +51,7 @@ class Client extends Model {
         ['name' => 'email', 'type' => 'email', "required" => true, "mask" => false],
         ['name' => 'company_name', 'type' => 'text', "required" => true, "mask" => false],
         ['name' => 'trading_name', 'type' => 'text', "required" => false, "mask" => false],
-        ['name' => 'name', 'type' => 'text', "required" => false, "mask" => false],
+        ['name' => 'name', 'type' => 'text', "required" => true, "mask" => false],
         ['name' => 'address', 'type' => 'text', "required" => true, "mask" => false],
         ['name' => 'address_number', 'type' => 'tel', "required" => true, "mask" => "00000000"],
         ['name' => 'zone', 'type' => 'text', "required" => true, "mask" => false],

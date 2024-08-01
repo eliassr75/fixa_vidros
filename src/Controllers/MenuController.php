@@ -28,6 +28,7 @@ class MenuController extends BaseController
                 "icon" => 'document-text-outline',
                 "badge" => false
             ],
+            /*
             [
                 "name" => $functionController->locale('menu_item_products'),
                 "permissions" => [1, 2, 3],
@@ -48,7 +49,7 @@ class MenuController extends BaseController
                 "url" => '/reports/',
                 "icon" => 'stats-chart-outline',
                 "badge" => false
-            ],
+            ],*/
         ];
 
         $user_permission_id = $_SESSION['permission_id'];

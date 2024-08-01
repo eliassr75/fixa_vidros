@@ -99,6 +99,7 @@ class SettingsController extends BaseController
 
         $status_code = 200;
         $response = $functionController->baseResponse();
+        $response->dialog = true;
         $data = $functionController->putStatement();
         $error = false;
 
@@ -106,6 +107,7 @@ class SettingsController extends BaseController
         switch ($routeName) {
             case 'subcategory':
 
+                $response->dialog = false;
                 $subCategory = SubCategory::find($Id);
 
                 $subCategory->name = $data->name;
@@ -142,6 +144,13 @@ class SettingsController extends BaseController
                     ]);
                 }
 
+                foreach ($category->thickness()->get() as $thick) {
+                    $key = "input-{$thick->name}{$thick->type}";
+                    if (isset($data->$key)) {
+                        $thick->update(['price' => $data->$key]);
+                    }
+                }
+
                 $category->save();
                 break;
             case 'glass_type':
@@ -153,6 +162,7 @@ class SettingsController extends BaseController
                 $glass_type->save();
                 break;
             case 'glass_thickness':
+
                 $thickness = GlassThickness::find($Id);
                 $old_thickness = GlassThickness::find($Id);
 
@@ -186,8 +196,8 @@ class SettingsController extends BaseController
 
                 try {
                     if ($needsUpdate) {
-                        foreach (Product::all() as $product) {
-                            $thick = $product->thickness()
+                        foreach (Category::all() as $category) {
+                            $thick = $category->thickness()
                                 ->where('name', $old_thickness->name)
                                 ->where('price', $old_thickness->price)
                                 ->where('type', $old_thickness->type)
@@ -196,7 +206,7 @@ class SettingsController extends BaseController
                                 ->first();
 
                             if (!$thick) {
-                                $product->thickness()->create([
+                                $category->thickness()->create([
                                     'name' => $thickness->name,
                                     'price' => $thickness->price,
                                     'type' => $thickness->type,
@@ -264,7 +274,6 @@ class SettingsController extends BaseController
         $response->status = "success";
         $response->reload = true;
         $response->spinner = true;
-        $response->dialog = true;
 
         $functionController->sendResponse($response, $status_code);
     }
@@ -340,8 +349,8 @@ class SettingsController extends BaseController
                 $thickness->save();
 
                 if($needsCreate){
-                    foreach (Product::all() as $product):
-                        $product->thickness()->create([
+                    foreach (Category::all() as $category):
+                        $category->thickness()->create([
                             'name' => $thickness->name,
                             'price' => $thickness->price,
                             'type' => $thickness->type,
@@ -406,13 +415,15 @@ class SettingsController extends BaseController
     public function category($categoryId=false, $json=false)
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_category'));
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_category'));
 
         if($categoryId):
+
+            $functionController->is_dashboard(false);
 
             $data = $functionController->getStatement($_GET);
             $status_code = 200;
@@ -423,7 +434,9 @@ class SettingsController extends BaseController
             endif;
 
             $thickness = GlassThickness::where('glass_type_id', null)
-                ->where('products_id', null)->orderBy('id', 'desc')->get();
+                ->where('products_id', null)
+                ->where('category_id', null)
+                ->orderBy('id', 'desc')->get();
             $types = GlassType::where('active', true)->get();
 
             if($json):
@@ -447,7 +460,7 @@ class SettingsController extends BaseController
                     $subCategory->created_text = date('d/m/Y H:i', strtotime($subCategory->created_at));
 
                     if($subCategory->glass_type_id):
-                        $product = Product::updateOrCreate(
+                        Product::updateOrCreate(
                             [
                                 'category_id' => $subCategory->category_id,
                                 'sub_category_id' => $subCategory->id,
@@ -459,6 +472,7 @@ class SettingsController extends BaseController
                             ]
                         );
 
+                        /* será migrado para categorias
                         $values = [];
                         if (!$product->thickness()->exists()):
                             foreach ($thickness as $thick):
@@ -473,6 +487,7 @@ class SettingsController extends BaseController
                             $product->thickness()->createMany($values);
                         endif;
                         $values = [];
+                        */
                     endif;
 
                     $values[] =  $subCategory;
@@ -488,12 +503,28 @@ class SettingsController extends BaseController
 
             else:
 
+                $values = [];
+                if (!$category->thickness()->exists()):
+                    foreach ($thickness as $thick):
+                        $values[] = [
+                            'name' => $thick->name,
+                            'price' => $thick->price,
+                            'type' => $thick->type,
+                            'category' => $thick->category,
+                            'active' => $thick->active,
+                        ];
+                    endforeach;
+                    $category->thickness()->createMany($values);
+                endif;
+                $thickness = $category->thickness()->orderBy('id', 'desc')->get();
+
+
                 $this->render(
                     "category", [
                         "button" => "None",
                         "category" => $category,
+                        "thickness" => $thickness,
                         "default" => [
-                            "thickness" => $thickness,
                             "types" => $types
                         ]
                     ]
@@ -504,6 +535,28 @@ class SettingsController extends BaseController
         else:
 
             $categories = Category::all();
+            /*
+            $thickness = GlassThickness::where('glass_type_id', null)
+                ->where('products_id', null)
+                ->where('category_id', null)
+                ->orderBy('id', 'desc')->get();
+            foreach ($categories as $category) {
+                $values = [];
+                if (!$category->thickness()->exists()):
+                    foreach ($thickness as $thick):
+                        $values[] = [
+                            'name' => $thick->name,
+                            'price' => $thick->price,
+                            'type' => $thick->type,
+                            'category' => $thick->category,
+                            'active' => $thick->active,
+                        ];
+                    endforeach;
+                    $category->thickness()->createMany($values);
+                endif;
+            }
+            */
+
             $this->render(
                 "categories", [
                     "button" => "add",
@@ -517,7 +570,7 @@ class SettingsController extends BaseController
     public function glass_type()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         $type = GlassType::all();
@@ -541,11 +594,13 @@ class SettingsController extends BaseController
     public function glass_thickness()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
-        $thickness = GlassThickness::where('glass_type_id', null)->
-            where('products_id', null)->orderBy('id', 'desc')->get();
+        $thickness = GlassThickness::where('glass_type_id', null)
+            ->where('products_id', null)
+            ->where('category_id', null)
+            ->orderBy('id', 'desc')->get();
 
         if($this->only_return){
             return $thickness;
@@ -566,7 +621,7 @@ class SettingsController extends BaseController
     public function glass_colors()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         $colors = GlassColors::all();
@@ -590,7 +645,7 @@ class SettingsController extends BaseController
     public function glass_finish()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         $finish = GlassFinish::all();
@@ -614,7 +669,7 @@ class SettingsController extends BaseController
     public function glass_clearances()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         $clearances = GlassClearances::all();
@@ -638,7 +693,7 @@ class SettingsController extends BaseController
     public function print_templates()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
         define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_print_templates'));
@@ -659,7 +714,7 @@ class SettingsController extends BaseController
     {
 
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
         $functionController->is_('settings_page', true);
 
 

@@ -80,6 +80,7 @@ class OrdersItems extends Model
         'glass_color_id',
         'glass_finish_id',
         'glass_clearances_id',
+        'glass_type_id',
         'quantity',
         'width',
         'height',

@@ -128,9 +128,15 @@ $functionController = new FunctionController();
                         }
 
                         if(el.value === 'cnpj'){
+                            $('input[name="name"]').prop('required', false).parent().parent().hide();
+                            $('input[name="company_name"]').prop('required', true).parent().parent().show();
+                            $('input[name="trading_name"]').prop('required', false).parent().parent().show();
                             $(input_name).on('keyup', handleKeyUp)
                         }else{
                             auto_remove_alert(0)
+                            $('input[name="name"]').prop('required', true).parent().parent().show();
+                            $('input[name="company_name"]').prop('required', false).parent().parent().hide();
+                            $('input[name="trading_name"]').prop('required', false).parent().parent().hide();
                             $(input_name).off('keyup', handleKeyUp)
                         }
                     });
@@ -139,10 +145,17 @@ $functionController = new FunctionController();
                     if(field.value){
                         if(field.value.length === 18){
                             $('input[name="document-type"][value="cnpj"]').prop('checked', true).trigger('change');
+                            $('input[name="company_name"]').prop('required', true).parent().parent().show();
+                            $('input[name="trading_name"]').prop('required', false).parent().parent().show();
+                            $('input[name="name"]').prop('required', false).parent().parent().hide();
+
                         }
 
                         if(field.value.length === 14){
                             $('input[name="document-type"][value="cpf"]').prop('checked', true).trigger('change');
+                            $('input[name="company_name"]').prop('required', false).parent().parent().hide();
+                            $('input[name="trading_name"]').prop('required', false).parent().parent().hide();
+                            $('input[name="name"]').prop('required', true).parent().parent().show();
                         }
                         $(input_name).val(field.value).trigger('change');
                     }

@@ -11,6 +11,22 @@ $functionController = new FunctionController();
 
 <div class="section mt-2">
     <ul class="listview image-listview inset list my-2">
+
+        <li class="w-100 align-items-center justify-content-between">
+            <h3 class="m-2"><?=SUBTITLE_PAGE?></h3>
+            <a
+                <?php if (!isset($url)): ?>
+                    href="javascript:void(0)" onclick="actionForm('<?=$actionForm?>')"
+                    data-bs-toggle="modal" data-bs-target="#actionSheetForm"
+                <?php else: ?>
+                    href="<?=$url?>"
+                <?php endif; ?>
+                    class="m-2 btn btn-primary">
+                <ion-icon name="add-outline"></ion-icon>
+                <?=$functionController->locale('label_btn_add')?>
+            </a>
+        </li>
+
         <?php if(count($finish)): foreach ($finish as $item):
 
             $item->created_text = date('d/m/Y H:i', strtotime($item->created_at));
