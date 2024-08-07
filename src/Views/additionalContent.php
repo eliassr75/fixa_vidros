@@ -9,6 +9,7 @@ $menuController = new MenuController();
 ?>
 
 <!-- App Bottom Menu -->
+<?php if(in_array($_SESSION['permission_id'], [1, 2, 3])): ?>
 <div class="appBottomMenu">
     <a href="/dashboard/" class="item">
         <div class="col">
@@ -36,14 +37,17 @@ $menuController = new MenuController();
         </div>
     </a>
     -->
-    <a href="/settings/" class="item">
-        <div class="col">
-            <ion-icon name="settings-outline"></ion-icon>
-            <strong><?=$functionController->locale('menu_item_settings')?></strong>
-        </div>
-    </a>
+    <?php if(in_array($_SESSION['permission_id'], [1])): ?>
+        <a href="/settings/" class="item">
+            <div class="col">
+                <ion-icon name="settings-outline"></ion-icon>
+                <strong><?=$functionController->locale('menu_item_settings')?></strong>
+            </div>
+        </a>
+    <?php endif; ?>
 </div>
 <!-- * App Bottom Menu -->
+<?php endif; ?>
 
 <!-- App Sidebar -->
 <div class="modal fade panelbox panelbox-left" id="sidebarPanel" tabindex="-1" role="dialog">
@@ -63,52 +67,6 @@ $menuController = new MenuController();
                         <ion-icon name="close-outline"></ion-icon>
                     </a>
                 </div>
-                <!-- * profile box -->
-                <!-- balance -->
-                <!-- <div class="sidebar-balance">
-                    <div class="listview-title">Movimentações</div>
-                    <div class="in">
-                        <h1 class="amount">$ 2,562.50</h1>
-                    </div>
-                </div> -->
-                <!-- * balance -->
-
-                <!-- action group -->
-                <!-- <div class="action-group">
-                    <a href="index.html" class="action-button">
-                        <div class="in">
-                            <div class="iconbox">
-                                <ion-icon name="add-outline"></ion-icon>
-                            </div>
-                            Deposit
-                        </div>
-                    </a>
-                    <a href="index.html" class="action-button">
-                        <div class="in">
-                            <div class="iconbox">
-                                <ion-icon name="arrow-down-outline"></ion-icon>
-                            </div>
-                            Withdraw
-                        </div>
-                    </a>
-                    <a href="index.html" class="action-button">
-                        <div class="in">
-                            <div class="iconbox">
-                                <ion-icon name="arrow-forward-outline"></ion-icon>
-                            </div>
-                            Send
-                        </div>
-                    </a>
-                    <a href="app-cards.html" class="action-button">
-                        <div class="in">
-                            <div class="iconbox">
-                                <ion-icon name="card-outline"></ion-icon>
-                            </div>
-                            My Cards
-                        </div>
-                    </a>
-                </div> -->
-                <!-- * action group -->
 
                 <!-- menu -->
                 <div class="listview-title mt-1">Menu</div>

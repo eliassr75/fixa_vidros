@@ -14,6 +14,8 @@ class LogEntry extends Model {
         'title',
         'description',
         'request_type',
+        'old_dump_post',
+        'new_dump_post',
         'user_agent'
     ];
 
@@ -23,6 +25,8 @@ class LogEntry extends Model {
         'title',
         'description',
         'request_type',
+        'old_dump_post',
+        'new_dump_post',
         'user_agent'
     ];
 
@@ -43,6 +47,11 @@ class LogEntry extends Model {
     public function users()
     {
         return $this->belongsToMany(User::class, 'log_entry_user', 'log_id', 'user_id');
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Orders::class, 'log_entry_user', 'log_id', 'order_id');
     }
 
     /**

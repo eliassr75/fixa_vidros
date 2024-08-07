@@ -13,7 +13,7 @@ class UserController extends BaseController
     public function index()
     {
         $functionController = new FunctionController();
-        $functionController->is_dashboard(false);
+        $functionController->is_dashboard(true);
 
         define('TITLE_PAGE', 'Fixa Vidros - Usuários');
         define('SUBTITLE_PAGE', $functionController->locale('menu_item_users'));
@@ -138,7 +138,6 @@ class UserController extends BaseController
 
         $user_search->name = $data->name;
         $user_search->email = $data->email;
-        $user_search->username = explode('@', $data->email)[0];
         $user_search->language = $data->language;
 
         if($user_search->permissions()->exists()):

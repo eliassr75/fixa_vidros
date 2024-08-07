@@ -111,6 +111,13 @@
     </style>
 </head>
 <body>
+<div style="margin-bottom: 2mm; width: 100%; display: flex; justify-content: center;">
+    <button id="printButton" onclick="f_print()">
+        Imprimir Etiqueta
+    </button>
+</div>
+
+
 
 <?php switch ($routeName){
     case 'products': ?>
@@ -157,11 +164,6 @@ case 'order': ?>
 <?php break;
 }
 ?>
-
-<button id="printButton" onclick="f_print()">
-    Imprimir Etiqueta
-</button>
-
 <script src="/assets/js/custom_vars.js"></script>
 <script>
 

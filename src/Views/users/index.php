@@ -10,75 +10,86 @@ $functionController = new FunctionController();
 ?>
 
 <div class="section mt-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-12">
+            <div class="card">
+                <div id="users">
 
-    <div class="card">
-
-        <div id="users">
-
-            <!-- class="search" automagically makes an input a search field. -->
-            <div class="px-3 pt-3">
-                <form class="search-form">
-                    <div class="form-group searchbox">
-                        <input type="text" class="form-control search">
-                        <i class="input-icon">
-                            <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
-                        </i>
-                    </div>
-                </form>
-            </div>
-            <!-- class="sort" automagically makes an element a sort buttons. The date-sort value decides what to sort by. -->
-            <!--
-            <button class="sort btn btn-primary" data-sort="name">
-                Sort
-            </button>
-            -->
-
-            <ul class="listview image-listview inset list my-2">
-                <?php foreach ($users as $user): ?>
-                <li id="li-model">
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#actionSheetFormUser" onclick="userController(false, <?=$user->id?>)" class="item">
-                        <img src="/assets/img/sample/avatar/do-utilizador.png" alt="image" class="image">
-                        <div class="in">
-                            <div>
-                                <header class="permission"><?=$user->current_permission?></header>
-                                <span class="name"><?=$user->name?></span>
-                                <footer class="str_created">
-                                    <?=$user->str_created?>
-                                </footer>
+                    <!-- class="search" automagically makes an input a search field. -->
+                    <div class="px-3 pt-3 d-flex">
+                        <form class="search-form">
+                            <div class="form-group searchbox">
+                                <input type="text" class="form-control search">
+                                <i class="input-icon">
+                                    <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
+                                </i>
                             </div>
-                        </div>
-                    </a>
-                    <div class="form-check form-switch me-2">
-                        <input class="form-check-input" type="checkbox" value="<?=$user->id?>" <?=$user->active ? "checked" : ""?> id="SwitchCheckUser<?=$user->id?>" onchange="change('/users/change/', <?=$user->id?>, this)">
-                        <label class="form-check-label" for="SwitchCheckUser<?=$user->id?>"></label>
+                        </form>
+                        <a
+                            <?php if (!isset($url)): ?>
+                                href="javascript:void(0)" onclick="actionForm('<?=$actionForm?>')"
+                                data-bs-toggle="modal" data-bs-target="#actionSheetForm"
+                            <?php else: ?>
+                                href="<?=$url?>"
+                            <?php endif; ?>
+                                class=" ms-2 btn btn-primary">
+                            <ion-icon name="add-outline"></ion-icon>
+                            <?=$functionController->locale('label_btn_add')?>
+                        </a>
                     </div>
-                </li>
-                <?php endforeach; ?>
-            </ul>
+                    <!-- class="sort" automagically makes an element a sort buttons. The date-sort value decides what to sort by. -->
+                    <!--
+                    <button class="sort btn btn-primary" data-sort="name">
+                        Sort
+                    </button>
+                    -->
 
-            <div class="modal fade modalbox" id="actionSheetFormUser" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"></h5>
-                            <a href="javascript:void(0);" data-bs-dismiss="modal" class="btn-close btn-close-white">
+                    <ul class="listview image-listview inset list my-2">
+                        <?php foreach ($users as $user): ?>
+                        <li id="li-model">
+                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#actionSheetFormUser" onclick="userController(false, <?=$user->id?>)" class="item">
+                                <img src="/assets/img/sample/avatar/do-utilizador.png" alt="image" class="image">
+                                <div class="in">
+                                    <div>
+                                        <header class="permission"><?=$user->current_permission?></header>
+                                        <span class="name"><?=$user->name?></span>
+                                        <footer class="str_created">
+                                            <?=$user->str_created?>
+                                        </footer>
+                                    </div>
+                                </div>
                             </a>
-                        </div>
-                        <div class="modal-body">
-                            <div class="action-sheet-content" id="user-info">
-                                <div id="section-animation" class="w-100 d-flex justify-content-center"></div>
+                            <div class="form-check form-switch me-2">
+                                <input class="form-check-input" type="checkbox" value="<?=$user->id?>" <?=$user->active ? "checked" : ""?> id="SwitchCheckUser<?=$user->id?>" onchange="change('/users/change/', <?=$user->id?>, this)">
+                                <label class="form-check-label" for="SwitchCheckUser<?=$user->id?>"></label>
+                            </div>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+
+                    <div class="modal fade modalbox" id="actionSheetFormUser" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"></h5>
+                                    <a href="javascript:void(0);" data-bs-dismiss="modal" class="btn-close btn-close-white">
+                                    </a>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="action-sheet-content" id="user-info">
+                                        <div id="section-animation" class="w-100 d-flex justify-content-center"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <div id="child-global-custom-alert"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="modal-footer border-0">
-                            <div id="child-global-custom-alert"></div>
-                        </div>
                     </div>
+
                 </div>
             </div>
-
         </div>
-
-
     </div>
 </div>
 

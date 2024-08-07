@@ -10,7 +10,9 @@ $functionController = new FunctionController();
 ?>
 
 <div class="section mt-2">
-    <ul class="listview image-listview inset list my-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-12">
+            <ul class="listview image-listview inset list my-2">
 
         <li class="w-100 align-items-center justify-content-between">
             <h3 class="m-2"><?=SUBTITLE_PAGE?></h3>
@@ -49,6 +51,8 @@ $functionController = new FunctionController();
             </div>
         <?php endif; ?>
     </ul>
+        </div>
+    </div>
 </div>
 
 <?php require_once __DIR__ . '/../bodyContentEnd.php'; ?>

@@ -75,6 +75,7 @@ $router->addRoute('GET', '/settings/glass_colors/', true, "system", [1], Setting
 $router->addRoute('GET', '/settings/glass_finish/', true, "system", [1], SettingsController::class, 'glass_finish');
 $router->addRoute('GET', '/settings/glass_clearances/', true, "system", [1], SettingsController::class, 'glass_clearances');
 $router->addRoute('GET', '/settings/print_templates/', true, "system", [1], SettingsController::class, 'print_templates');
+$router->addRoute('GET', '/settings/emails/', true, "system", [1], SettingsController::class, 'emails');
 $router->addRoute('POST', '/settings/{routeName}/', true, "system", [1], SettingsController::class, 'create');
 $router->addRoute('PUT', '/settings/{routeName}/{Id}/', true, "system", [1], SettingsController::class, 'update');
 
@@ -87,7 +88,7 @@ $router->addRoute('GET', '/orders/', true, "system", [1, 2, 3, 4],OrdersControll
 $router->addRoute('GET', '/order/new/', true, "system", [1, 2, 3],OrdersController::class, 'getOrder');
 $router->addRoute('POST', '/order/new/', true, "system", [1, 2, 3],OrdersController::class, 'newOrder');
 $router->addRoute('GET', '/order/{orderId}/', true, "system", [1, 2, 3, 4],OrdersController::class, 'getOrder');
-$router->addRoute('PUT', '/order/{orderId}/', true, "system", [1, 2, 3],OrdersController::class, 'updateOrder');
+$router->addRoute('PUT', '/order/{orderId}/', true, "system", [1, 2, 3, 4],OrdersController::class, 'updateOrder');
 
 $router->addRoute('POST', '/uploads/addImage/', true, "system", [1, 2, 3], UploadsController::class, 'addImage');
 $router->addRoute('GET', '/print/{routeName}/{Id}/', true, "system", [1, 2, 3, 4], SettingsController::class, 'print');

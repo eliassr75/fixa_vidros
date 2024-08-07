@@ -11,10 +11,12 @@ use App\Models\Orders;
 use App\Models\OrdersItems;
 use App\Models\OrderStatus;
 use App\Models\Product;
+use App\Models\Registry;
 use App\Models\SubCategory;
 use App\Models\User;
 use Doctrine\Inflector\Rules\Transformation;
 use Exception;
+use TCPDF;
 
 class OrdersController extends BaseController
 {
@@ -42,8 +44,13 @@ class OrdersController extends BaseController
         ->join('client', 'client.id', '=', 'orders.client_id')
         ->join('users', 'users.id', '=', 'orders.user_id')
         ->join('type_status_orders', 'type_status_orders.id', '=', 'orders.status_id')
-        ->join('type_status_finance', 'type_status_finance.id', '=', 'orders.finance_id')
-        ->get();
+        ->join('type_status_finance', 'type_status_finance.id', '=', 'orders.finance_id');
+
+        if(in_array($_SESSION['permission_id'], [3])):
+            $orders = $orders->where('orders.user_id', $_SESSION['id']);
+        endif;
+        $orders = $orders->get();
+
         $orders_array = [];
         foreach ($orders as $order) {
             $order->str_created = date('d/m/Y H:i', strtotime($order->created_at));
@@ -58,6 +65,135 @@ class OrdersController extends BaseController
         ]);
     }
 
+    public function sendEmailNotification($email, $subject, $body, $url = null, $accessLabel = null) {
+        $functionController = new FunctionController();
+        return $functionController->sendMail(
+            $email,
+            $subject,
+            $body,
+            $url,
+            $accessLabel
+        );
+    }
+
+    function generatePDF($order, $items, $showPrices = true) {
+        // Create new PDF document
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // Set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('FixaVidros');
+
+        $name = date('Ymd', strtotime($order->created_at)) . "_" .  $order->id;
+        $pdf->SetTitle("Pedido {$name}");
+
+        $pdf->SetSubject('Data de criação: ' . date('d/m/Y H:i:s', strtotime($order->created_at)));
+        $pdf->SetKeywords('TCPDF, PDF, order, details');
+
+        // Set default header data
+        $logo = __DIR__ . '/../../public/assets/img/logo-fixa-new.png';
+        $pdf->Image($logo, 10, 10, 50, 0, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+
+        // Add title and subtitle
+        $pdf->SetFont('helvetica', 'B', 20);
+        $pdf->Cell(0, 15, 'Pedido', 0, 1, 'C', 0, '', 0, false, 'M', 'M');
+        $pdf->SetFont('helvetica', '', 12);
+        $pdf->Cell(0, 15, 'Data de criação: ' . date('d/m/Y', strtotime($order->created_at)), 0, 1, 'C', 0, '', 0, false, 'M', 'M');
+
+        // Set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // Set margins
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+        // Set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+        // Set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // Add a page
+        $pdf->AddPage();
+
+        // Add order information
+        $html = '<h1>Detalhes do Pedido</h1>';
+        $html .= '<p>Id do Pedido: ' . $order->id . '</p>';
+        if ($showPrices) {
+            $html .= '<p>Valor total: ' . $this->formatCurrencyBR($order->total_price) . '</p>';
+        }
+        $html .= '<p>Cliente: ' . htmlspecialchars($order->client_name) . '</p>';
+        $html .= '<h2>Itens do Pedido</h2>';
+
+        // Add items table
+        $html .= '<table border="1" cellpadding="5" cellspacing="0">';
+        $html .= '<tr>';
+        $html .= '<th>Produto</th>';
+        $html .= '<th>Quantidade</th>';
+        $html .= '<th>Dimensões</th>';
+        if ($showPrices) {
+            $html .= '<th>Preço</th>';
+        }
+        $html .= '</tr>';
+
+        foreach ($items as $item) {
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($item['name']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['quantity']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['width']) . ' x ' . htmlspecialchars($item['height']) . '</td>';
+            if ($showPrices) {
+                $html .= '<td>' . htmlspecialchars($this->formatCurrencyBR($item['price'])) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</table>';
+
+        // Print text using writeHTMLCell()
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        // Close and output PDF document
+        $file =  __DIR__ . '/../../public/assets/docs/orders_' . $name . '.pdf';
+        $pdf->Output($file, 'F');
+    }
+
+    public function generateOrderItemsTable($items, $prices=true) {
+
+        $functionController = new FunctionController();
+
+        $html = '<table border="1" cellpadding="5" cellspacing="0" style="font-size: 11px; width: 100%">';
+        $html .= '<tr>';
+        $html .= '<th>Produto</th>';
+        $html .= '<th>Tipo</th>';
+        $html .= '<th>Quantidade</th>';
+        $html .= '<th>Dimensões</th>';
+
+        if($prices):
+            $html .= '<th>Preço</th>';
+        endif;
+        $html .= '</tr>';
+
+        foreach ($items as $item) {
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($item['name']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['glass_type_id'] == 1 ? 'COMUM' : 'TEMPERADO') . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['quantity']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($item['width']) . ' x ' . htmlspecialchars($item['height']) . '</td>';
+            if($prices):
+                $html .= '<td>' . htmlspecialchars($functionController->formatCurrencyBR($item['price'])) . '</td>';
+            endif;
+            $html .= '</tr>';
+        }
+
+        $html .= '</table>';
+        return $html;
+    }
+
+    function formatCurrencyBR($value) {
+        return 'R$ ' . number_format($value, 2, ',', '.');
+    }
+
     public function prepareOrderData($orderId)
     {
         $functionController = new FunctionController();
@@ -65,15 +201,21 @@ class OrdersController extends BaseController
         $orderFinance = [];
         $existsOrder = [];
         if($orderId){
-            $orderStatus = OrderStatus::all();
-            $orderFinance = OrderFinance::all();
+            $orderStatus = OrderStatus::orderBy('id', 'asc')->get();
+            $orderFinance = OrderFinance::orderBy('id', 'asc')->get();
             $order = Orders::find($orderId);
-            $orderItems = $order->items()->get();
+            $orderItems = $order->items()->where('active', true)->get();
             $existsOrder['order'] = $order;
-            $existsOrder['items'] = $orderItems;
+            $orderItemsArray = [];
+            foreach ($orderItems as $orderItem) {
+                $orderItem->client_id = $order->client_id;
+                $orderItemsArray[] = $orderItem;
+            }
+
+            $existsOrder['items'] = $orderItemsArray;
         }
 
-        $clients = Client::orderBy('id', 'desc')->get();
+        $clients = Client::where('active', true)->orderBy('id', 'desc')->get();
         $clients_array = [];
         foreach ($clients as $client) {
             $client->str_created = date('d/m/Y H:i', strtotime($client->created_at));
@@ -99,10 +241,10 @@ class OrdersController extends BaseController
                 ->get();
 
             $subCategorias[$category->id] = $subcategories;
-
+            $products_array[$category->id] = [];
             foreach ($subcategories as $subcategory) {
 
-                $products_array[] = [
+                $products_array[$category->id][] = [
                     "name" => $category->name . " " . $subcategory->name,
                     "str_created" => date('d/m/Y H:i', strtotime($subcategory->created_at)),
                     "custom_name" => $subcategory->additional_name,
@@ -118,6 +260,7 @@ class OrdersController extends BaseController
             }
         }
 
+        $logs = [];
         if($orderId):
 
             $order = Orders::where('orders.id', $orderId)
@@ -131,6 +274,11 @@ class OrdersController extends BaseController
                 ->first();
             $order->str_created = date('d/m/Y H:i', strtotime($order->created_at));
 
+            foreach ($order->log_entry()->orderBy('id', 'desc')->get() as $log) {
+                $log->str_created = date('d/m/Y H:i', strtotime($log->created));
+                $logs[] = $log;
+            }
+
         else:
             $order = new Orders();
         endif;
@@ -141,6 +289,7 @@ class OrdersController extends BaseController
             'showPrice' => in_array($_SESSION['permission_id'], [1, 2, 3]),
             'min_date' => date('Y-m-d'),
             'order' => $order,
+            'logs' => $logs,
             'orderStatus' => $orderStatus,
             'orderFinance' => $orderFinance,
             'categories' => $categories,
@@ -187,11 +336,13 @@ class OrdersController extends BaseController
         $order->date_delivery = $data->date_delivery;
         $order->save();
 
+        $order->setLog('Orders', "Pedido $order->id adicionado por {$_SESSION['username']} ({$_SESSION['id']})", [], $order);
         $items = [];
         foreach ($data->items as $key => $value) {
             foreach ($value as $item) {
                 $base = [];
                 $base['order_id'] = $order->id;
+                $base['name'] = $item->name;
                 $base['category_id'] = $item->category_id;
                 $base['sub_category_id'] = $item->sub_category_id;
                 if (intval($item->product_id)):
@@ -209,7 +360,9 @@ class OrdersController extends BaseController
                 $base['obs_client'] = $item->obs_client;
                 $base['obs_tempera'] = $item->obs_tempera;
                 $base['price'] = $item->price;
+
                 $items[] = $base;
+                $order->setLog('OrdersItems', "Produto $item->name adicionado por {$_SESSION['username']} ({$_SESSION['id']})", [], $base);
             }
         }
 
@@ -233,6 +386,7 @@ class OrdersController extends BaseController
         $functionController = new FunctionController();
         $functionController->api = true;
         $status_code = 200;
+        $send_email = false;
 
         try{
 
@@ -240,6 +394,8 @@ class OrdersController extends BaseController
             $response = $functionController->baseResponse();
 
             $order = Orders::find($orderId);
+            $oldOrder = Orders::find($orderId);
+
             $order->status_id = $data->status_id;
             $order->finance_id = $data->finance_id;
             $order->total_price = $data->total_price;
@@ -247,19 +403,37 @@ class OrdersController extends BaseController
             $order->obs_client = $data->obs_client;
             $order->date_delivery = $data->date_delivery;
 
-
             if (!empty($data->ids_to_remove)) {
                 $ids = explode(',', $data->ids_to_remove);
-                $order->items()->whereIn('id', $ids)->delete();
+                foreach ($ids as $id) {
+                    $item = OrdersItems::find($id);
+                    $order->setLog('OrdersItems', "Produto $item->name removido por {$_SESSION['username']} ({$_SESSION['id']})", $item, []);
+                }
+                $order->items()->whereIn('id', $ids)->update(['active' => false]);
             }
 
+            $hasChangesOrder = false;
+            foreach ($data as $key => $value) {
+                if ($key != "total_price" and $key != "items" and isset($oldOrder->$key) and $oldOrder->$key != $value) {
+                    $hasChangesOrder = true;
+                    break;
+                }
+            }
             $order->save();
+            if ($hasChangesOrder > 0) {
+                $order->setLog('Orders', "Pedido $order->id modificado por {$_SESSION['username']} ({$_SESSION['id']})", $oldOrder, $order);
+            }
+
+            $items = [];
+            $singleProducts = [];
+            $temperedProducts = [];
 
             $needsCreate = [];
             foreach ($data->items as $key => $value) {
                 foreach ($value as $item) {
                     $base = [];
                     $base['category_id'] = $item->category_id;
+                    $base['name'] = $item->name;
                     $base['sub_category_id'] = $item->sub_category_id;
                     if (intval($item->product_id)):
                         $base['product_id'] = $item->product_id;
@@ -268,6 +442,7 @@ class OrdersController extends BaseController
                     $base['glass_color_id'] = $item->glass_color_id;
                     $base['glass_finish_id'] = $item->glass_finish_id;
                     $base['glass_clearances_id'] = $item->glass_clearances_id;
+                    $base['glass_type_id'] = $item->glass_type_id;
                     $base['quantity'] = $item->quantity;
                     $base['width'] = $item->width;
                     $base['height'] = $item->height;
@@ -275,10 +450,32 @@ class OrdersController extends BaseController
                     $base['obs_client'] = $item->obs_client;
                     $base['obs_tempera'] = $item->obs_tempera;
                     $base['price'] = $item->price;
+
+                    $items[] = $base;
+                    if($item->glass_type_id == 1):
+                        $singleProducts[] = $base;
+                    else:
+                        $temperedProducts[] = $base;
+                    endif;
+
                     if (!$order->items()->where('id', $item->id)->exists()) {
+
                         $needsCreate[] = $base;
+                        $order->setLog('OrdersItems', "Produto $item->name adicionado por {$_SESSION['username']} ({$_SESSION['id']})", [], $base);
                     }else{
-                        OrdersItems::where('id', $item->id)->update($base);
+                        $oldItem = $order->items()->where('id', $item->id)->first();
+                        $hasChanges = false;
+                        foreach ($item as $key => $value) {
+                            if (isset($oldItem->$key) and $oldItem->$key != $value) {
+                                $hasChanges = true;
+                                break;
+                            }
+                        }
+                        if ($hasChanges) {
+                            OrdersItems::where('id', $item->id)->update($base);
+                            $newItem = $order->items()->where('id', $item->id)->first();
+                            $order->setLog('OrdersItems', "Produto $item->name modificado por {$_SESSION['username']} ({$_SESSION['id']})", $oldItem, $newItem);
+                        }
                     }
 
                 }
@@ -289,8 +486,62 @@ class OrdersController extends BaseController
                 $order->items()->createMany($needsCreate);
             }
 
-    //        $user = User::find($_SESSION['id']);
-    //        $user->setLog('Orders', "Usuário atualizou o pedido {$order->id}");
+            if ($hasChangesOrder > 0 and $order->status_id == 2){
+
+                $client = Client::find($order->client_id);
+                $emailFinance = "
+                    <span>Id do Pedido: {$order->id}</span> <br>
+                    <span>Valor total: {$functionController->formatCurrencyBR($order->total_price)}</span> <br>
+                    <span>Cliente: {$client->id}-{$client->name}</span> <br>
+                    <span>O.C.: {$order->obs_client}</span> <br>
+                    <span>Itens do Pedido:</span> <br>
+                    " . $this->generateOrderItemsTable($items) . "
+                ";
+
+                $email_finance = Registry::where('key', 'email_finance')->first();
+                $email_fabric = Registry::where('key', 'email_fabric')->first();
+                $email_production = Registry::where('key', 'email_production')->first();
+
+                $this->sendEmailNotification(
+                    $email_finance->value,
+                    $functionController->locale('label_new_order_added'),
+                    $emailFinance,
+                    "{$functionController->generateCurrentUrl("/order/{$order->id}/")}",
+                    "{$functionController->locale('access')} {$functionController->locale('menu_item_orders')}"
+                );
+
+                if(count($temperedProducts)):
+                    $emailFabric = "
+                        <span>Id do Pedido: {$order->id}</span> <br>
+                        <span>Cliente: {$client->id}-{$client->name}</span> <br>
+                        <span>O.C.: {$order->obs_client}</span> <br>
+                        <span>Itens do Pedido:</span> <br>
+                        " . $this->generateOrderItemsTable($temperedProducts, false) . "
+                    ";
+                    $this->sendEmailNotification(
+                        $email_fabric->value,
+                        $functionController->locale('label_new_order_added'),
+                        $emailFabric
+                    );
+                endif;
+
+                if(count($singleProducts)):
+                    $emailProduction = "
+                        <span>Id do Pedido: {$order->id}</span> <br>
+                        <span>Cliente: {$client->id}-{$client->name}</span> <br>
+                        <span>O.C.: {$order->obs_client}</span> <br>
+                        <span>Itens do Pedido:</span> <br>
+                        " . $this->generateOrderItemsTable($singleProducts, false) . "
+                    ";
+                    $this->sendEmailNotification(
+                        $email_production->value,
+                        $functionController->locale('label_new_order_added'),
+                        $emailProduction,
+                        "{$functionController->generateCurrentUrl("/order/{$order->id}/")}",
+                        "{$functionController->locale('access')} {$functionController->locale('menu_item_orders')}"
+                    );
+                endif;
+            }
 
             $response->status = "success";
             $response->reload = true;
@@ -302,7 +553,7 @@ class OrdersController extends BaseController
         }catch (Exception $e){
             $response->message = $e->getMessage();
             $response->dialog = true;
-            $response->spinner = true;
+            $response->spinner = false;
             $functionController->sendResponse($response, $status_code);
             return;
         }

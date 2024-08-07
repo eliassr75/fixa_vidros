@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Controllers\FunctionController;
 use Exception;
 use App\Validators\Validator;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,31 @@ class Orders extends Model {
 
     }
 
+    public function log_entry()
+    {
+        return $this->belongsToMany(LogEntry::class, 'log_entry_user', 'order_id', 'log_id');
+    }
+
+    public function setLog($title, $description, $old_dump_post, $new_dump_post)
+    {
+
+        $functionController = new FunctionController();
+        $log = new LogEntry();
+        $log->request_type = $_SERVER['REQUEST_METHOD'];
+        $log->user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $log->title = $title;
+        $log->description = $description;
+        $log->old_dump_post = $functionController->parseObjectToJson($old_dump_post);
+        $log->new_dump_post = $functionController->parseObjectToJson($new_dump_post);
+
+        if($log->validate()){
+            $log->save();
+            $this->log_entry()->attach($log->id);
+            return $log->id;
+        }
+
+    }
+
     public function items()
     {
         return $this->hasMany(OrdersItems::class, 'order_id', 'id');
@@ -51,6 +77,8 @@ class OrdersItems extends Model
     protected $table = 'order_items';
     protected $columns = [
         'id',
+        'name',
+        'active',
         'order_id',
         'category_id',
         'sub_category_id',
@@ -72,6 +100,8 @@ class OrdersItems extends Model
 
     use HasFactory;
     protected $fillable = [
+        'name',
+        'active',
         'order_id',
         'category_id',
         'sub_category_id',

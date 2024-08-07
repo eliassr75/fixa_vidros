@@ -22,6 +22,7 @@
     "statickidz/php-google-translate-free": "^1.2",
     "illuminate/database": "^11.13",
     "jenssegers/agent": "^2.6",
-    "jenssegers/blade": "^2.0"
+    "jenssegers/blade": "^2.0",
+    "tecnickcom/tcpdf": "^6.7"
   }
 }

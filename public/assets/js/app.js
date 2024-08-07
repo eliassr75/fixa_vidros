@@ -126,43 +126,56 @@ function uploadIMage(response = false) {
 
         if (response && response.responseJSON && response.responseJSON.image) {
             el = `
-            <div class="card my-2">
-                <div class="card-body" id="card-body-image">
-                    <img src="${response.responseJSON.image ? response.responseJSON.image : "/assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid border border-1">
+                <div class="card my-2">
+                    <div class="card-body" id="card-body-image">
+                        <img src="${response.responseJSON.image ? response.responseJSON.image : "/assets/img/sample/photo/1.jpg"}" alt="image" class="imaged img-fluid border border-1">
+                    </div>
                 </div>
-            </div>
-            <hr>
+                <hr>
             `;
-            $(".send-image").html(el);
+
+            $(".send-image").html(`
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-12">
+                        ${el}
+                    </div>
+                </div>
+            `);
             $("input[name='image']").val(response.responseJSON.image).trigger('change')
         } else {
             el = `
-            <div class="card my-2">
-                <div class="card-body" id="card-body-image">
-                    <form id="form-image" data-method="POST" data-action="/uploads/addImage/" data-ajax="default" data-callback="uploadIMage" enctype="multipart/form-data">
-                        <div class="custom-file-upload" id="fileUpload">
-                            <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg" required>
-                            <label for="image">
-                                <span>
-                                    <strong>
-                                        <ion-icon name="arrow-up-circle-outline" role="img" class="md hydrated" aria-label="arrow up circle outline"></ion-icon>
-                                        <i id="section-animation-image">${locale.upload_image}</i>
-                                    </strong>
-                                </span>
-                            </label>
-                        </div>
-                        <div class="mt-2" id="progressContainerImage">
-                            <div class="progress rounded-0 mb-0" role="progressbar" id="progressDivImage" aria-label="progressDivImage" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" id="progressBarImage" style="width: 0%"></div>
+                <div class="card my-2">
+                    <div class="card-body" id="card-body-image">
+                        <form id="form-image" data-method="POST" data-action="/uploads/addImage/" data-ajax="default" data-callback="uploadIMage" enctype="multipart/form-data">
+                            <div class="custom-file-upload" id="fileUpload">
+                                <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg" required>
+                                <label for="image">
+                                    <span>
+                                        <strong>
+                                            <ion-icon name="arrow-up-circle-outline" role="img" class="md hydrated" aria-label="arrow up circle outline"></ion-icon>
+                                            <i id="section-animation-image">${locale.upload_image}</i>
+                                        </strong>
+                                    </span>
+                                </label>
                             </div>
-                        </div>
-                    </form>            
+                            <div class="mt-2" id="progressContainerImage">
+                                <div class="progress rounded-0 mb-0" role="progressbar" id="progressDivImage" aria-label="progressDivImage" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" id="progressBarImage" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </form>            
+                    </div>
                 </div>
-            </div>
-            <hr>
+                <hr>
             `;
 
-            $(".send-image").html(el);
+            $(".send-image").html(`
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12">
+                    ${el}
+                </div>
+            </div>
+            `);
             $("#progressContainerImage").hide();
 
             $('#form-image').on("submit", function (e) {
@@ -557,6 +570,38 @@ function actionForm(action, data=false){
 
             break;
 
+        case 'addEmails':
+        case "editEmails":
+
+            route = `/settings/emails/${data.id}/`;
+            method = "PUT";
+            if (action === "addEmails" || !data.id){
+                route = `/settings/emails/`;
+                method = "POST";
+            }
+
+            global_action_sheet_title.html(`${locale.menu_item_emails} - ${data.title}`);
+
+            body = `
+                <input type="hidden" name="key" value="${data.registry_key}" >
+                <p class="form-check-label" >${data.created_text ? `${locale.label_created} ${data.created_text}`: locale.label_new_registry}</p>
+                <hr>
+
+                <div class="form-group basic">
+                    <div class="input-wrapper">
+                        <label class="label" for="email">${locale.input_email}</label>
+                        <input type="text" class="form-control" id="email" name="email" value="${data.value ? data.value : ""}" placeholder="${locale.input_email}" required>
+                        <i class="clear-input">
+                            <ion-icon name="close-circle"></ion-icon>
+                        </i>
+                    </div>
+                </div>
+                
+                <div id="child-global-custom-alert" class="custom-alert my-2"></div>
+            `;
+
+            break;
+
         case 'addType':
         case "editType":
 
@@ -667,6 +712,10 @@ function actionForm(action, data=false){
 
             route = `/settings/glass_colors/${data.id}/`;
             method = "PUT";
+            if (action === "addColor"){
+                route = `/settings/glass_colors/`;
+                method = "POST";
+            }
 
             global_action_sheet_title.html(locale.menu_item_glass_colors);
 
@@ -709,7 +758,7 @@ function actionForm(action, data=false){
 
             route = `/settings/glass_clearances/${data.id}/`;
             method = "PUT";
-            if (action === "addFinish"){
+            if (action === "addClearance"){
                 route = `/settings/glass_clearances/`;
                 method = "POST";
             }
@@ -844,6 +893,7 @@ function actionForm(action, data=false){
             break;
 
         case 'showDescriptionProduct':
+
             global_action_sheet_title.html(locale.product_description);
 
             data.product_id = data.id;

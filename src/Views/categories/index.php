@@ -10,8 +10,9 @@ $functionController = new FunctionController();
 ?>
 
 <div class="section mt-2">
-
-    <div class="card">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-12">
+            <div class="card">
 
         <div id="categories">
 
@@ -62,6 +63,8 @@ $functionController = new FunctionController();
                 <?php endif; ?>
             </ul>
 
+        </div>
+    </div>
         </div>
     </div>
 </div>

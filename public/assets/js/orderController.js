@@ -1,5 +1,6 @@
 const actionSheetForm = new bootstrap.Modal('#actionSheetForm')
 const required_string = `<ion-icon name="alert-circle-outline"></ion-icon>`;
+
 function getNameItem(category_id, sub_category_id){
 
     let listNamesCategories = {};
@@ -23,6 +24,35 @@ function formatCurrency(value) {
     }).format(value);
 }
 
+function getLogs(){
+
+    let log_item = "";
+    if (existsOrder.order){
+        if (logs.length){
+            for (let log of logs){
+                log_item += `
+                <p class="text-truncate border-bottom"> 
+                    <!--<button class="btn btn-primary btn-sm btn-icon"><ion-icon name="eye-outline"></ion-icon></button>-->
+                    ${log.str_created} -> ${log.description}
+                </p>
+            `;
+            }
+        }else{
+            log_item = `
+            <div class="alert alert-primary" role="alert">
+                ${locale.not_items_founded}
+            </div>
+        `;
+        }
+
+        $("#logEntry").html(log_item);
+    }else{
+        $('#accordionLogs').parent().hide(0);
+    }
+
+
+}
+
 function checkExistsOrder(){
 
     if(existsOrder.order){
@@ -41,9 +71,11 @@ function checkExistsOrder(){
             let model = {
                 id: data.id ? data.id : null,
                 order_id: data.order_id ? data.order_id : null,
+                client_id: existsOrder.order ? existsOrder.order.client_id : null,
                 category_id: data.category_id,
                 sub_category_id: data.sub_category_id,
                 glass_thickness_id: data.glass_thickness_id,
+                glass_type_id: data.glass_type_id,
                 glass_color_id: data.glass_color_id,
                 glass_finish_id: data.glass_finish_id,
                 glass_clearances_id: data.glass_clearances_id,
@@ -67,10 +99,17 @@ function checkExistsOrder(){
         clearOrders();
     }
     orderController();
+    getLogs();
 }
 
 function importData(data){
-    updateLocalStorage(data)
+
+    let temp_data = getLocalStorageData();
+    if(temp_data.id){
+        data.id = temp_data.id
+    }
+
+    updateLocalStorage(data);
     actionSheetForm.toggle('hide');
     $('#products > #rows-images').hide();
     prepareOrderForm();
@@ -147,11 +186,9 @@ function editItem(id){
             let itemId = Object.keys(itemObj)[0];
             if (parseInt(itemId) === parseInt(id)){
                 let item = itemObj[itemId];
-                orderController(item);
                 updateLocalStorage(item);
-                prepareOrderForm();
+                orderController(item);
             }
-
         }
     }
 }
@@ -233,7 +270,7 @@ function saveOrder(save=false, show=true){
 
             console.log(params)
 
-            processForm(false, params, 'clearOrders');
+            processForm(false, params);
         }
 
     }
@@ -259,10 +296,12 @@ function getOrderItems() {
                 </p>
             </div>
             <div>
-                <button class="px-1 btn btn-primary" type="button" ${readOnly ? "" : `onclick="orderController(true);"`}>
-                    <ion-icon name="add-outline"></ion-icon>
-                    ${locale.label_btn_add}
-                </button>
+                ${readOnly ? "" :
+                    `<button class="px-1 btn btn-primary" type="button" ${readOnly ? "" : `onclick="orderController(true);"`}>
+                        <ion-icon name="add-outline"></ion-icon>
+                        ${locale.label_btn_add}
+                    </button>`
+                }
                 ${ order_id ? `
                     <button class="px-1 btn btn-primary" type="button" ${!existsOrder.order ? "" : `onclick="print('products');"`}>
                         <ion-icon name="print-outline"></ion-icon>
@@ -320,7 +359,7 @@ function getOrderItems() {
         </div>
         <div class="form-group basic">
             <div class="input-wrapper">
-                <label class="label" for="general-obs-client">${required_string} ${locale.input_obs_client}</label>
+                <label class="label" for="general-obs-client"> ${locale.input_obs_client}</label>
                 <textarea class="form-control" rows="6" id="general-obs-client" name="general-obs-client" ${readOnly ? "disabled" : ""}
                 placeholder="${locale.input_obs_client}" required>${general_obs_client ? general_obs_client : ""}</textarea>
                 <i class="clear-input">
@@ -329,16 +368,31 @@ function getOrderItems() {
             </div>
         </div>
         <div class="w-100">
-            <div class="row">
+            <div class="row d-flex align-items-center">
                 <div class="col-lg-4 col-md-5 col-6 d-flex align-items-center">
-                    <p>
-                        <b>${locale.label_total_price}: ${showPrice ? formatCurrency(total_price_order.toFixed(2)) : "--"}</b>
-                    </p>
+                    ${locale.label_total_price}: ${showPrice ? formatCurrency(total_price_order.toFixed(2)) : "--"}
                 </div>
                 <div class="col-lg-4 col-md-5 col-6">
                     <button type="button" class="btn btn-lg btn-primary btn-block btn-submit" onclick="saveOrder()">
                         ${locale.label_btn_save}
                     </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section border-top full mt-2">
+            <div class="accordion" id="accordionLogs">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionModifications" aria-expanded="false">
+                            ${locale.label_modify_history}
+                        </button>
+                    </h2>
+                    <div id="accordionModifications" class="accordion-collapse collapse" data-bs-parent="#accordionLogs">
+                        <div class="accordion-body" id="logEntry">
+                            
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -381,34 +435,10 @@ function prepareOrderForm() {
     $("#title-page").text(locale.label_item)
 
     let data = getLocalStorageData();
-
-    //SELECT CATEGORIES
-    let categories_select_values = "";
-    let customPrices = {};
-    for (let item of categories){
-        customPrices[item.id] = item.thickness;
-        categories_select_values += `
-            <option value="${item.id}" ${data.category_id && parseInt(data.category_id) === item.id ? "selected" : ""}>${item.name}</option>
-        `;
-    }
-    localStorage.setItem('customPrices', JSON.stringify(customPrices))
-
     let subcategory_select_values = "";
     let types_select_values = "";
     let images = [];
     if(data.category_id) {
-
-        categories_select_values = `
-            <div class="form-group boxed" id="categories">
-                <div class="input-wrapper">
-                    <label class="label" for="select-category">${required_string} ${locale.menu_item_category}</label>
-                    <select class="form-control custom-select" id="select-category" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'category_id', 'sub_category_id')" name="category">
-                        <option value="" selected disabled>${locale.select_2_placeholder}</option>
-                        ${categories_select_values}
-                    </select>
-                </div>
-            </div>
-        `;
 
         for (let item of subCategorias[data.category_id]) {
             images[item.id] = item.image;
@@ -647,11 +677,10 @@ function prepareOrderForm() {
     }
 
     nextForm.html(`
-        ${categories_select_values}
         ${nextFormBody}
         <br>
         <p>
-            <b>${locale.label_total_price}: ${showPrice ? formatCurrency(price.toFixed(2)) : "--"}</b>
+            <b>${locale.label_total_price}: ${showPrice ? (price ? formatCurrency(price.toFixed(2))  :  0.00) : "--"}</b>
         </p>
     `);
 
@@ -675,8 +704,18 @@ function changeValue(el, set_key, unset_key){
     data[set_key] = el.value;
     data[unset_key] = false;
 
+    const client_id = localStorage.getItem('selected_client_id') ? parseInt(localStorage.getItem('selected_client_id')) : null
+    updateLocalStorage('client_id', client_id);
     updateLocalStorage(data);
-    prepareOrderForm();
+    setTimeout(() => {
+        data = getLocalStorageData();
+        if(data.sub_category_id){
+            prepareOrderForm();
+        }else{
+            orderController(data);
+        }
+
+    }, 0);
 }
 
 function orderController(data=false){
@@ -685,7 +724,7 @@ function orderController(data=false){
     let formBory = ``;
 
     let status_select_values = "";
-    if(orderStatus.length){
+    if(orderStatus.length && !data){
         //SELECT ORDER STATUS
         let status_id = localStorage.getItem('selected_status_id') ? parseInt(localStorage.getItem('selected_status_id')) : false
         for (let item of orderStatus){
@@ -707,7 +746,7 @@ function orderController(data=false){
     }
 
     let finance_select_values = "";
-    if(orderFinance.length){
+    if(orderFinance.length && !data){
         //SELECT ORDER STATUS
         let finance_id = localStorage.getItem('selected_finance_id') ? parseInt(localStorage.getItem('selected_finance_id')) : false
         for (let item of orderFinance){
@@ -748,6 +787,18 @@ function orderController(data=false){
         </div>
     `;
 
+    //SELECT CATEGORIES
+    let categories_select_values = "";
+    let customPrices = {};
+    for (let item of categories){
+        customPrices[item.id] = item.thickness;
+        categories_select_values += `
+            <option value="${item.id}" ${data.category_id && parseInt(data.category_id) === item.id ? "selected" : ""}>${item.name}</option>
+        `;
+    }
+
+    localStorage.setItem('customPrices', JSON.stringify(customPrices))
+
     if(data){
 
         if(!client_id){
@@ -765,12 +816,24 @@ function orderController(data=false){
             localStorage.removeItem('jsonStorage');
         }
 
+        categories_select_values = `
+            <div class="form-group boxed" id="categories">
+                <div class="input-wrapper">
+                    <label class="label" for="select-category">${required_string} ${locale.menu_item_category}</label>
+                    <select class="form-control custom-select" id="select-category" ${readOnly ? "disabled" : ""} onchange="changeValue(this, 'category_id', 'sub_category_id')" name="category">
+                        <option value="" selected disabled>${locale.select_2_placeholder}</option>
+                        ${categories_select_values}
+                    </select>
+                </div>
+            </div>
+        `;
+
         //SEARCH PRODUCTS
         let products_select_values = `
                 <div id="products">
                     <form class="search-form">
                         <div class="form-group searchbox">
-                            <input type="text" class="form-control search" placeholder="${locale.input_label_search} ${locale.menu_item_category}" id="searchInput" ${readOnly ? "disabled" : ""}>
+                            <input type="text" class="form-control search" placeholder="${locale.input_label_search}" id="searchInput" ${readOnly ? "disabled" : ""}>
                             <i class="input-icon">
                                 <ion-icon name="search-outline" role="img" class="md hydrated" aria-label="search outline"></ion-icon>
                             </i>
@@ -780,8 +843,9 @@ function orderController(data=false){
                         <div class="row overflow-scroll overflow-visible d-flex" style="max-height: 45vh">
             `;
 
-        for (let item of products){
-            products_select_values += `
+        if(data.category_id) {
+            for (let item of products[data.category_id]) {
+                products_select_values += `
 
                         <div onclick='showDescriptionProduct(${JSON.stringify(item)})' class="col-lg-2 col-md-4 col-6 custom-item searchable">
                             <div class="border border-1 p-1 my-1 rounded-2 search-item">
@@ -794,6 +858,7 @@ function orderController(data=false){
                         </div>
 
                     `;
+            }
         }
         products_select_values += `
                     </div>
@@ -807,14 +872,6 @@ function orderController(data=false){
                 ${products_select_values}
 
                 <div id="nextForm"></div>
-
-                ${data.image ? `
-                    <div class="card my-2">
-                        <div class="card-body" id="card-body-image">
-                            <img src="${data.image}" alt="image" class="imaged img-fluid border border-1">
-                        </div>
-                    </div>
-                ` : "" }
 
                 <div id="child-global-custom-alert" class="custom-alert my-2"></div>
 
@@ -833,6 +890,8 @@ function orderController(data=false){
             </div>
 
         `;
+    }else{
+        categories_select_values = "";
     }
 
     orderBody.html(`
@@ -842,14 +901,14 @@ function orderController(data=false){
                 <p id="title-page">${locale.menu_item_orders}</p>
             </div>
             <div>       
-                ${ existsOrder.order ? `
+                ${ existsOrder.order && !data ? `
                     <button class="px-1 btn btn-primary" type="button" ${!existsOrder.order ? "" : `onclick="print('order');"`}>
                         <ion-icon name="print-outline"></ion-icon>
                         ${locale.menu_item_orders}
                     </button>
                 ` : "" }
                 
-                ${ client_id ? `
+                ${ client_id && !existsOrder.order ? `
                     <button class="px-1 btn btn-primary" type="button" ${readOnly ? "" : `onclick="clearOrders();"`}>
                         <ion-icon name="reload-outline"></ion-icon>
                         ${locale.label_clear}
@@ -862,6 +921,7 @@ function orderController(data=false){
         ${status_select_values}
         ${finance_select_values}
         ${clients_select_values}
+        ${categories_select_values}
         ${formBory}
     
         <br>
@@ -885,13 +945,18 @@ function orderController(data=false){
         localStorage.setItem('selected_finance_id', this.value);
     })
 
+    $("#products").hide();
+
     if(data) {
 
         $('#orderItems, #products > #rows-images').hide();
 
         if (data.category_id){
             $('#products').show();
-            $('#products > #rows-images').hide();
+            if(!data.sub_category_id){
+                $('#products > #rows-images').show();
+                $("#searchInput").focus()
+            }
         }
 
         document.getElementById('searchInput').addEventListener('input', function () {

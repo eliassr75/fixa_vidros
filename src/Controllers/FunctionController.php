@@ -527,7 +527,7 @@ class FunctionController extends BaseController
         return $str;
     }
 
-    public function generateCurrentUrl() {
+    public function generateCurrentUrl($customURL=false) {
 
         // Determine the scheme (http or https)
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -539,7 +539,11 @@ class FunctionController extends BaseController
         $path = $_SERVER['REQUEST_URI'];
 
         // Combine to form the full URL
-        $url = $scheme . '://' . $host . $path;
+        if(!$customURL){
+            $url = $scheme . '://' . $host . $path;
+        }else{
+            $url = $scheme . '://' . $host . $customURL;
+        }
 
         return $url;
     }

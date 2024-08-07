@@ -11,6 +11,7 @@ use App\Models\GlassThickness;
 use App\Models\GlassType;
 use App\Models\PrintTemplates;
 use App\Models\Product;
+use App\Models\Registry;
 use App\Models\SubCategory;
 use App\Models\User;
 use Exception;
@@ -127,6 +128,7 @@ class SettingsController extends BaseController
 
                 break;
             case 'category':
+
                 $category = Category::find($Id);
 
                 $category->name = $data->name;
@@ -154,6 +156,7 @@ class SettingsController extends BaseController
                 $category->save();
                 break;
             case 'glass_type':
+                $response->dialog = false;
                 $glass_type = GlassType::find($Id);
 
                 $glass_type->name = $data->name;
@@ -163,6 +166,7 @@ class SettingsController extends BaseController
                 break;
             case 'glass_thickness':
 
+                $response->dialog = false;
                 $thickness = GlassThickness::find($Id);
                 $old_thickness = GlassThickness::find($Id);
 
@@ -231,6 +235,7 @@ class SettingsController extends BaseController
                 $thickness->save();
                 break;
             case 'glass_colors':
+                $response->dialog = false;
                 $glass_color = GlassColors::find($Id);
 
                 $glass_color->name = $data->name;
@@ -240,6 +245,7 @@ class SettingsController extends BaseController
                 $glass_color->save();
                 break;
             case 'glass_finish':
+                $response->dialog = false;
                 $glass_finish = GlassFinish::find($Id);
 
                 $glass_finish->name = $data->name;
@@ -248,17 +254,25 @@ class SettingsController extends BaseController
                 $glass_finish->save();
                 break;
             case 'glass_clearances':
-                $glass_finish = GlassClearances::find($Id);
+                $response->dialog = false;
+                $glass_clearances = GlassClearances::find($Id);
 
-                $glass_finish->name = $data->name;
-                $glass_finish->width = $data->width;
-                $glass_finish->height = $data->height;
-                $glass_finish->active = (isset($data->active) and $data->active === 'on');
+                $glass_clearances->name = $data->name;
+                $glass_clearances->width = $data->width;
+                $glass_clearances->height = $data->height;
+                $glass_clearances->active = (isset($data->active) and $data->active === 'on');
 
-                $glass_finish->save();
+                $glass_clearances->save();
+                break;
+            case 'emails':
+
+                $registry = new Registry();
+                $registry->set($data->key, $data->email);
+
                 break;
             case 'print_templates':
 
+                $response->dialog = false;
                 $template = PrintTemplates::find($Id);
                 $template->name = $data->name;
                 $template->width = $data->width;
@@ -290,125 +304,133 @@ class SettingsController extends BaseController
         $response->dialog = true;
 
         $data = $functionController->postStatement($_POST);
-
-        switch ($routeName) {
-            case 'subcategory':
-
-                SubCategory::createOrUpdate(
-                    [
-                    'name' => $data->name,
-                    'additional_name' => $data->additional_name,
-                    'image' => $data->image,
-                    'category_id' => $data->category_id,
-                    ],
-                    [
-                        'name' => $data->name,
-                        'additional_name' => $data->additional_name,
-                        'image' => $data->image,
-                        'glass_type_id' => $data->glass_type_id,
-                    ]
-                );
-                $response->dialog = false;
-
-                break;
-            case 'category':
-                $category = new Category();
-
-                $category->name = $data->name;
-                $category->active = (isset($data->active) and $data->active === 'on');
-
-                $category->save();
-                $response->url = "/settings/category/{$category->id}/";
-                $response->reload = false;
-                break;
-            case 'glass_type':
-                $glass_type = new GlassType();
-
-                $glass_type->name = $data->name;
-                $glass_type->active = (isset($data->active) and $data->active === 'on');
-
-                $glass_type->save();
-                $response->dialog = false;
-                break;
-            case 'glass_thickness':
-                $thickness = new GlassThickness();
-
-                $needsCreate = false;
-                if($thickness->name != $data->name) {
-                    $needsCreate = true;
-                }
-
-                $thickness->name = $data->name;
-                $thickness->price = $data->price;
-                $thickness->active = (isset($data->active) and $data->active === 'on');
-
-                $array = explode("/", $data->type);
-                $thickness->type = end($array);
-                $thickness->category = $array[0];
-
-                $thickness->save();
-
-                if($needsCreate){
-                    foreach (Category::all() as $category):
-                        $category->thickness()->create([
-                            'name' => $thickness->name,
-                            'price' => $thickness->price,
-                            'type' => $thickness->type,
-                            'category' => $thickness->category,
-                            'active' => $thickness->active,
-                        ]);
-                    endforeach;
-                }
-
-                $response->dialog = false;
-                break;
-            case 'glass_colors':
-                $glass_color = new GlassColors();
-
-                $glass_color->name = $data->name;
-                $glass_color->percent = $data->percent;
-                $glass_color->active = (isset($data->active) and $data->active === 'on');
-
-                $glass_color->save();
-                $response->dialog = false;
-                break;
-            case 'glass_finish':
-                $glass_finish = new GlassFinish();
-
-                $glass_finish->name = $data->name;
-                $glass_finish->active = (isset($data->active) and $data->active === 'on');
-
-                $glass_finish->save();
-                $response->dialog = false;
-                break;
-            case 'glass_clearances':
-                $glass_finish = new GlassClearances();
-
-                $glass_finish->name = $data->name;
-                $glass_finish->width = $data->width;
-                $glass_finish->height = $data->height;
-                $glass_finish->active = (isset($data->active) and $data->active === 'on');
-
-                $glass_finish->save();
-                $response->dialog = false;
-                break;
-
-            case 'print_templates':
-                $template = new PrintTemplates();
-
-                $template->name = $data->name;
-                $template->width = $data->width;
-                $template->height = $data->height;
-                $template->spacing = $data->spacing;
-                $template->active = (isset($data->active) and $data->active === 'on');
-
-                $template->save();
-                break;
-        }
-
         $response->message = $functionController->locale('register_success_created');
-        $response->status = "success";
+        try{
+            switch ($routeName) {
+                case 'subcategory':
 
+                    SubCategory::createOrUpdate(
+                        [
+                            'name' => $data->name,
+                            'additional_name' => $data->additional_name,
+                            'image' => $data->image,
+                            'category_id' => $data->category_id,
+                        ],
+                        [
+                            'name' => $data->name,
+                            'additional_name' => $data->additional_name,
+                            'image' => $data->image,
+                            'glass_type_id' => $data->glass_type_id,
+                        ]
+                    );
+                    $response->dialog = false;
+
+                    break;
+                case 'category':
+                    $category = new Category();
+
+                    $category->name = $data->name;
+                    $category->active = (isset($data->active) and $data->active === 'on');
+
+                    $category->save();
+                    $response->url = "/settings/category/{$category->id}/";
+                    $response->reload = false;
+                    break;
+                case 'glass_type':
+                    $glass_type = new GlassType();
+
+                    $glass_type->name = $data->name;
+                    $glass_type->active = (isset($data->active) and $data->active === 'on');
+
+                    $glass_type->save();
+                    $response->dialog = false;
+                    break;
+                case 'glass_thickness':
+                    $thickness = new GlassThickness();
+
+                    $needsCreate = false;
+                    if($thickness->name != $data->name) {
+                        $needsCreate = true;
+                    }
+
+                    $thickness->name = $data->name;
+                    $thickness->price = $data->price;
+                    $thickness->active = (isset($data->active) and $data->active === 'on');
+
+                    $array = explode("/", $data->type);
+                    $thickness->type = end($array);
+                    $thickness->category = $array[0];
+
+                    $thickness->save();
+
+                    if($needsCreate){
+                        foreach (Category::all() as $category):
+                            $category->thickness()->create([
+                                'name' => $thickness->name,
+                                'price' => $thickness->price,
+                                'type' => $thickness->type,
+                                'category' => $thickness->category,
+                                'active' => $thickness->active,
+                            ]);
+                        endforeach;
+                    }
+
+                    $response->dialog = false;
+                    break;
+                case 'glass_colors':
+                    $glass_color = new GlassColors();
+
+                    $glass_color->name = $data->name;
+                    $glass_color->percent = $data->percent;
+                    $glass_color->active = (isset($data->active) and $data->active === 'on');
+
+                    $glass_color->save();
+                    $response->dialog = false;
+                    break;
+                case 'glass_finish':
+                    $glass_finish = new GlassFinish();
+
+                    $glass_finish->name = $data->name;
+                    $glass_finish->active = (isset($data->active) and $data->active === 'on');
+
+                    $glass_finish->save();
+                    $response->dialog = false;
+                    break;
+                case 'glass_clearances':
+
+                    $glass_clearances = new GlassClearances();
+
+                    $glass_clearances->name = $data->name;
+                    $glass_clearances->width = $data->width;
+                    $glass_clearances->height = $data->height;
+                    $glass_clearances->active = (isset($data->active) and $data->active === 'on');
+
+                    $glass_clearances->save();
+                    $response->dialog = false;
+                    break;
+
+                case 'emails':
+
+                    $registry = new Registry();
+                    $registry->set($data->key, $data->email);
+
+                    break;
+                case 'print_templates':
+                    $template = new PrintTemplates();
+
+                    $template->name = $data->name;
+                    $template->width = $data->width;
+                    $template->height = $data->height;
+                    $template->spacing = $data->spacing;
+                    $template->active = (isset($data->active) and $data->active === 'on');
+
+                    $template->save();
+                    break;
+            }
+        }catch (Exception $e){
+            $response->message = $e->getMessage();
+        }
+        $response->status = "success";
         $functionController->sendResponse($response, $status_code);
     }
 
@@ -710,6 +732,29 @@ class SettingsController extends BaseController
         );
     }
 
+    public function emails()
+    {
+        $functionController = new FunctionController();
+        $functionController->is_dashboard(true);
+        $functionController->is_('emails_page', true);
+
+        $registry = new Registry();
+
+        if($this->only_return){
+            return $registry;
+        }
+
+        define('TITLE_PAGE', 'Fixa Vidros - ' . $functionController->locale('menu_item_emails'));
+        define('SUBTITLE_PAGE', $functionController->locale('menu_item_emails'));
+
+        $this->render(
+            "emails", [
+                "button" => "add",
+                "actionForm" => "addEmails"
+            ]
+        );
+    }
+
     public function index()
     {
 
@@ -777,6 +822,14 @@ class SettingsController extends BaseController
                 "individual" => false,
                 "url" => '/settings/print_templates/',
                 "icon" => 'print-outline',
+                "badge" => false
+            ],
+            [
+                "name" => $functionController->locale('menu_item_emails'),
+                "permissions" => [1],
+                "individual" => false,
+                "url" => '/settings/emails/',
+                "icon" => 'mail-outline',
                 "badge" => false
             ],
         ];

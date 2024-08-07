@@ -75,7 +75,7 @@ class MenuController extends BaseController
         $options = [
             [
                 "name" => $functionController->locale('menu_item_settings'),
-                "permissions" => [1, 2, 3],
+                "permissions" => [1],
                 "individual" => false,
                 "url" => '/settings/',
                 "icon" => 'settings-outline',

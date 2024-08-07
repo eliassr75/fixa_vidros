@@ -26,14 +26,14 @@ $functionController = new FunctionController();
         // Agrupar por finance color
         if (!isset($financeTotals[$order->type_status_finance_name])) {
             $financeTotals[$order->type_status_finance_name] = 0;
+            $financeTotalsPrices[$order->type_status_finance_name] = [
+                "total_price" => 0, // Inicializa com zero
+                "color" => $order->type_finance_color,
+                "name" => $order->type_status_finance_name,
+            ];
         }
         $financeTotals[$order->type_status_finance_name] += 1;
-        $financeTotalsPrices[$order->type_status_finance_name][] = [
-            "total_price" => $order->total_price,
-            "color" => $order->type_finance_color,
-            "name" => $order->type_status_finance_name,
-        ];
-
+        $financeTotalsPrices[$order->type_status_finance_name]['total_price'] += $order->total_price;
     }
 
     $statusResult = [];
@@ -50,7 +50,7 @@ $functionController = new FunctionController();
 
     <div class="section inset mt-2 mb-2">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
+            <div class="col-lg-9 col-md-12">
                 <div class=" mt-2 mb-2">
                     <div class="card">
 
@@ -120,21 +120,19 @@ $functionController = new FunctionController();
     <!-- Stats -->
     <div class="section inset">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
+            <div class="col-lg-9 col-md-12">
                 <div class="text-center rounded fw-bold bg-white border-bottom py-2">
                     <?=$functionController->locale('label_financial_movements')?>
                 </div>
                 <?php if($financeTotalsPrices): ?>
                 <div class="row justify-content-center">
                     <?php foreach ($financeTotalsPrices as $name => $value): ?>
-                        <?php foreach ($value as $item): ?>
                         <div class="section mt-2 mb-2 col-lg-6 col-md-12">
                             <div class="stat-box">
-                                <div class="title"><?=$item['name']?></div>
-                                <div class="value text-<?=$item['color']?>"><?=$functionController->formatCurrencyBR($item['total_price'])?></div>
+                                <div class="title"><?=$value['name']?></div>
+                                <div class="value text-<?=$value['color']?>"><?=$functionController->formatCurrencyBR($value['total_price'])?></div>
                             </div>
                         </div>
-                        <?php endforeach; ?>
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
@@ -150,7 +148,7 @@ $functionController = new FunctionController();
     <!-- Stats -->
     <div class="section inset">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
+            <div class="col-lg-9 col-md-12">
                 <div class="row justify-content-center">
                     <div class="section mt-2 mb-2 col-lg-6 col-md-12">
                         <div class="stat-box justify-content-center align-items-center w-100" id="chart-status" style="height: 400px">

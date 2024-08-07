@@ -17,6 +17,10 @@ class DashboardController extends BaseController
         $functionController = new FunctionController();
         $functionController->is_dashboard(true);
 
+        if(in_array($_SESSION['permission_id'], [4])):
+            header('Location: /orders/');
+        endif;
+
         $orderStatus = Orders::orderBy('orders.status_id', 'asc')
             ->orderBy('orders.id', 'desc')
             ->select(
@@ -33,9 +37,12 @@ class DashboardController extends BaseController
             ->join('client', 'client.id', '=', 'orders.client_id')
             ->join('users', 'users.id', '=', 'orders.user_id')
             ->join('type_status_orders', 'type_status_orders.id', '=', 'orders.status_id')
-            ->join('type_status_finance', 'type_status_finance.id', '=', 'orders.finance_id')
-            ->limit(10)
-            ->get();
+            ->join('type_status_finance', 'type_status_finance.id', '=', 'orders.finance_id');
+
+        if(in_array($_SESSION['permission_id'], [3])):
+            $orderStatus = $orderStatus->where('orders.user_id', $_SESSION['id']);
+        endif;
+        $orderStatus = $orderStatus->limit(10)->get();
 
         $this->render('dashboard', [
             'orderStatus' => $orderStatus,
