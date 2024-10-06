@@ -36,7 +36,7 @@ class Client extends Model {
         'updated_at'
     ];
 
-    protected $guarded = ['id'];
+    //protected $guarded = ['id'];
 
     /*TODO: criar locale das chaves novas - ok */
     public $missingDataKeys = [

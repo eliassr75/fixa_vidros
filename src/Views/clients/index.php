@@ -48,8 +48,8 @@ $functionController = new FunctionController();
                             <div class="in">
                                 <div>
                                     <header class="document"><?=$client->document?></header>
-                                    <span class="name"><?=$client->name?></span>
-                                    <footer class="str_created">
+                                    <span class="id"><?=$client->id?></span> - <span class="name"><?=$client->name ?? ($client->company_name ?? $client->trading_name)?></span>
+                                        <footer class="str_created">
                                         <?=$client->str_created?>
                                     </footer>
                                 </div>
@@ -82,7 +82,7 @@ $functionController = new FunctionController();
     <?php if (count($clients) > 0): ?>
         $(document).ready(() => {
             let options = {
-                valueNames: [ 'document', 'name', 'str_created' ]
+                valueNames: [ 'document', 'name', 'id', 'str_created' ]
             };
             window.clientList = new List('clients', options);
         })
